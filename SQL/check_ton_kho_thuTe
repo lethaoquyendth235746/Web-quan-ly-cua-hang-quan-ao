@@ -1,0 +1,11 @@
+SELECT 
+    bt.ma_bt,
+    bt.ma_sku,
+    sp.ten_sp,
+    COALESCE(SUM(DISTINCT pnk.so_luong_nhap), 0) AS tong_nhap_kho,
+    COALESCE((SELECT SUM(ct.so_luong) FROM ctdh_chi_tiet_dh ct JOIN dh_don_hang dh ON ct.ma_dh = dh.ma_dh WHERE ct.ma_bt = bt.ma_bt AND dh.trang_thai_dh != 'DA_HUY'), 0) AS tong_da_ban,
+    bt.so_luong_ton AS ton_kho_hien_tai
+FROM bt_bien_the_sp bt
+JOIN sp_san_pham sp ON bt.ma_sp = sp.ma_sp
+LEFT JOIN pnk_phieu_nhap_kho pnk ON bt.ma_bt = pnk.ma_bt
+GROUP BY bt.ma_bt;

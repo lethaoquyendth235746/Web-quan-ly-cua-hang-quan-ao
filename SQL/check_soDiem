@@ -1,0 +1,12 @@
+SELECT 
+    nd.ho_ten,
+    htv.ten_hang,
+    ttd.tong_diem_tich_luy AS diem_xet_hang_tren_the,
+    COALESCE(SUM(CASE WHEN lsd.so_diem_thay_doi > 0 THEN lsd.so_diem_thay_doi ELSE 0 END), 0) AS tong_diem_cong_trong_lich_su,
+    ttd.diem_kha_dung AS diem_kha_dung_tren_the,
+    COALESCE(SUM(lsd.so_diem_thay_doi), 0) AS so_du_tinh_tu_lich_su
+FROM ttd_the_tich_diem ttd
+JOIN nd_nguoi_dung nd ON ttd.ma_nd = nd.ma_nd
+JOIN htv_hang_thanh_vien htv ON ttd.ma_hang = htv.ma_hang
+LEFT JOIN lsd_lich_su_diem lsd ON ttd.ma_the = lsd.ma_the
+GROUP BY ttd.ma_the;

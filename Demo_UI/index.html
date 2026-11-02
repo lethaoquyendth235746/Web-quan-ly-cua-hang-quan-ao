@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fashion Loyalty | AURA STUDIO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Be Vietnam Pro"', 'system-ui', 'sans-serif'] },
+          colors: {
+            cream: '#FAF9F6',
+            stone: { 100: '#F3F2EE', 200: '#E7E5E0' },
+            charcoal: '#2D2D2D',
+            muted: '#71717A',
+            accent: '#8C6D53',
+            olive: '#5F6F52',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .fade-up { animation: fadeUp 0.6s ease both; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+  <meta property="og:image" content="https://bolt.new/static/og_default.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://bolt.new/static/og_default.png">
+</head>
+<body class="bg-cream font-sans text-charcoal antialiased">
+
+  <header id="siteHeader" class="sticky top-0 z-40 border-b border-stone-200 bg-cream/95 backdrop-blur transition-shadow duration-300">
+    <div class="mx-auto flex h-16 max-w-7xl items-center gap-6 px-6 lg:px-8">
+      <div class="flex items-center gap-8">
+        <a href="#top" data-nav="all" class="text-sm font-semibold tracking-[0.25em] text-charcoal">AURA STUDIO</a>
+        <nav class="hidden items-center gap-6 md:flex" aria-label="Danh mục chính">
+          <button type="button" data-nav="all" class="nav-link text-sm text-muted transition hover:text-charcoal">Trang chủ</button>
+          <button type="button" data-nav="nam" class="nav-link text-sm text-muted transition hover:text-charcoal">Thời trang Nam</button>
+          <button type="button" data-nav="nu" class="nav-link text-sm text-muted transition hover:text-charcoal">Thời trang Nữ</button>
+          <button type="button" data-action="open-loyalty" class="nav-link text-sm text-muted transition hover:text-charcoal">Ưu đãi Thành viên</button>
+        </nav>
+      </div>
+
+      <div class="mx-auto hidden max-w-md flex-1 lg:block">
+        <label class="relative block">
+          <span class="sr-only">Tìm kiếm sản phẩm</span>
+          <svg class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" stroke-linecap="round" />
+          </svg>
+          <input id="searchInput" type="search" placeholder="Tìm kiếm áo polo, đầm lụa..."
+            class="w-full rounded-full border border-stone-200 bg-white py-2 pl-11 pr-4 text-sm text-charcoal placeholder:text-muted transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20" />
+        </label>
+      </div>
+
+      <div class="ml-auto flex items-center gap-3 lg:ml-0">
+        <div class="relative">
+          <button type="button" id="tierBtn" aria-expanded="false" aria-controls="loyaltyPanel"
+            class="flex items-center gap-2 rounded-full border border-stone-200 bg-white px-3.5 py-1.5 text-xs font-medium text-charcoal shadow-sm transition hover:border-olive/50 hover:shadow">
+            <span class="h-2 w-2 rounded-full bg-olive"></span>
+            <span class="hidden sm:inline">Hạng Bạc</span>
+            <span class="text-muted">&bull;</span>
+            <span><span id="pointsValue">203</span> điểm</span>
+          </button>
+
+          <div id="loyaltyPanel" class="absolute right-0 top-full mt-3 hidden w-72 origin-top-right rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
+            <p class="text-xs uppercase tracking-wider text-muted">Thành viên Fashion Loyalty</p>
+            <p class="mt-1 text-lg font-semibold">Hạng Bạc</p>
+            <p class="mt-1 text-sm text-muted">Còn <span class="font-medium text-charcoal">297 điểm</span> để đạt Hạng Vàng</p>
+            <div class="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-stone-100">
+              <div id="tierProgress" class="h-full w-[40%] rounded-full bg-olive transition-all duration-700"></div>
+            </div>
+            <ul class="mt-5 space-y-2 text-sm text-muted">
+              <li class="flex justify-between"><span>Hạng Bạc</span><span class="text-charcoal">Giảm 3%</span></li>
+              <li class="flex justify-between"><span>Hạng Vàng (500 điểm)</span><span class="text-charcoal">Giảm 5%</span></li>
+              <li class="flex justify-between"><span>Hạng Bạch Kim (1.000 điểm)</span><span class="text-charcoal">Giảm 10%</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <button type="button" id="cartBtn" aria-label="Giỏ hàng"
+          class="relative rounded-full p-2 text-charcoal transition hover:bg-stone-100">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+            <path d="M6 7h12l-1 13H7L6 7Z" stroke-linejoin="round" /><path d="M9 7V5a3 3 0 0 1 6 0v2" stroke-linecap="round" />
+          </svg>
+          <span id="cartCount" class="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-[11px] font-semibold text-white">3</span>
+        </button>
+
+        <button type="button" aria-label="Tài khoản Demo" class="flex items-center gap-2 rounded-full p-1 pr-3 transition hover:bg-stone-100">
+          <span class="flex h-8 w-8 items-center justify-center rounded-full bg-olive text-sm font-medium text-white">D</span>
+          <span class="hidden text-sm text-charcoal xl:inline">Demo</span>
+        </button>
+      </div>
+    </div>
+    <div class="border-t border-stone-200 px-6 pb-3 pt-3 lg:hidden">
+      <label class="relative block">
+        <span class="sr-only">Tìm kiếm sản phẩm</span>
+        <input id="searchInputMobile" type="search" placeholder="Tìm kiếm áo polo, đầm lụa..."
+          class="w-full rounded-full border border-stone-200 bg-white py-2 pl-4 pr-4 text-sm text-charcoal placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20" />
+      </label>
+    </div>
+  </header>
+
+  <main id="top" class="mx-auto max-w-7xl space-y-16 px-6 py-8 lg:px-8 lg:py-12">
+
+    <section class="fade-up grid overflow-hidden rounded-2xl bg-stone-100 shadow-sm lg:grid-cols-2">
+      <div class="flex flex-col justify-center px-8 py-12 lg:px-16 lg:py-20">
+        <p class="text-xs font-medium uppercase tracking-[0.2em] text-accent">Bộ sưu tập Thu Đông 2026</p>
+        <h1 class="mt-4 text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl">Ấm áp cho những ngày se lạnh</h1>
+        <p class="mt-5 max-w-md text-base leading-relaxed text-muted">
+          Tích điểm mỗi ngày - Thăng hạng nhận ngay ưu đãi đến 10%. Chất liệu tự nhiên, form dáng thoải mái cho nhịp sống chậm rãi.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="#cua-hang" class="rounded-full bg-charcoal px-6 py-3 text-sm font-medium text-white transition hover:bg-accent">Khám phá ngay</a>
+          <button type="button" data-action="open-loyalty" class="rounded-full border border-charcoal/20 px-6 py-3 text-sm font-medium text-charcoal transition hover:border-accent hover:text-accent">Xem ưu đãi thành viên</button>
+        </div>
+      </div>
+      <div class="relative h-72 sm:h-96 lg:h-auto">
+        <img src="https://images.pexels.com/photos/9968526/pexels-photo-9968526.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+          alt="Người mặc áo khoác dáng dài màu be" class="absolute inset-0 h-full w-full object-cover" />
+      </div>
+    </section>
+
+    <section aria-labelledby="goi-y-title">
+      <div class="flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <h2 id="goi-y-title" class="text-2xl font-semibold leading-tight">Gợi ý riêng cho bạn</h2>
+          <p class="mt-2 inline-flex items-center rounded-full bg-olive/10 px-3 py-1 text-xs font-medium text-olive">Đề xuất theo sở thích màu sắc &amp; lịch sử mua của bạn</p>
+        </div>
+      </div>
+      <div id="recommendGrid" class="mt-8 grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4"></div>
+    </section>
+
+    <section id="cua-hang" class="grid gap-10 scroll-mt-24 lg:grid-cols-4">
+      <aside class="lg:col-span-1">
+        <div class="space-y-8 rounded-xl bg-white p-6 shadow-sm lg:sticky lg:top-28">
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-semibold">Bộ lọc</h2>
+            <button type="button" id="resetFilters" class="text-xs font-medium text-accent transition hover:underline">Xóa tất cả</button>
+          </div>
+
+          <fieldset>
+            <legend class="mb-3 text-sm font-medium text-charcoal">Danh mục</legend>
+            <div class="space-y-2.5 text-sm text-muted">
+              <label class="flex cursor-pointer items-center gap-3 transition hover:text-charcoal">
+                <input type="checkbox" value="ao" data-filter-cat class="h-4 w-4 rounded border-stone-300 accent-accent" /> Áo
+              </label>
+              <label class="flex cursor-pointer items-center gap-3 transition hover:text-charcoal">
+                <input type="checkbox" value="quan" data-filter-cat class="h-4 w-4 rounded border-stone-300 accent-accent" /> Quần
+              </label>
+              <label class="flex cursor-pointer items-center gap-3 transition hover:text-charcoal">
+                <input type="checkbox" value="dam" data-filter-cat class="h-4 w-4 rounded border-stone-300 accent-accent" /> Đầm &amp; Váy
+              </label>
+              <label class="flex cursor-pointer items-center gap-3 transition hover:text-charcoal">
+                <input type="checkbox" value="khoac" data-filter-cat class="h-4 w-4 rounded border-stone-300 accent-accent" /> Áo khoác
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend class="mb-3 text-sm font-medium text-charcoal">Khoảng giá</legend>
+            <div class="space-y-2.5 text-sm text-muted">
+              <label class="flex cursor-pointer items-center gap-3 transition hover:text-charcoal">
+                <input type="radio" name="price" value="all" checked class="h-4 w-4 border-stone-300 accent-accent" /> Tất cả
+              </label>
+              <label class="flex cursor-pointer items-center gap-3 transition hover:text-charcoal">
+                <input type="radio" name="price" value="under300" class="h-4 w-4 border-stone-300 accent-accent" /> Dưới 300.000đ
+              </label>
+              <label class="flex cursor-pointer items-center gap-3 transition hover:text-charcoal">
+                <input type="radio" name="price" value="300-400" class="h-4 w-4 border-stone-300 accent-accent" /> 300.000đ - 400.000đ
+              </label>
+              <label class="flex cursor-pointer items-center gap-3 transition hover:text-charcoal">
+                <input type="radio" name="price" value="over400" class="h-4 w-4 border-stone-300 accent-accent" /> Trên 400.000đ
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend class="mb-3 text-sm font-medium text-charcoal">Kích cỡ</legend>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" data-filter-size="S" aria-pressed="false" class="filter-size h-10 w-12 rounded-full border border-stone-200 text-sm text-charcoal transition hover:border-charcoal">S</button>
+              <button type="button" data-filter-size="M" aria-pressed="false" class="filter-size h-10 w-12 rounded-full border border-stone-200 text-sm text-charcoal transition hover:border-charcoal">M</button>
+              <button type="button" data-filter-size="L" aria-pressed="false" class="filter-size h-10 w-12 rounded-full border border-stone-200 text-sm text-charcoal transition hover:border-charcoal">L</button>
+              <button type="button" data-filter-size="XL" aria-pressed="false" class="filter-size h-10 w-12 rounded-full border border-stone-200 text-sm text-charcoal transition hover:border-charcoal">XL</button>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend class="mb-3 text-sm font-medium text-charcoal">Màu sắc</legend>
+            <div class="flex flex-wrap gap-3">
+              <button type="button" data-filter-color="Đen" aria-label="Đen" aria-pressed="false" title="Đen" class="filter-color h-7 w-7 rounded-full border border-stone-300 transition hover:scale-110" style="background:#2D2D2D"></button>
+              <button type="button" data-filter-color="Trắng" aria-label="Trắng" aria-pressed="false" title="Trắng" class="filter-color h-7 w-7 rounded-full border border-stone-300 transition hover:scale-110" style="background:#FFFFFF"></button>
+              <button type="button" data-filter-color="Be" aria-label="Màu Be" aria-pressed="false" title="Màu Be" class="filter-color h-7 w-7 rounded-full border border-stone-300 transition hover:scale-110" style="background:#D8C3A5"></button>
+              <button type="button" data-filter-color="Xanh cổ điển" aria-label="Xanh cổ điển" aria-pressed="false" title="Xanh cổ điển" class="filter-color h-7 w-7 rounded-full border border-stone-300 transition hover:scale-110" style="background:#4A6A7C"></button>
+              <button type="button" data-filter-color="Đỏ đô" aria-label="Đỏ đô" aria-pressed="false" title="Đỏ đô" class="filter-color h-7 w-7 rounded-full border border-stone-300 transition hover:scale-110" style="background:#6B1E2E"></button>
+            </div>
+          </fieldset>
+        </div>
+      </aside>
+
+      <div class="lg:col-span-3">
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-stone-200 pb-4">
+          <div>
+            <h2 id="storeTitle" class="text-xl font-semibold">Tất cả sản phẩm</h2>
+            <p id="resultCount" class="mt-1 text-sm text-muted"></p>
+          </div>
+          <label class="flex items-center gap-3 text-sm text-muted">
+            Sắp xếp
+            <select id="sortSelect" class="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm text-charcoal focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20">
+              <option value="newest">Mới nhất</option>
+              <option value="price-asc">Giá tăng dần</option>
+              <option value="price-desc">Giá giảm dần</option>
+            </select>
+          </label>
+        </div>
+
+        <div id="productGrid" class="mt-8 grid grid-cols-2 gap-x-6 gap-y-12 lg:grid-cols-3"></div>
+
+        <div id="emptyState" class="mt-16 hidden text-center">
+          <p class="text-base text-charcoal">Không tìm thấy sản phẩm phù hợp</p>
+          <p class="mt-2 text-sm text-muted">Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.</p>
+          <button type="button" data-action="reset" class="mt-6 rounded-full border border-charcoal/20 px-6 py-2.5 text-sm font-medium transition hover:border-accent hover:text-accent">Xóa bộ lọc</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-stone-200 bg-stone-100">
+    <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-8 text-sm text-muted sm:flex-row lg:px-8">
+      <p class="font-semibold tracking-[0.25em] text-charcoal">AURA STUDIO</p>
+      <p>&copy; 2026 Fashion Loyalty. Mọi quyền được bảo lưu.</p>
+    </div>
+  </footer>
+
+  <div id="toast" role="status" aria-live="polite"
+    class="pointer-events-none fixed bottom-6 left-1/2 z-50 -translate-x-1/2 translate-y-4 rounded-full bg-charcoal px-5 py-3 text-sm text-white opacity-0 shadow-sm transition duration-300"></div>
+
+  <script>
+    const COLOR_HEX = {
+      'Đen': '#2D2D2D',
+      'Trắng': '#FFFFFF',
+      'Be': '#D8C3A5',
+      'Xanh cổ điển': '#4A6A7C',
+      'Đỏ đô': '#6B1E2E',
+    };
+    const CATEGORY_LABEL = { ao: 'Áo', quan: 'Quần', dam: 'Đầm & Váy', khoac: 'Áo khoác' };
+    const POINTS_PER_VND = 10000;
+
+    const PRODUCTS = [
+      { id: 1, name: 'Áo Polo Nam Pique Coolmax', price: 245000, original: 320000, gender: 'nam', category: 'ao', colors: ['Đen', 'Trắng', 'Be'], sizes: ['S', 'M', 'L', 'XL'], image: 'https://images.pexels.com/photos/24509672/pexels-photo-24509672.jpeg?auto=compress&cs=tinysrgb&h=650&w=940' },
+      { id: 2, name: 'Đầm Nữ Cổ Vuông Taffeta', price: 395000, original: 490000, gender: 'nu', category: 'dam', colors: ['Đen', 'Đỏ đô'], sizes: ['S', 'M', 'L'], image: 'https://images.pexels.com/photos/17546554/pexels-photo-17546554.jpeg?auto=compress&cs=tinysrgb&h=650&w=940' },
+      { id: 3, name: 'Quần Kaki Slimfit', price: 375000, original: 450000, gender: 'nam', category: 'quan', colors: ['Be', 'Đen'], sizes: ['S', 'M', 'L', 'XL'], image: 'https://images.pexels.com/photos/9464625/pexels-photo-9464625.jpeg?auto=compress&cs=tinysrgb&h=650&w=940' },
+      { id: 4, name: 'Đầm Lụa Midi Cổ Điển', price: 420000, original: 520000, gender: 'nu', category: 'dam', colors: ['Xanh cổ điển', 'Be'], sizes: ['S', 'M', 'L'], image: 'https://images.pexels.com/photos/31046832/pexels-photo-31046832.jpeg?auto=compress&cs=tinysrgb&h=650&w=940' },
+      { id: 5, name: 'Áo Khoác Dạ Dáng Dài', price: 690000, original: 850000, gender: 'nu', category: 'khoac', colors: ['Be', 'Đen'], sizes: ['M', 'L', 'XL'], image: 'https://images.pexels.com/photos/19287856/pexels-photo-19287856.jpeg?auto=compress&cs=tinysrgb&h=650&w=940' },
+      { id: 6, name: 'Áo Len Cổ Lọ Dệt Mịn', price: 285000, original: 350000, gender: 'nam', category: 'ao', colors: ['Trắng', 'Be'], sizes: ['M', 'L', 'XL'], image: 'https://images.pexels.com/photos/8069692/pexels-photo-8069692.jpeg?auto=compress&cs=tinysrgb&h=650&w=940' },
+      { id: 7, name: 'Quần Tây Nữ Ống Suông', price: 355000, original: 420000, gender: 'nu', category: 'quan', colors: ['Đen', 'Trắng'], sizes: ['S', 'M', 'L'], image: 'https://images.pexels.com/photos/29090947/pexels-photo-29090947.jpeg?auto=compress&cs=tinysrgb&h=650&w=940' },
+      { id: 8, name: 'Áo Sơ Mi Oxford Nam', price: 365000, original: 445000, gender: 'nam', category: 'ao', colors: ['Trắng', 'Xanh cổ điển'], sizes: ['S', 'M', 'L', 'XL'], image: 'https://images.pexels.com/photos/27584193/pexels-photo-27584193.jpeg?auto=compress&cs=tinysrgb&h=650&w=940' },
+      { id: 9, name: 'Áo Khoác Bomber Nam', price: 520000, original: 640000, gender: 'nam', category: 'khoac', colors: ['Be', 'Đen'], sizes: ['M', 'L', 'XL'], image: 'https://images.pexels.com/photos/39915436/pexels-photo-39915436.jpeg?auto=compress&cs=tinysrgb&h=650&w=940' },
+    ];
+    const RECOMMENDED_IDS = [4, 5, 6, 8];
+
+    const state = {
+      gender: 'all',
+      query: '',
+      categories: new Set(),
+      price: 'all',
+      sizes: new Set(),
+      colors: new Set(),
+      sort: 'newest',
+      cartCount: 3,
+    };
+
+    const formatVND = (value) => value.toLocaleString('vi-VN') + 'đ';
+    const pointsFor = (price) => Math.floor(price / POINTS_PER_VND);
+
+    function matchesPrice(product) {
+      if (state.price === 'under300') return product.price < 300000;
+      if (state.price === '300-400') return product.price >= 300000 && product.price <= 400000;
+      if (state.price === 'over400') return product.price > 400000;
+      return true;
+    }
+
+    function filteredProducts() {
+      const query = state.query.trim().toLowerCase();
+      const list = PRODUCTS.filter((p) => {
+        if (state.gender !== 'all' && p.gender !== state.gender) return false;
+        if (query && !p.name.toLowerCase().includes(query)) return false;
+        if (state.categories.size && !state.categories.has(p.category)) return false;
+        if (!matchesPrice(p)) return false;
+        if (state.sizes.size && ![...state.sizes].some((s) => p.sizes.includes(s))) return false;
+        if (state.colors.size && ![...state.colors].some((c) => p.colors.includes(c))) return false;
+        return true;
+      });
+      if (state.sort === 'price-asc') list.sort((a, b) => a.price - b.price);
+      else if (state.sort === 'price-desc') list.sort((a, b) => b.price - a.price);
+      else list.sort((a, b) => b.id - a.id);
+      return list;
+    }
+
+    function productCardHTML(p) {
+      const dots = p.colors.map((c, i) => `
+        <button type="button" data-card-color data-product="${p.id}" data-color="${c}" aria-label="Màu ${c}" title="${c}"
+          class="h-4 w-4 rounded-full border border-stone-300 transition hover:scale-110 ${i === 0 ? 'ring-2 ring-offset-2 ring-charcoal ring-offset-cream' : ''}"
+          style="background:${COLOR_HEX[c]}"></button>`).join('');
+      return `
+        <article class="group">
+          <div class="relative aspect-[3/4] overflow-hidden rounded-xl bg-stone-100 shadow-sm">
+            <img src="${p.image}" alt="${p.name}" loading="lazy"
+              class="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+            <button type="button" data-add-cart
+              class="absolute bottom-3 right-3 rounded-full bg-white px-4 py-2 text-xs font-medium text-charcoal opacity-100 shadow-sm transition duration-300 hover:bg-charcoal hover:text-white md:translate-y-2 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100">
+              Thêm vào giỏ
+            </button>
+          </div>
+          <div class="mt-4 space-y-2">
+            <div class="flex items-center gap-2">${dots}</div>
+            <h3 class="text-sm font-medium leading-snug text-charcoal">${p.name}</h3>
+            <div class="flex items-baseline gap-2">
+              <span class="text-sm font-semibold text-charcoal">${formatVND(p.price)}</span>
+              <span class="text-xs text-muted line-through">${formatVND(p.original)}</span>
+            </div>
+            <p class="text-xs font-medium text-accent">+${pointsFor(p.price)} điểm thưởng khi mua</p>
+          </div>
+        </article>`;
+    }
+
+    function renderRecommended() {
+      const items = RECOMMENDED_IDS.map((id) => PRODUCTS.find((p) => p.id === id)).filter(Boolean);
+      document.getElementById('recommendGrid').innerHTML = items.map(productCardHTML).join('');
+    }
+
+    function renderStore() {
+      const list = filteredProducts();
+      document.getElementById('productGrid').innerHTML = list.map(productCardHTML).join('');
+      document.getElementById('resultCount').textContent = `Hiển thị ${list.length} sản phẩm`;
+      document.getElementById('emptyState').classList.toggle('hidden', list.length > 0);
+      document.getElementById('storeTitle').textContent = {
+        all: 'Tất cả sản phẩm', nam: 'Thời trang Nam', nu: 'Thời trang Nữ',
+      }[state.gender];
+      document.getElementById('cartCount').textContent = state.cartCount;
+      syncFilterControls();
+      syncNav();
+    }
+
+    function syncFilterControls() {
+      document.querySelectorAll('[data-filter-cat]').forEach((el) => {
+        el.checked = state.categories.has(el.value);
+      });
+      document.querySelectorAll('[name="price"]').forEach((el) => {
+        el.checked = el.value === state.price;
+      });
+      document.querySelectorAll('[data-filter-size]').forEach((el) => {
+        const active = state.sizes.has(el.dataset.filterSize);
+        el.setAttribute('aria-pressed', String(active));
+        el.classList.toggle('bg-charcoal', active);
+        el.classList.toggle('text-white', active);
+        el.classList.toggle('border-charcoal', active);
+      });
+      document.querySelectorAll('[data-filter-color]').forEach((el) => {
+        const active = state.colors.has(el.dataset.filterColor);
+        el.setAttribute('aria-pressed', String(active));
+        el.classList.toggle('ring-2', active);
+        el.classList.toggle('ring-offset-2', active);
+        el.classList.toggle('ring-charcoal', active);
+        el.classList.toggle('ring-offset-cream', active);
+      });
+    }
+
+    function syncNav() {
+      document.querySelectorAll('.nav-link[data-nav]').forEach((el) => {
+        const active = el.dataset.nav === state.gender;
+        el.classList.toggle('text-charcoal', active);
+        el.classList.toggle('font-medium', active);
+        el.classList.toggle('text-muted', !active);
+      });
+    }
+
+    function setSearch(value) {
+      state.query = value;
+      document.getElementById('searchInput').value = value;
+      document.getElementById('searchInputMobile').value = value;
+      renderStore();
+    }
+
+    function resetFilters() {
+      state.categories.clear();
+      state.sizes.clear();
+      state.colors.clear();
+      state.price = 'all';
+      state.query = '';
+      document.getElementById('searchInput').value = '';
+      document.getElementById('searchInputMobile').value = '';
+      renderStore();
+    }
+
+    let toastTimer;
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.remove('opacity-0', 'translate-y-4');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-4');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 2200);
+    }
+
+    function setLoyaltyOpen(open) {
+      const panel = document.getElementById('loyaltyPanel');
+      panel.classList.toggle('hidden', !open);
+      document.getElementById('tierBtn').setAttribute('aria-expanded', String(open));
+    }
+
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      const tierBtn = target.closest('#tierBtn');
+      const navBtn = target.closest('[data-nav]');
+      const actionBtn = target.closest('[data-action]');
+      const filterCat = target.closest('[data-filter-cat]');
+      const filterSize = target.closest('[data-filter-size]');
+      const filterColor = target.closest('[data-filter-color]');
+      const cardColor = target.closest('[data-card-color]');
+      const addCart = target.closest('[data-add-cart]');
+      const cartBtn = target.closest('#cartBtn');
+
+      if (tierBtn) {
+        setLoyaltyOpen(document.getElementById('loyaltyPanel').classList.contains('hidden'));
+        return;
+      }
+
+      if (!target.closest('#loyaltyPanel')) setLoyaltyOpen(false);
+
+      if (navBtn) {
+        state.gender = navBtn.dataset.nav;
+        renderStore();
+        if (navBtn.dataset.nav === 'all') {
+          document.getElementById('top').scrollIntoView({ behavior: 'smooth' });
+        } else {
+          document.getElementById('cua-hang').scrollIntoView({ behavior: 'smooth' });
+        }
+        return;
+      }
+
+      if (actionBtn) {
+        if (actionBtn.dataset.action === 'open-loyalty') {
+          setLoyaltyOpen(true);
+        } else if (actionBtn.dataset.action === 'reset') {
+          resetFilters();
+        }
+        return;
+      }
+
+      if (filterCat) {
+        const value = filterCat.value;
+        if (state.categories.has(value)) state.categories.delete(value);
+        else state.categories.add(value);
+        renderStore();
+        return;
+      }
+
+      if (filterSize) {
+        const value = filterSize.dataset.filterSize;
+        if (state.sizes.has(value)) state.sizes.delete(value);
+        else state.sizes.add(value);
+        renderStore();
+        return;
+      }
+
+      if (filterColor) {
+        const value = filterColor.dataset.filterColor;
+        if (state.colors.has(value)) state.colors.delete(value);
+        else state.colors.add(value);
+        renderStore();
+        return;
+      }
+
+      if (cardColor) {
+        const card = cardColor.closest('article');
+        card.querySelectorAll('[data-card-color]').forEach((dot) => {
+          dot.classList.remove('ring-2', 'ring-offset-2', 'ring-charcoal', 'ring-offset-cream');
+        });
+        cardColor.classList.add('ring-2', 'ring-offset-2', 'ring-charcoal', 'ring-offset-cream');
+        return;
+      }
+
+      if (addCart) {
+        state.cartCount += 1;
+        renderStore();
+        showToast('Đã thêm sản phẩm vào giỏ hàng');
+        return;
+      }
+
+      if (cartBtn) showToast(`Giỏ hàng của bạn có ${state.cartCount} sản phẩm`);
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') setLoyaltyOpen(false);
+    });
+
+    document.getElementById('resetFilters').addEventListener('click', resetFilters);
+    document.getElementById('sortSelect').addEventListener('change', (event) => {
+      state.sort = event.target.value;
+      renderStore();
+    });
+    document.querySelectorAll('[name="price"]').forEach((el) => {
+      el.addEventListener('change', () => {
+        state.price = el.value;
+        renderStore();
+      });
+    });
+    document.getElementById('searchInput').addEventListener('input', (event) => setSearch(event.target.value));
+    document.getElementById('searchInputMobile').addEventListener('input', (event) => setSearch(event.target.value));
+
+    const header = document.getElementById('siteHeader');
+    window.addEventListener('scroll', () => {
+      header.classList.toggle('shadow-sm', window.scrollY > 8);
+    }, { passive: true });
+
+    renderRecommended();
+    renderStore();
+  </script>
+</body>
+</html>

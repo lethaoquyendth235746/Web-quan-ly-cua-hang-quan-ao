@@ -51,7 +51,7 @@
           <button type="button" data-nav="all" class="nav-link text-sm text-muted transition hover:text-charcoal">Trang chủ</button>
           <button type="button" data-nav="nam" class="nav-link text-sm text-muted transition hover:text-charcoal">Thời trang Nam</button>
           <button type="button" data-nav="nu" class="nav-link text-sm text-muted transition hover:text-charcoal">Thời trang Nữ</button>
-          <button type="button" data-action="open-loyalty" class="nav-link text-sm text-muted transition hover:text-charcoal">Ưu đãi Thành viên</button>
+          <a href="#/thanh-vien" class="nav-link text-sm text-muted transition hover:text-charcoal">Ưu đãi Thành viên</a>
         </nav>
       </div>
 
@@ -71,20 +71,20 @@
           <button type="button" id="tierBtn" aria-expanded="false" aria-controls="loyaltyPanel"
             class="flex items-center gap-2 rounded-full border border-stone-200 bg-white px-3.5 py-1.5 text-xs font-medium text-charcoal shadow-sm transition hover:border-olive/50 hover:shadow">
             <span class="h-2 w-2 rounded-full bg-olive"></span>
-            <span class="hidden sm:inline">Hạng Bạc</span>
+            <span class="hidden sm:inline">Hạng Đồng</span>
             <span class="text-muted">&bull;</span>
-            <span>203 điểm</span>
+            <span>185 điểm</span>
           </button>
 
           <div id="loyaltyPanel" class="absolute right-0 top-full mt-3 hidden w-72 origin-top-right rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
             <p class="text-xs uppercase tracking-wider text-muted">Thành viên Fashion Loyalty</p>
-            <p class="mt-1 text-lg font-semibold">Hạng Bạc</p>
-            <p class="mt-1 text-sm text-muted">Còn <span class="font-medium text-charcoal">297 điểm</span> để đạt Hạng Vàng</p>
+            <p class="mt-1 text-lg font-semibold">Hạng Đồng</p>
+            <p class="mt-1 text-sm text-muted">Còn <span class="font-medium text-charcoal">15 điểm</span> để đạt Hạng Bạc</p>
             <div class="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-stone-100">
-              <div class="h-full w-[40%] rounded-full bg-olive transition-all duration-700"></div>
+              <div class="h-full w-[92.5%] rounded-full bg-olive transition-all duration-700"></div>
             </div>
             <ul class="mt-5 space-y-2 text-sm text-muted">
-              <li class="flex justify-between"><span>Hạng Bạc</span><span class="text-charcoal">Giảm 3%</span></li>
+              <li class="flex justify-between"><span>Hạng Bạc (200 điểm)</span><span class="text-charcoal">Giảm 3%</span></li>
               <li class="flex justify-between"><span>Hạng Vàng (500 điểm)</span><span class="text-charcoal">Giảm 5%</span></li>
               <li class="flex justify-between"><span>Hạng Bạch Kim (1.000 điểm)</span><span class="text-charcoal">Giảm 10%</span></li>
             </ul>
@@ -115,6 +115,13 @@
   </header>
 
   <main class="mx-auto max-w-7xl px-6 pb-20 pt-8 lg:px-8 lg:pt-12">
+
+    <nav id="accountTabs" aria-label="Khu vực tài khoản" class="mb-10 hidden">
+      <div class="inline-flex rounded-full border border-stone-200 bg-white p-1 shadow-sm">
+        <a href="#/thanh-vien" data-account-tab class="rounded-full px-5 py-2.5 text-sm font-medium text-muted transition hover:text-charcoal">Trung tâm Thành viên</a>
+        <a href="#/thanh-toan" data-account-tab class="rounded-full px-5 py-2.5 text-sm font-medium text-muted transition hover:text-charcoal">Thanh toán</a>
+      </div>
+    </nav>
 
     <div id="homeView" class="space-y-16">
       <section class="fade-up grid overflow-hidden rounded-2xl bg-stone-100 shadow-sm lg:grid-cols-2">
@@ -272,7 +279,7 @@
             <svg class="mt-0.5 h-4 w-4 shrink-0 text-accent" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2Z" />
             </svg>
-            <p>Mua sản phẩm này bạn nhận được <span id="pointsText" class="font-semibold"></span> (Hạng Bạc nhân 1.2x điểm)</p>
+            <p>Mua sản phẩm này bạn nhận được <span id="pointsText" class="font-semibold"></span> (Hạng Đồng nhân 1.0x điểm)</p>
           </div>
 
           <div class="mt-8 space-y-6">
@@ -370,6 +377,234 @@
           </ul>
         </div>
       </section>
+    </div>
+
+    <div id="loyaltyView" class="hidden space-y-16">
+      <section class="grid gap-10 lg:grid-cols-5">
+        <div class="lg:col-span-2 space-y-6">
+          <div class="relative overflow-hidden rounded-2xl bg-charcoal p-8 text-cream shadow-sm sm:p-10">
+            <div class="flex items-start justify-between">
+              <p class="text-xs uppercase tracking-[0.25em] text-stone-300">Fashion Loyalty</p>
+              <p class="text-sm font-semibold tracking-[0.25em]">AURA STUDIO</p>
+            </div>
+            <p class="mt-14 text-lg tracking-[0.2em]">THE-AGU-26001</p>
+            <div class="mt-10 flex items-end justify-between gap-6">
+              <div>
+                <p class="text-xs uppercase tracking-wider text-stone-300">Chủ thẻ</p>
+                <p class="mt-1 text-base font-medium">NEÀNG RA</p>
+              </div>
+              <div class="text-right">
+                <p class="text-xs uppercase tracking-wider text-stone-300">Hạng</p>
+                <p class="mt-1 text-base font-medium text-gold">HẠNG ĐỒNG (MEMBER)</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+            <div class="rounded-xl bg-white p-6 shadow-sm">
+              <p class="text-sm text-muted">Tổng điểm xét hạng</p>
+              <p class="mt-2 text-3xl font-semibold">185 <span class="text-base font-normal text-muted">điểm</span></p>
+            </div>
+            <div class="rounded-xl bg-white p-6 shadow-sm">
+              <p class="text-sm text-muted">Điểm khả dụng đổi quà</p>
+              <p class="mt-2 text-3xl font-semibold">185 <span class="text-base font-normal text-muted">điểm</span></p>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-3 flex flex-col justify-center rounded-xl bg-white p-8 shadow-sm">
+          <p class="text-sm text-muted">Đang đạt <span class="font-semibold text-charcoal">185 / 200 điểm</span></p>
+          <div class="mt-4 h-2 w-full overflow-hidden rounded-full bg-stone-100" role="progressbar" aria-valuemin="0" aria-valuemax="200" aria-valuenow="185">
+            <div class="h-full w-[92.5%] rounded-full bg-olive transition-all duration-700"></div>
+          </div>
+          <p class="mt-5 text-base leading-relaxed text-charcoal">
+            Chỉ cần tích thêm <span class="font-semibold">15 điểm</span> nữa để tự động thăng lên <span class="font-semibold">HẠNG BẠC</span>.
+          </p>
+          <p class="mt-2 text-sm leading-relaxed text-muted">Hạng Bạc giảm 3% mọi đơn hàng và nhân 1.2x điểm tích lũy.</p>
+        </div>
+      </section>
+
+      <section aria-labelledby="voucherTitle">
+        <div>
+          <h2 id="voucherTitle" class="text-xl font-semibold">Đổi điểm nhận voucher</h2>
+          <p class="mt-2 text-sm text-muted">Chọn voucher phù hợp với số điểm và hạng hiện tại của bạn.</p>
+        </div>
+        <div class="mt-8 grid gap-6 md:grid-cols-3">
+          <article class="relative flex flex-col rounded-xl border border-dashed border-stone-300 bg-white p-6 shadow-sm">
+            <span class="absolute -left-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-cream" aria-hidden="true"></span>
+            <span class="absolute -right-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-cream" aria-hidden="true"></span>
+            <p class="text-xs uppercase tracking-wider text-accent">Voucher</p>
+            <p class="mt-2 text-2xl font-semibold tracking-wide">GIAM30K</p>
+            <p class="mt-3 text-sm text-charcoal">Giảm 30.000đ cho đơn từ 250.000đ</p>
+            <p class="mt-1 text-xs text-muted">Cần 100 điểm</p>
+            <button type="button" data-redeem="GIAM30K" class="mt-6 rounded-full bg-charcoal px-5 py-3 text-sm font-medium text-white transition hover:bg-accent">Đổi ngay</button>
+          </article>
+
+          <article class="relative flex flex-col rounded-xl border border-dashed border-stone-300 bg-white p-6 shadow-sm">
+            <span class="absolute -left-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-cream" aria-hidden="true"></span>
+            <span class="absolute -right-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-cream" aria-hidden="true"></span>
+            <p class="text-xs uppercase tracking-wider text-accent">Voucher</p>
+            <p class="mt-2 text-2xl font-semibold tracking-wide">VIP50K</p>
+            <p class="mt-3 text-sm text-charcoal">Giảm 50.000đ cho đơn từ 400.000đ</p>
+            <p class="mt-1 text-xs text-muted">Cần 150 điểm &middot; Áp dụng từ Hạng Bạc</p>
+            <button type="button" disabled class="mt-6 rounded-full bg-stone-200 px-5 py-3 text-sm font-medium text-muted cursor-not-allowed">Cần Hạng Bạc</button>
+          </article>
+
+          <article class="relative flex flex-col rounded-xl border border-dashed border-stone-300 bg-white p-6 shadow-sm opacity-75">
+            <span class="absolute -left-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-cream" aria-hidden="true"></span>
+            <span class="absolute -right-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-cream" aria-hidden="true"></span>
+            <p class="text-xs uppercase tracking-wider text-accent">Đặc quyền Hạng Vàng</p>
+            <p class="mt-2 text-2xl font-semibold tracking-wide">GOLD10PT</p>
+            <p class="mt-3 text-sm text-charcoal">Giảm 10% cho mọi đơn hàng</p>
+            <p class="mt-1 text-xs text-muted">Cần 250 điểm &middot; Dành cho Hạng Vàng</p>
+            <button type="button" disabled class="mt-6 rounded-full bg-stone-200 px-5 py-3 text-sm font-medium text-muted cursor-not-allowed">Chưa đủ hạng</button>
+          </article>
+        </div>
+      </section>
+
+      <section aria-labelledby="ledgerTitle">
+        <h2 id="ledgerTitle" class="text-xl font-semibold">Lịch sử biến động điểm</h2>
+        <div class="mt-6 overflow-x-auto rounded-xl bg-white shadow-sm">
+          <table class="min-w-full text-left text-sm">
+            <thead class="border-b border-stone-200 text-xs uppercase tracking-wider text-muted">
+              <tr>
+                <th scope="col" class="px-6 py-4 font-medium">Thời gian</th>
+                <th scope="col" class="px-6 py-4 font-medium">Mã đơn</th>
+                <th scope="col" class="px-6 py-4 font-medium">Loại giao dịch</th>
+                <th scope="col" class="px-6 py-4 text-right font-medium">Điểm thay đổi</th>
+                <th scope="col" class="px-6 py-4 text-right font-medium">Số dư</th>
+                <th scope="col" class="px-6 py-4 font-medium">Nội dung</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-stone-200">
+              <tr>
+                <td class="whitespace-nowrap px-6 py-4 text-muted">28/10/2026</td>
+                <td class="whitespace-nowrap px-6 py-4">AURA-26-0918</td>
+                <td class="whitespace-nowrap px-6 py-4">Cộng mua hàng</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right font-medium text-emerald-700">+175</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">185</td>
+                <td class="px-6 py-4 text-muted">Đơn hàng Áo Khoác Dạ Dáng Dài</td>
+              </tr>
+              <tr>
+                <td class="whitespace-nowrap px-6 py-4 text-muted">15/10/2026</td>
+                <td class="whitespace-nowrap px-6 py-4">-</td>
+                <td class="whitespace-nowrap px-6 py-4">Đổi voucher</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right font-medium text-orange-700">-100</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">10</td>
+                <td class="px-6 py-4 text-muted">Đổi voucher GIAM30K</td>
+              </tr>
+              <tr>
+                <td class="whitespace-nowrap px-6 py-4 text-muted">12/10/2026</td>
+                <td class="whitespace-nowrap px-6 py-4">-</td>
+                <td class="whitespace-nowrap px-6 py-4">Thưởng đánh giá</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right font-medium text-emerald-700">+10</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">110</td>
+                <td class="px-6 py-4 text-muted">Đánh giá Áo Polo Nam Pique</td>
+              </tr>
+              <tr>
+                <td class="whitespace-nowrap px-6 py-4 text-muted">05/10/2026</td>
+                <td class="whitespace-nowrap px-6 py-4">AURA-26-0877</td>
+                <td class="whitespace-nowrap px-6 py-4">Cộng mua hàng</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right font-medium text-emerald-700">+100</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">100</td>
+                <td class="px-6 py-4 text-muted">Đơn hàng Áo Sơ Mi Oxford Nam</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <div id="checkoutView" class="hidden">
+      <div class="grid gap-10 lg:grid-cols-5">
+        <div class="space-y-10 lg:col-span-3">
+          <section aria-labelledby="addressTitle">
+            <h2 id="addressTitle" class="text-xl font-semibold">Địa chỉ nhận hàng</h2>
+            <div class="mt-6 space-y-3">
+              <label class="flex cursor-pointer gap-4 rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:border-stone-400 has-[:checked]:border-charcoal">
+                <input type="radio" name="address" value="home" checked class="mt-1 h-4 w-4 accent-accent" />
+                <span>
+                  <span class="block text-sm font-medium">Nhà riêng <span class="ml-2 rounded-full bg-olive/10 px-2 py-0.5 text-xs font-medium text-olive">Mặc định</span></span>
+                  <span class="mt-1 block text-sm text-muted">NEÀNG RA &middot; 0901 234 567</span>
+                  <span class="mt-1 block text-sm text-muted">24 Nguyễn Thị Minh Khai, Quận 3, TP. Hồ Chí Minh</span>
+                </span>
+              </label>
+              <label class="flex cursor-pointer gap-4 rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:border-stone-400 has-[:checked]:border-charcoal">
+                <input type="radio" name="address" value="office" class="mt-1 h-4 w-4 accent-accent" />
+                <span>
+                  <span class="block text-sm font-medium">Văn phòng</span>
+                  <span class="mt-1 block text-sm text-muted">NEÀNG RA &middot; 0901 234 567</span>
+                  <span class="mt-1 block text-sm text-muted">18 Lê Thánh Tôn, Quận 1, TP. Hồ Chí Minh</span>
+                </span>
+              </label>
+            </div>
+          </section>
+
+          <section aria-labelledby="paymentTitle">
+            <h2 id="paymentTitle" class="text-xl font-semibold">Phương thức thanh toán</h2>
+            <div class="mt-6 space-y-3">
+              <label class="flex cursor-pointer gap-4 rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:border-stone-400 has-[:checked]:border-charcoal">
+                <input type="radio" name="payment" value="cod" checked class="mt-1 h-4 w-4 accent-accent" />
+                <span>
+                  <span class="block text-sm font-medium">Thanh toán khi nhận hàng (COD)</span>
+                  <span class="mt-1 block text-sm text-muted">Kiểm tra sản phẩm trước khi thanh toán.</span>
+                </span>
+              </label>
+              <label class="flex cursor-pointer gap-4 rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:border-stone-400 has-[:checked]:border-charcoal">
+                <input type="radio" name="payment" value="bank" class="mt-1 h-4 w-4 accent-accent" />
+                <span>
+                  <span class="block text-sm font-medium">Chuyển khoản ngân hàng</span>
+                  <span class="mt-1 block text-sm text-muted">Hiển thị thông tin tài khoản sau khi đặt hàng.</span>
+                </span>
+              </label>
+            </div>
+          </section>
+        </div>
+
+        <aside class="lg:col-span-2">
+          <div class="space-y-6 rounded-xl bg-white p-6 shadow-sm lg:sticky lg:top-28">
+            <h2 class="text-xl font-semibold">Tóm tắt đơn hàng</h2>
+
+            <ul class="divide-y divide-stone-200 text-sm">
+              <li class="flex justify-between gap-4 py-3"><span>Áo Polo Nam Pique Coolmax (Đen, M)</span><span class="whitespace-nowrap">245.000đ</span></li>
+              <li class="flex justify-between gap-4 py-3"><span>Áo Len Cổ Lọ Dệt Mịn (Trắng, L)</span><span class="whitespace-nowrap">285.000đ</span></li>
+              <li class="flex justify-between gap-4 py-3"><span>Đầm Nữ Cổ Vuông Taffeta (Đỏ đô, S)</span><span class="whitespace-nowrap">395.000đ</span></li>
+            </ul>
+
+            <div class="space-y-4 rounded-xl bg-gold p-5">
+              <label class="block">
+                <span class="text-sm font-medium">Voucher từ ví của bạn</span>
+                <select id="voucherSelect" class="mt-2 w-full rounded-full border border-stone-200 bg-white px-4 py-2.5 text-sm text-charcoal focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20">
+                  <option value="GIAM30K">GIAM30K - Giảm 30.000đ</option>
+                  <option value="">Không áp dụng voucher</option>
+                </select>
+              </label>
+              <label class="flex cursor-pointer items-start justify-between gap-4">
+                <span class="text-sm leading-relaxed">Sử dụng 50 điểm khả dụng để trừ trực tiếp 50.000đ</span>
+                <input id="pointsToggle" type="checkbox" checked class="mt-0.5 h-5 w-5 shrink-0 accent-olive" />
+              </label>
+            </div>
+
+            <dl class="space-y-3 text-sm">
+              <div class="flex justify-between gap-4"><dt class="text-muted">Tổng tiền hàng gốc</dt><dd id="ckBase" class="font-medium"></dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-muted">Chiết khấu hạng Đồng</dt><dd id="ckTier" class="font-medium"></dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-muted">Giảm từ voucher</dt><dd id="ckVoucher" class="font-medium"></dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-muted">Giảm từ điểm tiêu dùng</dt><dd id="ckPoints" class="font-medium"></dd></div>
+            </dl>
+
+            <div class="flex items-baseline justify-between gap-4 border-t border-stone-200 pt-5">
+              <span class="text-sm font-semibold uppercase tracking-wider">Tổng thanh toán</span>
+              <span id="ckTotal" class="text-2xl font-semibold"></span>
+            </div>
+
+            <p class="rounded-xl bg-olive/10 p-4 text-sm leading-relaxed text-olive">
+              Đơn hàng này sẽ cộng thêm <span class="font-semibold">+91 điểm thưởng</span> (Hạng Đồng nhân hệ số 1.0x) sau khi hoàn thành.
+            </p>
+
+            <button type="button" id="placeOrderBtn" class="w-full rounded-full bg-charcoal px-6 py-4 text-sm font-medium text-white transition hover:bg-accent">Đặt hàng</button>
+          </div>
+        </aside>
+      </div>
     </div>
   </main>
 
@@ -922,14 +1157,29 @@
 
     /* Routing between home and product detail */
 
+    const ACCOUNT_TABS = { '#/thanh-vien': 'loyaltyView', '#/thanh-toan': 'checkoutView' };
+
     function showView() {
       const id = currentProductId();
       const product = productById(id);
-      $('homeView').classList.toggle('hidden', Boolean(product));
+      const accountView = ACCOUNT_TABS[location.hash] ?? null;
+      $('homeView').classList.toggle('hidden', Boolean(product || accountView));
       $('productView').classList.toggle('hidden', !product);
+      $('accountTabs').classList.toggle('hidden', !accountView);
+      $('loyaltyView').classList.toggle('hidden', accountView !== 'loyaltyView');
+      $('checkoutView').classList.toggle('hidden', accountView !== 'checkoutView');
+      document.querySelectorAll('[data-account-tab]').forEach((tab) => {
+        const active = tab.getAttribute('href') === location.hash;
+        tab.classList.toggle('bg-charcoal', active);
+        tab.classList.toggle('text-white', active);
+        tab.classList.toggle('text-muted', !active);
+        tab.setAttribute('aria-current', active ? 'page' : 'false');
+      });
       if (product) {
         resetDetail(product);
         renderDetail();
+        window.scrollTo({ top: 0 });
+      } else if (accountView) {
         window.scrollTo({ top: 0 });
       } else {
         renderStore();
@@ -938,8 +1188,26 @@
     }
 
     function navigateHome() {
-      if (currentProductId() !== null) location.hash = '';
+      if (currentProductId() !== null || ACCOUNT_TABS[location.hash]) location.hash = '';
       else showView();
+    }
+
+    /* Checkout totals */
+
+    const CHECKOUT = { subtotal: 925000, voucherValue: 30000, pointsValue: 50000 };
+
+    function discountText(value) {
+      return value > 0 ? `-${formatVND(value)}` : formatVND(0);
+    }
+
+    function renderCheckoutTotals() {
+      const voucher = $('voucherSelect').value ? CHECKOUT.voucherValue : 0;
+      const points = $('pointsToggle').checked ? CHECKOUT.pointsValue : 0;
+      $('ckBase').textContent = formatVND(CHECKOUT.subtotal);
+      $('ckTier').textContent = formatVND(0);
+      $('ckVoucher').textContent = discountText(voucher);
+      $('ckPoints').textContent = discountText(points);
+      $('ckTotal').textContent = formatVND(CHECKOUT.subtotal - voucher - points);
     }
 
     /* Events */
@@ -1075,6 +1343,13 @@
     $('searchInput').addEventListener('input', (event) => setSearch(event.target.value));
     $('searchInputMobile').addEventListener('input', (event) => setSearch(event.target.value));
     $('cartCloseBtn').addEventListener('click', closeDrawer);
+    $('voucherSelect').addEventListener('change', renderCheckoutTotals);
+    $('pointsToggle').addEventListener('change', renderCheckoutTotals);
+    $('placeOrderBtn').addEventListener('click', () => showToast('Chức năng đặt hàng đang được hoàn thiện'));
+    $('loyaltyView').addEventListener('click', (event) => {
+      const redeem = event.target.closest('[data-redeem]');
+      if (redeem) showToast('Chức năng đổi điểm đang được hoàn thiện');
+    });
     $('cartBackdrop').addEventListener('click', closeDrawer);
     document.addEventListener('keydown', (event) => {
       if (event.key !== 'Escape') return;
@@ -1089,6 +1364,7 @@
 
     renderRecommended();
     renderCart();
+    renderCheckoutTotals();
     showView();
   </script>
 </body>

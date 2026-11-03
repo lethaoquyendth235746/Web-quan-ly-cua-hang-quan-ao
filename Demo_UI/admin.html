@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quản trị | Fashion Loyalty</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Be Vietnam Pro"', 'system-ui', 'sans-serif'] },
+          colors: { canvas: '#F8FAFC' },
+        },
+      },
+    };
+  </script>
+  <style>
+    .fade-up { animation: fadeUp 0.5s ease both; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .nav-item { transition: background-color 0.2s ease, color 0.2s ease; }
+  </style>
+</head>
+<body class="bg-canvas font-sans text-slate-800 antialiased">
+  <div id="authGate" class="flex min-h-screen items-center justify-center px-6 py-12">
+    <div class="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-8">
+      <p class="text-sm font-semibold tracking-[0.25em] text-slate-900">AURA STUDIO</p>
+      <h1 class="mt-4 text-xl font-semibold leading-tight text-slate-900">Quản trị Fashion Loyalty</h1>
+      <p class="mt-1 text-sm text-slate-500">Đăng nhập hoặc tạo tài khoản để vào trang quản trị.</p>
+
+      <div role="tablist" aria-label="Chế độ tài khoản" class="mt-6 grid grid-cols-2 gap-1 rounded-lg bg-slate-100 p-1">
+        <button type="button" role="tab" data-auth-mode="signin" aria-selected="true" class="rounded-md px-3 py-2 text-sm font-medium transition">Đăng nhập</button>
+        <button type="button" role="tab" data-auth-mode="signup" aria-selected="false" class="rounded-md px-3 py-2 text-sm font-medium transition">Tạo tài khoản</button>
+      </div>
+
+      <form id="authForm" class="mt-6 space-y-4" novalidate>
+        <div>
+          <label for="authEmail" class="block text-sm font-medium text-slate-700">Email</label>
+          <input id="authEmail" type="email" autocomplete="email" class="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200" />
+        </div>
+        <div>
+          <label for="authPassword" class="block text-sm font-medium text-slate-700">Mật khẩu</label>
+          <input id="authPassword" type="password" autocomplete="current-password" class="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200" />
+          <p class="mt-1.5 text-xs text-slate-500">Tối thiểu 6 ký tự.</p>
+        </div>
+        <p id="authMessage" role="alert" class="hidden rounded-lg px-3 py-2 text-sm"></p>
+        <button id="authSubmit" type="submit" class="w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60">Đăng nhập</button>
+      </form>
+    </div>
+  </div>
+
+ <div id="adminApp" class="hidden h-screen flex overflow-hidden bg-slate-50">
+
+    <aside class="border-b border-slate-200 bg-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-64 lg:shrink-0 lg:flex-col lg:border-b-0 lg:border-r">
+      <div class="px-6 pb-4 pt-6 lg:pb-6">
+        <p class="text-sm font-semibold tracking-[0.25em] text-slate-900">AURA STUDIO</p>
+        <p class="mt-1 text-xs text-slate-500">Quản trị Fashion Loyalty</p>
+      </div>
+      <nav aria-label="Menu quản trị" class="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:overflow-visible lg:pb-0">
+        <a href="#" aria-current="page" class="nav-item flex shrink-0 items-center gap-3 rounded-lg bg-slate-100 px-3 py-2.5 text-sm font-medium text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5" /><rect x="14" y="3" width="7" height="5" rx="1.5" /><rect x="14" y="12" width="7" height="9" rx="1.5" /><rect x="3" y="16" width="7" height="5" rx="1.5" /></svg>
+          Tổng quan
+        </a>
+        <a href="#" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7l8-4 8 4-8 4-8-4Z" stroke-linejoin="round" /><path d="M4 7v10l8 4 8-4V7" stroke-linejoin="round" /></svg>
+          Danh mục &amp; Sản phẩm
+        </a>
+        <a href="#" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 8h18M5 8v11h14V8M9 12h6" stroke-linejoin="round" /></svg>
+          Biến thể SKU &amp; Nhập kho
+        </a>
+        <a href="#" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 4h12v16l-6-3-6 3V4Z" stroke-linejoin="round" /></svg>
+          Quản lý Đơn hàng
+        </a>
+        <a href="#" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.6 6.8 19.1l1-5.8-4.3-4.1 5.9-.9L12 3Z" stroke-linejoin="round" /></svg>
+          Cấu hình Hạng thành viên
+        </a>
+        <a href="#" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 9a2 2 0 0 0 0 4v2h18v-2a2 2 0 0 0 0-4V7H3v2Z" stroke-linejoin="round" /></svg>
+          Chiến dịch Voucher
+        </a>
+      </nav>
+      <div class="border-t border-slate-200 px-6 py-4 lg:mt-auto">
+        <p id="adminUserEmail" class="truncate text-xs text-slate-500"></p>
+        <button id="signOutButton" type="button" class="mt-2 text-sm font-medium text-slate-700 underline-offset-4 transition hover:text-slate-900 hover:underline">Đăng xuất</button>
+      </div>
+    </aside>
+
+    <main class="flex-1 px-6 py-8 lg:px-10 lg:py-10">
+      <header class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-semibold leading-tight text-slate-900">Tổng quan</h1>
+          <p class="mt-1 text-sm text-slate-500">Số liệu tính đến ngày 02/11/2026</p>
+        </div>
+      </header>
+
+      <section aria-label="Chỉ số chính" class="fade-up mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div class="rounded-xl border border-slate-200 bg-white p-6">
+          <p class="text-sm text-slate-500">Tổng doanh thu tháng</p>
+          <p class="mt-3 text-2xl font-semibold text-slate-900">11.675.000đ</p>
+          <p class="mt-2 text-xs text-slate-500">Tháng 11/2026</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-6">
+          <p class="text-sm text-slate-500">Đơn hàng chờ duyệt</p>
+          <p class="mt-3 text-2xl font-semibold text-slate-900">1 đơn</p>
+          <p class="mt-2 text-xs text-slate-500">Cần duyệt để cộng điểm</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-6">
+          <p class="text-sm text-slate-500">Tổng thành viên Loyalty</p>
+          <p class="mt-3 text-2xl font-semibold text-slate-900">4 khách</p>
+          <p class="mt-2 text-xs text-slate-500">Đang tham gia chương trình</p>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-6">
+          <p class="text-sm text-slate-500">Tổng điểm đang lưu hành</p>
+          <p class="mt-3 text-2xl font-semibold text-slate-900">860 điểm</p>
+          <p class="mt-2 text-xs text-slate-500">Số dư khả dụng của thành viên</p>
+        </div>
+      </section>
+
+      <section aria-label="Biểu đồ" class="fade-up mt-6 grid gap-4 lg:grid-cols-3">
+        <div class="rounded-xl border border-slate-200 bg-white p-6 lg:col-span-2">
+          <h2 class="text-base font-semibold text-slate-900">Doanh thu và số đơn theo tháng</h2>
+          <div class="relative mt-6 h-72">
+            <canvas id="revenueChart" role="img" aria-label="Biểu đồ cột doanh thu và đường số đơn hàng theo tháng"></canvas>
+          </div>
+        </div>
+        <div class="rounded-xl border border-slate-200 bg-white p-6">
+          <h2 class="text-base font-semibold text-slate-900">Khách hàng theo hạng</h2>
+          <div class="relative mt-6 h-72">
+            <canvas id="tierChart" role="img" aria-label="Biểu đồ tròn phân bổ khách hàng theo hạng thành viên"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="ordersTitle" class="fade-up mt-6 rounded-xl border border-slate-200 bg-white">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-6 py-5">
+          <div>
+            <h2 id="ordersTitle" class="text-base font-semibold text-slate-900">Đơn hàng và cộng điểm thưởng</h2>
+            <p class="mt-1 text-sm text-slate-500">Duyệt đơn để cộng điểm và xét lại hạng thành viên.</p>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-left text-sm">
+            <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+              <tr>
+                <th scope="col" class="px-6 py-3 font-medium">Mã đơn</th>
+                <th scope="col" class="px-6 py-3 font-medium">Khách hàng</th>
+                <th scope="col" class="px-6 py-3 text-right font-medium">Tổng tiền</th>
+                <th scope="col" class="px-6 py-3 text-right font-medium">Điểm dự kiến</th>
+                <th scope="col" class="px-6 py-3 font-medium">Trạng thái</th>
+                <th scope="col" class="px-6 py-3 text-right font-medium">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+              <tr class="align-middle">
+                <td class="whitespace-nowrap px-6 py-4 font-medium text-slate-900">#DH04</td>
+                <td class="px-6 py-4">
+                  <p class="font-medium text-slate-900">Neàng Ra</p>
+                  <p class="mt-0.5 text-xs text-slate-500">Hạng Đồng &middot; 185/200 điểm</p>
+                </td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">245.000đ</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right font-medium text-emerald-700">+24 điểm</td>
+                <td class="whitespace-nowrap px-6 py-4">
+                  <span class="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-800">Chờ xác nhận</span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                  <button type="button" class="rounded-lg bg-slate-900 px-4 py-2 text-left text-xs font-medium leading-snug text-white transition hover:bg-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2">
+                    Duyệt hoàn thành<span class="block font-normal text-slate-300">+ cộng điểm &amp; xét hạng</span>
+                  </button>
+                </td>
+              </tr>
+              <tr class="align-middle">
+                <td class="whitespace-nowrap px-6 py-4 font-medium text-slate-900">#DH03</td>
+                <td class="px-6 py-4">
+                  <p class="font-medium text-slate-900">Quốc Bảo</p>
+                  <p class="mt-0.5 text-xs text-slate-500">Hạng Bạc</p>
+                </td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">690.000đ</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right font-medium text-emerald-700">+83 điểm</td>
+                <td class="whitespace-nowrap px-6 py-4">
+                  <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-800">Hoàn thành</span>
+                </td>
+                <td class="px-6 py-4 text-right text-xs text-slate-500">Đã cộng điểm</td>
+              </tr>
+              <tr class="align-middle">
+                <td class="whitespace-nowrap px-6 py-4 font-medium text-slate-900">#DH02</td>
+                <td class="px-6 py-4">
+                  <p class="font-medium text-slate-900">Thu Hà</p>
+                  <p class="mt-0.5 text-xs text-slate-500">Hạng Vàng</p>
+                </td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">395.000đ</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right font-medium text-emerald-700">+59 điểm</td>
+                <td class="whitespace-nowrap px-6 py-4">
+                  <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-800">Hoàn thành</span>
+                </td>
+                <td class="px-6 py-4 text-right text-xs text-slate-500">Đã cộng điểm</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section aria-labelledby="tierTitle" class="fade-up mt-6 rounded-xl border border-slate-200 bg-white">
+        <div class="border-b border-slate-200 px-6 py-5">
+          <h2 id="tierTitle" class="text-base font-semibold text-slate-900">Cấu hình 4 hạng thành viên</h2>
+          <p class="mt-1 text-sm text-slate-500">Mốc điểm, chiết khấu và hệ số tích điểm áp dụng cho từng hạng.</p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-left text-sm">
+            <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+              <tr>
+                <th scope="col" class="px-6 py-3 font-medium">Hạng</th>
+                <th scope="col" class="px-6 py-3 text-right font-medium">Mốc điểm</th>
+                <th scope="col" class="px-6 py-3 text-right font-medium">Chiết khấu</th>
+                <th scope="col" class="px-6 py-3 text-right font-medium">Hệ số điểm</th>
+                <th scope="col" class="px-6 py-3 text-right font-medium">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+              <tr>
+                <td class="whitespace-nowrap px-6 py-4 font-medium text-slate-900">Hạng Đồng</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">0 điểm</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">0%</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">x1.0</td>
+                <td class="px-6 py-4 text-right"><button type="button" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-500 hover:text-slate-900">Chỉnh sửa</button></td>
+              </tr>
+              <tr>
+                <td class="whitespace-nowrap px-6 py-4 font-medium text-slate-900">Hạng Bạc</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">200 điểm</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">3%</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">x1.2</td>
+                <td class="px-6 py-4 text-right"><button type="button" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-500 hover:text-slate-900">Chỉnh sửa</button></td>
+              </tr>
+              <tr>
+                <td class="whitespace-nowrap px-6 py-4 font-medium text-slate-900">Hạng Vàng</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">500 điểm</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">5%</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">x1.5</td>
+                <td class="px-6 py-4 text-right"><button type="button" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-500 hover:text-slate-900">Chỉnh sửa</button></td>
+              </tr>
+              <tr>
+                <td class="whitespace-nowrap px-6 py-4 font-medium text-slate-900">Hạng Kim Cương</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">1.500 điểm</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">10%</td>
+                <td class="whitespace-nowrap px-6 py-4 text-right">x2.0</td>
+                <td class="px-6 py-4 text-right"><button type="button" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-500 hover:text-slate-900">Chỉnh sửa</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (() => {
+      const ACCOUNTS_KEY = 'fashionLoyaltyAdminAccounts';
+      const SESSION_KEY = 'fashionLoyaltyAdminSession';
+
+      const gate = document.getElementById('authGate');
+      const adminApp = document.getElementById('adminApp');
+      const form = document.getElementById('authForm');
+      const emailInput = document.getElementById('authEmail');
+      const passwordInput = document.getElementById('authPassword');
+      const submitButton = document.getElementById('authSubmit');
+      const message = document.getElementById('authMessage');
+      const modeTabs = document.querySelectorAll('[data-auth-mode]');
+      const userEmail = document.getElementById('adminUserEmail');
+      const signOutButton = document.getElementById('signOutButton');
+
+      let mode = 'signin';
+
+      function showMessage(text, tone = 'error') {
+        message.textContent = text;
+        message.classList.toggle('hidden', !text);
+        message.classList.toggle('bg-red-50', tone === 'error');
+        message.classList.toggle('text-red-700', tone === 'error');
+        message.classList.toggle('bg-emerald-50', tone === 'success');
+        message.classList.toggle('text-emerald-800', tone === 'success');
+      }
+
+      function setMode(nextMode) {
+        mode = nextMode;
+        modeTabs.forEach((tab) => {
+          const active = tab.dataset.authMode === nextMode;
+          tab.setAttribute('aria-selected', String(active));
+          tab.classList.toggle('bg-white', active);
+          tab.classList.toggle('shadow-sm', active);
+          tab.classList.toggle('text-slate-900', active);
+          tab.classList.toggle('text-slate-500', !active);
+          tab.classList.toggle('hover:text-slate-900', !active);
+        });
+        submitButton.textContent = nextMode === 'signin' ? 'Đăng nhập' : 'Tạo tài khoản';
+        passwordInput.autocomplete = nextMode === 'signin' ? 'current-password' : 'new-password';
+        showMessage('');
+      }
+
+      function getAccounts() {
+        return JSON.parse(localStorage.getItem(ACCOUNTS_KEY) || '[]');
+      }
+
+      function renderSession(email) {
+        const signedIn = Boolean(email);
+        gate.classList.toggle('hidden', signedIn);
+        adminApp.classList.toggle('hidden', !signedIn);
+        userEmail.textContent = email ?? '';
+        passwordInput.value = '';
+      }
+
+      modeTabs.forEach((tab) => {
+        tab.addEventListener('click', () => setMode(tab.dataset.authMode));
+      });
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const email = emailInput.value.trim().toLowerCase();
+        const password = passwordInput.value;
+
+        if (!email || password.length < 6) {
+          showMessage('Vui lòng nhập email và mật khẩu tối thiểu 6 ký tự.');
+          return;
+        }
+
+        const accounts = getAccounts();
+        const existing = accounts.find((account) => account.email === email);
+
+        if (mode === 'signup') {
+          if (existing) {
+            showMessage('Email này đã có tài khoản. Vui lòng đăng nhập.');
+            return;
+          }
+          accounts.push({ email, password });
+          localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+          setMode('signin');
+          emailInput.value = email;
+          showMessage('Tạo tài khoản thành công. Hãy đăng nhập bằng email và mật khẩu vừa tạo.', 'success');
+          return;
+        }
+
+        if (!existing || existing.password !== password) {
+          showMessage('Email hoặc mật khẩu chưa đúng.');
+          return;
+        }
+
+        localStorage.setItem(SESSION_KEY, email);
+        renderSession(email);
+      });
+
+      signOutButton.addEventListener('click', () => {
+        localStorage.removeItem(SESSION_KEY);
+        renderSession(null);
+      });
+
+      setMode('signin');
+      renderSession(localStorage.getItem(SESSION_KEY));
+    })();
+  </script>
+  <script>
+    const MONTHS = ['T6', 'T7', 'T8', 'T9', 'T10', 'T11'];
+    const REVENUE_MILLIONS = [18.2, 15.4, 21.0, 17.6, 19.8, 11.675];
+    const ORDER_COUNTS = [22, 19, 25, 21, 24, 14];
+    const TIER_LABELS = ['Hạng Đồng', 'Hạng Bạc', 'Hạng Vàng', 'Hạng Kim Cương'];
+    const TIER_COUNTS = [2, 1, 1, 0];
+    const TIER_COLORS = ['#CBD5E1', '#94A3B8', '#B08D57', '#0F766E'];
+
+    new Chart(document.getElementById('revenueChart'), {
+      data: {
+        labels: MONTHS,
+        datasets: [
+          {
+            type: 'bar',
+            label: 'Doanh thu (triệu đ)',
+            data: REVENUE_MILLIONS,
+            backgroundColor: '#0F766E',
+            borderRadius: 6,
+            maxBarThickness: 36,
+            yAxisID: 'y',
+          },
+          {
+            type: 'line',
+            label: 'Số đơn hàng',
+            data: ORDER_COUNTS,
+            borderColor: '#64748B',
+            backgroundColor: '#64748B',
+            pointRadius: 4,
+            tension: 0.35,
+            yAxisID: 'y1',
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, color: '#475569' } } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#64748B' } },
+          y: { beginAtZero: true, grid: { color: '#E2E8F0' }, ticks: { color: '#64748B' }, title: { display: true, text: 'Triệu đồng', color: '#64748B' } },
+          y1: { beginAtZero: true, position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#64748B', precision: 0 }, title: { display: true, text: 'Đơn', color: '#64748B' } },
+        },
+      },
+    });
+
+    new Chart(document.getElementById('tierChart'), {
+      type: 'doughnut',
+      data: {
+        labels: TIER_LABELS,
+        datasets: [{ data: TIER_COUNTS, backgroundColor: TIER_COLORS, borderColor: '#FFFFFF', borderWidth: 2 }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '66%',
+        plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, color: '#475569' } } },
+      },
+    });
+  </script>
+</body>
+</html>

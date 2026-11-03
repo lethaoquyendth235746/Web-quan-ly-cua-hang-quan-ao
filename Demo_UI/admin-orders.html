@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đơn hàng | Fashion Loyalty</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Be Vietnam Pro"', 'system-ui', 'sans-serif'] },
+          colors: { canvas: '#F8FAFC' },
+        },
+      },
+    };
+  </script>
+  <style>
+    .nav-item { transition: background-color 0.2s ease, color 0.2s ease; }
+  </style>
+</head>
+<body class="bg-canvas font-sans text-slate-800 antialiased">
+  <div class="flex min-h-screen flex-col lg:flex-row">
+
+    <aside class="border-b border-slate-200 bg-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-64 lg:shrink-0 lg:flex-col lg:border-b-0 lg:border-r">
+      <div class="px-6 pb-4 pt-6 lg:pb-6">
+        <p class="text-sm font-semibold tracking-[0.25em] text-slate-900">AURA STUDIO</p>
+        <p class="mt-1 text-xs text-slate-500">Quản trị Fashion Loyalty</p>
+      </div>
+      <nav aria-label="Menu quản trị" class="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:overflow-visible lg:pb-0">
+        <a href="admin.html" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5" /><rect x="14" y="3" width="7" height="5" rx="1.5" /><rect x="14" y="12" width="7" height="9" rx="1.5" /><rect x="3" y="16" width="7" height="5" rx="1.5" /></svg>
+          Tổng quan
+        </a>
+        <a href="admin-products.html" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7l8-4 8 4-8 4-8-4Z" stroke-linejoin="round" /><path d="M4 7v10l8 4 8-4V7" stroke-linejoin="round" /></svg>
+          Danh mục &amp; Sản phẩm
+        </a>
+        <a href="admin-inventory.html" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 8h18M5 8v11h14V8M9 12h6" stroke-linejoin="round" /></svg>
+          Quản lý nhập hàng
+        </a>
+        <a href="admin-orders.html" aria-current="page" class="nav-item flex shrink-0 items-center gap-3 rounded-lg bg-slate-100 px-3 py-2.5 text-sm font-medium text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 4h12v16l-6-3-6 3V4Z" stroke-linejoin="round" /></svg>
+          Quản lý Đơn hàng
+        </a>
+        <a href="admin-tiers.html" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.6 6.8 19.1l1-5.8-4.3-4.1 5.9-.9L12 3Z" stroke-linejoin="round" /></svg>
+          Cấu hình Hạng thành viên
+        </a>
+        <a href="admin-vouchers.html" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 9a2 2 0 0 0 0 4v2h18v-2a2 2 0 0 0 0-4V7H3v2Z" stroke-linejoin="round" /></svg>
+          Chiến dịch Voucher
+        </a>
+      </nav>
+      <div class="border-t border-slate-200 px-6 py-4 lg:mt-auto">
+        <p id="adminUserEmail" class="truncate text-xs text-slate-500"></p>
+        <button id="signOutButton" type="button" class="mt-2 text-sm font-medium text-slate-700 underline-offset-4 transition hover:text-slate-900 hover:underline">Đăng xuất</button>
+      </div>
+    </aside>
+
+    <main class="flex-1 px-6 py-8 lg:px-10 lg:py-10">
+      <header>
+        <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs text-slate-500">
+          <a href="admin.html" class="hover:text-slate-900">Tổng quan</a>
+          <span aria-hidden="true">/</span>
+          <span class="text-slate-700">Quản lý Đơn hàng</span>
+        </nav>
+        <h1 class="mt-2 text-2xl font-semibold leading-tight text-slate-900">Quản lý Đơn hàng</h1>
+      </header>
+
+      <section aria-label="Công cụ lọc" class="mt-8 flex flex-col gap-3 sm:flex-row">
+        <div class="relative">
+          <label for="orderSearch" class="sr-only">Tìm theo mã đơn hoặc tên khách</label>
+          <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4 4" stroke-linecap="round" /></svg>
+          <input id="orderSearch" type="search" placeholder="Tìm theo mã đơn hoặc tên khách..." class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-100 sm:w-80" />
+        </div>
+        <div>
+          <label for="statusFilter" class="sr-only">Lọc theo trạng thái</label>
+          <select id="statusFilter" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-100 sm:w-56">
+            <option value="">Tất cả trạng thái</option>
+            <option value="pending">Chờ xác nhận</option>
+            <option value="completed">Hoàn thành</option>
+            <option value="cancelled">Đã hủy</option>
+          </select>
+        </div>
+      </section>
+
+      <section aria-label="Danh sách đơn hàng" class="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-left text-sm">
+            <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+              <tr>
+                <th scope="col" class="px-6 py-3 font-medium">Mã đơn</th>
+                <th scope="col" class="px-6 py-3 font-medium">Khách hàng</th>
+                <th scope="col" class="px-6 py-3 font-medium">Ngày đặt</th>
+                <th scope="col" class="px-6 py-3 text-right font-medium">Tổng tiền</th>
+                <th scope="col" class="px-6 py-3 text-right font-medium">Điểm dự kiến</th>
+                <th scope="col" class="px-6 py-3 font-medium">Trạng thái</th>
+                <th scope="col" class="px-6 py-3 text-right font-medium">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="orderRows" class="divide-y divide-slate-200"></tbody>
+          </table>
+        </div>
+        <p id="orderSummary" class="border-t border-slate-200 px-6 py-4 text-sm text-slate-500"></p>
+      </section>
+    </main>
+  </div>
+
+  <div id="orderModal" data-overlay class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 px-4 py-8" role="dialog" aria-modal="true" aria-labelledby="orderModalTitle">
+    <div class="max-h-full w-full max-w-lg overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-xl">
+      <div class="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
+        <div>
+          <p id="orderModalCode" class="text-xs font-medium uppercase tracking-wider text-slate-500"></p>
+          <h2 id="orderModalTitle" class="mt-1 text-lg font-semibold leading-tight text-slate-900">Chi tiết đơn hàng</h2>
+        </div>
+        <button type="button" data-close-overlay aria-label="Đóng" class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
+        </button>
+      </div>
+
+      <div class="space-y-6 px-6 py-6">
+        <dl class="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
+          <div>
+            <dt class="text-slate-500">Khách hàng</dt>
+            <dd id="orderCustomer" class="mt-1 font-medium text-slate-900"></dd>
+          </div>
+          <div>
+            <dt class="text-slate-500">Ngày đặt</dt>
+            <dd id="orderDate" class="mt-1 font-medium text-slate-900"></dd>
+          </div>
+          <div>
+            <dt class="text-slate-500">Tổng thanh toán</dt>
+            <dd id="orderTotal" class="mt-1 font-medium text-slate-900"></dd>
+          </div>
+          <div>
+            <dt class="text-slate-500">Trạng thái</dt>
+            <dd class="mt-1"><span id="orderModalStatus" class="inline-block rounded-full px-2.5 py-0.5 text-xs font-medium"></span></dd>
+          </div>
+        </dl>
+
+        <div class="rounded-lg bg-slate-50 p-4">
+          <p class="text-sm font-medium text-slate-700">Điểm thành viên</p>
+          <p id="orderPointsSummary" class="mt-1 text-sm text-slate-600"></p>
+          <div class="mt-3 h-2 overflow-hidden rounded-full bg-slate-200" role="progressbar" aria-label="Tiến độ lên hạng" aria-valuemin="0" aria-valuemax="100">
+            <div id="orderPointsBar" class="h-full rounded-full bg-blue-700 transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <div class="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
+          <button type="button" data-close-overlay class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-500 hover:text-slate-900">Đóng</button>
+          <button type="button" id="orderApproveButton" class="rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2">Duyệt hoàn thành</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="approveDialog" data-overlay class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 px-4" role="alertdialog" aria-modal="true" aria-labelledby="approveTitle" aria-describedby="approveDescription">
+    <div class="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-6 shadow-xl">
+      <h2 id="approveTitle" class="text-lg font-semibold leading-tight text-slate-900">Duyệt hoàn thành đơn?</h2>
+      <p id="approveDescription" class="mt-2 text-sm text-slate-500">Đơn <span id="approveCode" class="font-medium text-slate-700"></span> sẽ chuyển sang Hoàn thành và khách được cộng <span id="approvePoints" class="font-medium text-slate-700"></span> điểm.</p>
+      <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <button type="button" data-close-overlay class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-500 hover:text-slate-900">Hủy</button>
+        <button type="button" id="confirmApprove" class="rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2">Xác nhận duyệt</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite" class="pointer-events-none fixed bottom-6 right-6 z-50 translate-y-4 rounded-lg bg-slate-900 px-4 py-3 text-sm text-white opacity-0 shadow-lg transition duration-300"></div>
+
+  <script>
+    (() => {
+      const SESSION_KEY = 'fashionLoyaltyAdminSession';
+      const STATUS = {
+        pending: { label: 'Chờ xác nhận', badge: 'bg-amber-50 text-amber-800' },
+        completed: { label: 'Hoàn thành', badge: 'bg-emerald-50 text-emerald-800' },
+        cancelled: { label: 'Đã hủy', badge: 'bg-slate-100 text-slate-600' },
+      };
+      const NEXT_TIER = { name: 'Bạc', threshold: 200 };
+
+      const email = localStorage.getItem(SESSION_KEY);
+      if (!email) {
+        window.location.replace('admin.html');
+        return;
+      }
+
+      const $ = (id) => document.getElementById(id);
+      const rowsEl = $('orderRows');
+      const summaryEl = $('orderSummary');
+      const searchInput = $('orderSearch');
+      const statusFilter = $('statusFilter');
+      const orderModal = $('orderModal');
+      const approveDialog = $('approveDialog');
+      const toast = $('toast');
+
+      $('adminUserEmail').textContent = email;
+      $('signOutButton').addEventListener('click', () => {
+        localStorage.removeItem(SESSION_KEY);
+        window.location.replace('admin.html');
+      });
+
+      let orders = [
+        { code: 'DH04', customer: 'Neàng Ra', memberPoints: 185, date: '2026-11-02', total: 245000, points: 24, status: 'pending' },
+        { code: 'DH03', customer: 'Minh Anh', memberPoints: 310, date: '2026-11-01', total: 510000, points: 51, status: 'completed' },
+        { code: 'DH02', customer: 'Thu Hà', memberPoints: 96, date: '2026-10-30', total: 180000, points: 18, status: 'cancelled' },
+      ];
+      let lastFocused = null;
+      let selectedCode = null;
+      let toastTimer = null;
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function formatVnd(amount) {
+        return `${amount.toLocaleString('vi-VN')}đ`;
+      }
+
+      function formatDate(iso) {
+        const [year, month, day] = iso.split('-');
+        return `${day}/${month}/${year}`;
+      }
+
+      function findOrder(code) {
+        return orders.find((order) => order.code === code);
+      }
+
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.remove('translate-y-4', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toast.classList.add('translate-y-4', 'opacity-0');
+          toast.classList.remove('translate-y-0', 'opacity-100');
+        }, 2500);
+      }
+
+      function openOverlay(overlay) {
+        lastFocused = document.activeElement;
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+      }
+
+      function closeOverlay(overlay) {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+        if (lastFocused) lastFocused.focus();
+        lastFocused = null;
+      }
+
+      function render() {
+        const query = searchInput.value.trim().toLowerCase();
+        const status = statusFilter.value;
+        const filtered = orders.filter((order) => {
+          const matchesQuery = !query
+            || order.code.toLowerCase().includes(query)
+            || order.customer.toLowerCase().includes(query);
+          const matchesStatus = !status || order.status === status;
+          return matchesQuery && matchesStatus;
+        });
+
+        rowsEl.innerHTML = filtered.length
+          ? filtered.map((order) => {
+              const code = escapeHtml(order.code);
+              const badge = STATUS[order.status];
+              const approve = order.status === 'pending'
+                ? `<button type="button" data-approve="${code}" class="rounded-lg bg-blue-700 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">Duyệt</button>`
+                : '';
+              return `
+                <tr class="align-middle">
+                  <td class="whitespace-nowrap px-6 py-4 font-medium text-slate-900">#${code}</td>
+                  <td class="whitespace-nowrap px-6 py-4 text-slate-700">${escapeHtml(order.customer)}</td>
+                  <td class="whitespace-nowrap px-6 py-4 text-slate-600">${formatDate(order.date)}</td>
+                  <td class="whitespace-nowrap px-6 py-4 text-right font-medium text-slate-900">${formatVnd(order.total)}</td>
+                  <td class="whitespace-nowrap px-6 py-4 text-right text-slate-700">+${order.points} điểm</td>
+                  <td class="whitespace-nowrap px-6 py-4"><span class="inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.badge}">${badge.label}</span></td>
+                  <td class="whitespace-nowrap px-6 py-4 text-right">
+                    <div class="inline-flex items-center gap-2">
+                      <button type="button" data-view="${code}" aria-label="Xem đơn ${code}" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-500 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">Xem</button>
+                      ${approve}
+                    </div>
+                  </td>
+                </tr>`;
+            }).join('')
+          : '<tr><td colspan="7" class="px-6 py-12 text-center text-sm text-slate-500">Không có đơn hàng phù hợp.</td></tr>';
+
+        summaryEl.textContent = `Hiển thị ${filtered.length} trên ${orders.length} đơn hàng`;
+      }
+
+      function openDetail(code) {
+        const order = findOrder(code);
+        selectedCode = code;
+        $('orderModalCode').textContent = `Đơn #${order.code}`;
+        $('orderCustomer').textContent = order.customer;
+        $('orderDate').textContent = formatDate(order.date);
+        $('orderTotal').textContent = formatVnd(order.total);
+        const badge = STATUS[order.status];
+        const statusEl = $('orderModalStatus');
+        statusEl.textContent = badge.label;
+        statusEl.className = `inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.badge}`;
+
+        const remaining = Math.max(0, NEXT_TIER.threshold - order.memberPoints);
+        const progress = Math.min(100, Math.round((order.memberPoints / NEXT_TIER.threshold) * 100));
+        $('orderPointsSummary').textContent = remaining > 0
+          ? `${order.memberPoints}/${NEXT_TIER.threshold} điểm, còn ${remaining} điểm để lên hạng ${NEXT_TIER.name}.`
+          : `${order.memberPoints} điểm, đã đủ điều kiện lên hạng ${NEXT_TIER.name}.`;
+        $('orderPointsBar').style.width = `${progress}%`;
+
+        const approveButton = $('orderApproveButton');
+        approveButton.classList.toggle('hidden', order.status !== 'pending');
+        openOverlay(orderModal);
+        approveButton.focus();
+      }
+
+      function openApprove(code) {
+        const order = findOrder(code);
+        selectedCode = code;
+        $('approveCode').textContent = `#${order.code}`;
+        $('approvePoints').textContent = `${order.points} điểm`;
+        openOverlay(approveDialog);
+        $('confirmApprove').focus();
+      }
+
+      function confirmApprove() {
+        const order = findOrder(selectedCode);
+        order.status = 'completed';
+        order.memberPoints += order.points;
+        closeOverlay(approveDialog);
+        render();
+        showToast(`Đã duyệt đơn #${order.code}, cộng ${order.points} điểm cho ${order.customer}`);
+      }
+
+      rowsEl.addEventListener('click', (event) => {
+        const view = event.target.closest('button[data-view]');
+        const approve = event.target.closest('button[data-approve]');
+        if (view) openDetail(view.dataset.view);
+        if (approve) openApprove(approve.dataset.approve);
+      });
+
+      $('orderApproveButton').addEventListener('click', () => {
+        closeOverlay(orderModal);
+        openApprove(selectedCode);
+      });
+      $('confirmApprove').addEventListener('click', confirmApprove);
+
+      searchInput.addEventListener('input', render);
+      statusFilter.addEventListener('change', render);
+
+      document.querySelectorAll('[data-overlay]').forEach((overlay) => {
+        overlay.addEventListener('click', (event) => {
+          if (event.target === overlay) closeOverlay(overlay);
+        });
+        overlay.querySelectorAll('[data-close-overlay]').forEach((button) => {
+          button.addEventListener('click', () => closeOverlay(overlay));
+        });
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        const openOne = [approveDialog, orderModal].find((overlay) => !overlay.classList.contains('hidden'));
+        if (openOne) closeOverlay(openOne);
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>

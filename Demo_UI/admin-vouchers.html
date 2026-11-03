@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quản lý Chiến dịch Voucher | Fashion Loyalty</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Be Vietnam Pro"', 'system-ui', 'sans-serif'] },
+          colors: { canvas: '#F8FAFC' },
+        },
+      },
+    };
+  </script>
+  <style>.nav-item { transition: background-color 0.2s ease, color 0.2s ease; }</style>
+</head>
+<body class="bg-canvas font-sans text-slate-800 antialiased">
+  <div class="flex h-screen flex-col overflow-hidden lg:flex-row">
+    <aside class="shrink-0 border-b border-slate-200 bg-white lg:flex lg:h-screen lg:w-64 lg:flex-col lg:border-b-0 lg:border-r">
+      <div class="px-6 pb-4 pt-6 lg:pb-6">
+        <p class="text-sm font-semibold tracking-[0.25em] text-slate-900">AURA STUDIO</p>
+        <p class="mt-1 text-xs text-slate-500">Quản trị Fashion Loyalty</p>
+      </div>
+      <nav aria-label="Menu quản trị" class="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:overflow-visible lg:pb-0">
+        <a href="admin.html" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5" /><rect x="14" y="3" width="7" height="5" rx="1.5" /><rect x="14" y="12" width="7" height="9" rx="1.5" /><rect x="3" y="16" width="7" height="5" rx="1.5" /></svg>
+          Tổng quan
+        </a>
+        <a href="admin-products.html" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7l8-4 8 4-8 4-8-4Z" stroke-linejoin="round" /><path d="M4 7v10l8 4 8-4V7" stroke-linejoin="round" /></svg>
+          Danh mục &amp; Sản phẩm
+        </a>
+        <a href="admin-inventory.html" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 8h18M5 8v11h14V8M9 12h6" stroke-linejoin="round" /></svg>
+          Quản lý nhập hàng
+        </a>
+        <a href="admin-orders.html" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 4h12v16l-6-3-6 3V4Z" stroke-linejoin="round" /></svg>
+          Quản lý Đơn hàng
+        </a>
+        <a href="admin-tiers.html" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.6 6.8 19.1l1-5.8-4.3-4.1 5.9-.9L12 3Z" stroke-linejoin="round" /></svg>
+          Cấu hình Hạng thành viên
+        </a>
+        <a href="admin-vouchers.html" aria-current="page" class="nav-item flex shrink-0 items-center gap-3 rounded-lg bg-slate-100 px-3 py-2.5 text-sm font-medium text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 9a2 2 0 0 0 0 4v2h18v-2a2 2 0 0 0 0-4V7H3v2Z" stroke-linejoin="round" /></svg>
+          Chiến dịch Voucher
+        </a>
+      </nav>
+      <div class="hidden border-t border-slate-200 px-6 py-4 lg:mt-auto lg:block">
+        <p class="text-xs text-slate-500">Quản trị Fashion Loyalty</p>
+      </div>
+    </aside>
+
+    <main class="min-w-0 flex-1 overflow-y-auto px-6 py-8 lg:px-10 lg:py-10">
+      <header>
+        <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs text-slate-500">
+          <a href="admin.html" class="hover:text-slate-900">Tổng quan</a>
+          <span aria-hidden="true">/</span>
+          <span class="text-slate-700">Chiến dịch Voucher</span>
+        </nav>
+        <h1 class="mt-2 text-2xl font-semibold leading-tight text-slate-900">Quản lý Chiến dịch Voucher Loyalty</h1>
+      </header>
+
+      <section aria-label="Công cụ chiến dịch voucher" class="mt-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <p class="text-sm text-slate-500">Khóa chiến dịch để tạm ngừng cho phép khách đổi voucher.</p>
+        <button id="openVoucherModal" type="button" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-800 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2">
+          <span aria-hidden="true" class="text-base leading-none">+</span>
+          Tạo Voucher mới
+        </button>
+      </section>
+
+      <section aria-label="Bảng chiến dịch voucher" class="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-left text-sm">
+            <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+              <tr>
+                <th scope="col" class="px-6 py-3 font-medium">Mã Code</th>
+                <th scope="col" class="px-6 py-3 font-medium">Tên chương trình</th>
+                <th scope="col" class="px-6 py-3 text-right font-medium">Trị giá giảm</th>
+                <th scope="col" class="px-6 py-3 text-right font-medium">Điểm cần đổi</th>
+                <th scope="col" class="px-6 py-3 font-medium">Hạng yêu cầu</th>
+                <th scope="col" class="px-6 py-3 text-right font-medium">Số lượng còn</th>
+                <th scope="col" class="px-6 py-3 font-medium">Hạn sử dụng</th>
+                <th scope="col" class="px-6 py-3 text-right font-medium">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="voucherRows" class="divide-y divide-slate-200"></tbody>
+          </table>
+        </div>
+        <p id="voucherSummary" class="border-t border-slate-200 px-6 py-4 text-sm text-slate-500" aria-live="polite"></p>
+      </section>
+    </main>
+  </div>
+
+  <div id="voucherModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 px-4 py-8" role="dialog" aria-modal="true" aria-labelledby="voucherModalTitle">
+    <div class="max-h-full w-full max-w-3xl overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-xl">
+      <div class="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5 sm:px-8">
+        <div>
+          <h2 id="voucherModalTitle" class="text-lg font-semibold leading-tight text-slate-900">Tạo Voucher mới</h2>
+          <p class="mt-1 text-sm text-slate-500">Thiết lập ưu đãi và điều kiện đổi điểm cho khách hàng.</p>
+        </div>
+        <button type="button" data-close-modal aria-label="Đóng" class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
+        </button>
+      </div>
+      <form id="voucherForm" class="px-6 py-6 sm:px-8" novalidate>
+        <div class="grid gap-x-8 gap-y-5 md:grid-cols-2">
+          <div class="space-y-5">
+            <div>
+              <label for="voucherCode" class="block text-sm font-medium text-slate-700">Mã Code</label>
+              <input id="voucherCode" type="text" maxlength="20" required placeholder="VD: VIP50K" class="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm uppercase text-slate-900 placeholder:normal-case placeholder:text-slate-400 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-100" />
+              <p id="voucherCodeError" class="mt-1.5 hidden text-xs text-red-600"></p>
+            </div>
+            <div>
+              <label for="voucherName" class="block text-sm font-medium text-slate-700">Tên chương trình</label>
+              <input id="voucherName" type="text" required placeholder="Ví dụ: Ưu đãi thành viên mới" class="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-100" />
+              <p id="voucherNameError" class="mt-1.5 hidden text-xs text-red-600"></p>
+            </div>
+            <div>
+              <label for="voucherType" class="block text-sm font-medium text-slate-700">Loại giảm</label>
+              <select id="voucherType" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                <option value="amount">Tiền (VNĐ)</option>
+                <option value="percent">Phần trăm (%)</option>
+              </select>
+            </div>
+            <div>
+              <label for="voucherValue" class="block text-sm font-medium text-slate-700">Trị giá giảm</label>
+              <input id="voucherValue" type="number" min="1" step="1" required placeholder="0" class="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-100" />
+              <p id="voucherValueError" class="mt-1.5 hidden text-xs text-red-600"></p>
+            </div>
+          </div>
+          <div class="space-y-5">
+            <div>
+              <label for="voucherPoints" class="block text-sm font-medium text-slate-700">Điểm cần đổi</label>
+              <input id="voucherPoints" type="number" min="0" step="1" required placeholder="100" class="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-100" />
+              <p id="voucherPointsError" class="mt-1.5 hidden text-xs text-red-600"></p>
+            </div>
+            <div>
+              <label for="voucherTier" class="block text-sm font-medium text-slate-700">Hạng yêu cầu</label>
+              <select id="voucherTier" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                <option>Đồng</option>
+                <option>Bạc</option>
+                <option>Vàng</option>
+                <option>Kim Cương</option>
+              </select>
+            </div>
+            <div>
+              <label for="voucherQuantity" class="block text-sm font-medium text-slate-700">Số lượng phát hành</label>
+              <input id="voucherQuantity" type="number" min="1" step="1" required placeholder="100" class="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-100" />
+              <p id="voucherQuantityError" class="mt-1.5 hidden text-xs text-red-600"></p>
+            </div>
+            <div>
+              <label for="voucherExpiry" class="block text-sm font-medium text-slate-700">Hạn sử dụng</label>
+              <input id="voucherExpiry" type="date" required class="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-100" />
+              <p id="voucherExpiryError" class="mt-1.5 hidden text-xs text-red-600"></p>
+            </div>
+          </div>
+        </div>
+        <div class="mt-7 flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
+          <button type="button" data-close-modal class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-500 hover:text-slate-900">Hủy</button>
+          <button type="submit" class="rounded-lg bg-blue-800 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2">Tạo voucher</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div id="toast" role="status" aria-live="polite" class="fixed bottom-5 right-5 z-[60] translate-y-4 rounded-lg bg-slate-900 px-4 py-3 text-sm text-white opacity-0 shadow-lg transition"></div>
+  <script>
+    (() => {
+      const vouchers = [
+        { code: 'VIP50K', name: 'Ưu đãi thành viên Bạc', type: 'amount', value: 50000, points: 150, tier: 'Bạc', quantity: 120, expiry: '2026-12-31', active: true },
+        { code: 'FREESHIP25', name: 'Miễn phí vận chuyển', type: 'amount', value: 25000, points: 50, tier: 'Đồng', quantity: 300, expiry: '2027-01-31', active: true },
+        { code: 'WELCOME10', name: 'Giảm 10% cho đơn đầu tiên', type: 'percent', value: 10, points: 80, tier: 'Đồng', quantity: 200, expiry: '2027-06-30', active: false },
+      ];
+      const $ = (id) => document.getElementById(id);
+      const rows = $('voucherRows');
+      const modal = $('voucherModal');
+      const form = $('voucherForm');
+      let lastFocused = null;
+      let toastTimer;
+
+      const formatDate = (iso) => {
+        const [year, month, day] = iso.split('-');
+        return `${day}/${month}/${year}`;
+      };
+      const formatDiscount = (voucher) => voucher.type === 'percent'
+        ? `${voucher.value}%`
+        : `${voucher.value.toLocaleString('vi-VN')}đ`;
+      const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+      })[char]);
+
+      function renderVouchers() {
+        rows.innerHTML = vouchers.map((voucher) => {
+          const code = escapeHtml(voucher.code);
+          const status = voucher.active
+            ? '<span class="mt-1 inline-block rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-800">Đang chạy</span>'
+            : '<span class="mt-1 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">Đã khóa</span>';
+          const action = voucher.active
+            ? `<button type="button" data-toggle-voucher="${code}" class="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-700 transition hover:border-red-400 hover:bg-red-50">Khóa</button>`
+            : `<button type="button" data-toggle-voucher="${code}" class="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-700">Mở</button>`;
+          return `<tr>
+            <td class="whitespace-nowrap px-6 py-4"><span class="font-mono font-medium text-slate-900">${code}</span><br />${status}</td>
+            <td class="px-6 py-4 text-slate-700">${escapeHtml(voucher.name)}</td>
+            <td class="whitespace-nowrap px-6 py-4 text-right font-medium text-slate-900">${formatDiscount(voucher)}</td>
+            <td class="whitespace-nowrap px-6 py-4 text-right text-slate-700">${voucher.points.toLocaleString('vi-VN')} điểm</td>
+            <td class="whitespace-nowrap px-6 py-4 text-slate-700">${escapeHtml(voucher.tier)}</td>
+            <td class="whitespace-nowrap px-6 py-4 text-right text-slate-700">${voucher.quantity.toLocaleString('vi-VN')}</td>
+            <td class="whitespace-nowrap px-6 py-4 text-slate-700">${formatDate(voucher.expiry)}</td>
+            <td class="whitespace-nowrap px-6 py-4 text-right">${action}</td>
+          </tr>`;
+        }).join('');
+        const activeCount = vouchers.filter((voucher) => voucher.active).length;
+        $('voucherSummary').textContent = `${activeCount} chiến dịch đang chạy trên ${vouchers.length} chiến dịch`;
+      }
+
+      function todayIso() {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      }
+
+      function setError(input, message) {
+        const error = $(`${input.id}Error`);
+        error.textContent = message;
+        error.classList.toggle('hidden', !message);
+        input.setAttribute('aria-invalid', String(Boolean(message)));
+      }
+
+      function clearErrors() {
+        form.querySelectorAll('input').forEach((input) => setError(input, ''));
+      }
+
+      function openModal() {
+        form.reset();
+        clearErrors();
+        $('voucherExpiry').min = todayIso();
+        lastFocused = document.activeElement;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        $('voucherCode').focus();
+      }
+
+      function closeModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        if (lastFocused instanceof HTMLElement) lastFocused.focus();
+      }
+
+      function showToast(message) {
+        const toast = $('toast');
+        toast.textContent = message;
+        toast.classList.remove('translate-y-4', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toast.classList.add('translate-y-4', 'opacity-0');
+          toast.classList.remove('translate-y-0', 'opacity-100');
+        }, 2500);
+      }
+
+      $('openVoucherModal').addEventListener('click', openModal);
+      $('voucherCode').addEventListener('input', (event) => {
+        event.target.value = event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      });
+      rows.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-toggle-voucher]');
+        if (!button) return;
+        const voucher = vouchers.find((item) => item.code === button.dataset.toggleVoucher);
+        if (!voucher) return;
+        voucher.active = !voucher.active;
+        renderVouchers();
+        rows.querySelector(`[data-toggle-voucher="${voucher.code}"]`)?.focus();
+        showToast(voucher.active ? `Đã mở chiến dịch ${voucher.code}` : `Đã khóa chiến dịch ${voucher.code}`);
+      });
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        clearErrors();
+        const code = $('voucherCode').value.trim().toUpperCase();
+        const name = $('voucherName').value.trim();
+        const type = $('voucherType').value;
+        const value = Number($('voucherValue').value);
+        const points = Number($('voucherPoints').value);
+        const quantity = Number($('voucherQuantity').value);
+        const expiry = $('voucherExpiry').value;
+        setError($('voucherCode'), !/^[A-Z0-9]{3,20}$/.test(code)
+          ? 'Mã gồm 3-20 ký tự chữ không dấu hoặc số.'
+          : vouchers.some((voucher) => voucher.code === code) ? 'Mã voucher đã tồn tại.' : '');
+        setError($('voucherName'), name ? '' : 'Vui lòng nhập tên chương trình.');
+        setError($('voucherValue'), Number.isFinite(value) && value >= 1 && (type !== 'percent' || value <= 100)
+          ? '' : type === 'percent' ? 'Phần trăm giảm phải từ 1 đến 100.' : 'Nhập số tiền giảm lớn hơn 0.');
+        setError($('voucherPoints'), $('voucherPoints').value !== '' && Number.isInteger(points) && points >= 0 ? '' : 'Điểm cần đổi phải là số nguyên từ 0 trở lên.');
+        setError($('voucherQuantity'), Number.isInteger(quantity) && quantity > 0 ? '' : 'Số lượng phải là số nguyên lớn hơn 0.');
+        setError($('voucherExpiry'), expiry && expiry >= todayIso() ? '' : 'Chọn hạn sử dụng từ hôm nay trở đi.');
+        const invalid = form.querySelector('[aria-invalid="true"]');
+        if (invalid) {
+          invalid.focus();
+          return;
+        }
+        vouchers.push({
+          code, name, type, value, points, tier: $('voucherTier').value, quantity, expiry, active: true,
+        });
+        closeModal();
+        renderVouchers();
+        showToast(`Đã tạo voucher ${code}`);
+      });
+      modal.addEventListener('click', (event) => {
+        if (event.target === modal || event.target.closest('[data-close-modal]')) closeModal();
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+      });
+      renderVouchers();
+    })();
+  </script>
+</body>
+</html>

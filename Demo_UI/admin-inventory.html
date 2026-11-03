@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quản lý nhập hàng &amp; Tồn kho | Fashion Loyalty</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Be Vietnam Pro"', 'system-ui', 'sans-serif'] },
+          colors: { canvas: '#F8FAFC' },
+        },
+      },
+    };
+  </script>
+  <style>.nav-item { transition: background-color 0.2s ease, color 0.2s ease; }</style>
+</head>
+<body class="bg-canvas font-sans text-slate-800 antialiased">
+  <div class="flex h-screen flex-col overflow-hidden lg:flex-row">
+    <aside class="shrink-0 border-b border-slate-200 bg-white lg:flex lg:h-screen lg:w-64 lg:flex-col lg:border-b-0 lg:border-r">
+      <div class="px-6 pb-4 pt-6 lg:pb-6">
+        <p class="text-sm font-semibold tracking-[0.25em] text-slate-900">AURA STUDIO</p>
+        <p class="mt-1 text-xs text-slate-500">Quản trị Fashion Loyalty</p>
+      </div>
+      <nav aria-label="Menu quản trị" class="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:overflow-visible lg:pb-0">
+        <a href="admin.html" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5" /><rect x="14" y="3" width="7" height="5" rx="1.5" /><rect x="14" y="12" width="7" height="9" rx="1.5" /><rect x="3" y="16" width="7" height="5" rx="1.5" /></svg>
+          Tổng quan
+        </a>
+        <a href="admin-products.html" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7l8-4 8 4-8 4-8-4Z" stroke-linejoin="round" /><path d="M4 7v10l8 4 8-4V7" stroke-linejoin="round" /></svg>
+          Danh mục &amp; Sản phẩm
+        </a>
+        <a href="admin-inventory.html" aria-current="page" class="nav-item flex shrink-0 items-center gap-3 rounded-lg bg-slate-100 px-3 py-2.5 text-sm font-medium text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 8h18M5 8v11h14V8M9 12h6" stroke-linejoin="round" /></svg>
+          Quản lý nhập hàng
+        </a>
+        <a href="admin-orders.html" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 4h12v16l-6-3-6 3V4Z" stroke-linejoin="round" /></svg>
+          Quản lý Đơn hàng
+        </a>
+        <a href="admin-tiers.html" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.6 6.8 19.1l1-5.8-4.3-4.1 5.9-.9L12 3Z" stroke-linejoin="round" /></svg>
+          Cấu hình Hạng thành viên
+        </a>
+        <a href="admin-vouchers.html" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 9a2 2 0 0 0 0 4v2h18v-2a2 2 0 0 0 0-4V7H3v2Z" stroke-linejoin="round" /></svg>
+          Chiến dịch Voucher
+        </a>
+      </nav>
+      <div class="hidden border-t border-slate-200 px-6 py-4 lg:mt-auto lg:block">
+        <p class="text-xs text-slate-500">Quản trị Fashion Loyalty</p>
+      </div>
+    </aside>
+
+    <main class="min-w-0 flex-1 overflow-y-auto px-6 py-8 lg:px-10 lg:py-10">
+      <header>
+        <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs text-slate-500">
+          <a href="admin.html" class="hover:text-slate-900">Tổng quan</a>
+          <span aria-hidden="true">/</span>
+          <span class="text-slate-700">Quản lý nhập hàng</span>
+        </nav>
+        <h1 class="mt-2 text-2xl font-semibold leading-tight text-slate-900">Quản lý Nhập hàng &amp; Tồn kho</h1>
+      </header>
+
+      <section aria-label="Công cụ tồn kho" class="mt-8 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div class="relative">
+          <label for="stockSearch" class="sr-only">Tìm theo mã SKU hoặc tên sản phẩm</label>
+          <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4 4" stroke-linecap="round" /></svg>
+          <input id="stockSearch" type="search" placeholder="Tìm theo mã SKU hoặc tên sản phẩm..." class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-100 md:w-96" />
+        </div>
+        <button type="button" id="openStockModal" class="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-800 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2">
+          <span aria-hidden="true" class="text-base leading-none">+</span>
+          Lập phiếu nhập kho
+        </button>
+      </section>
+
+      <section aria-label="Bảng tồn kho" class="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-left text-sm">
+            <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+              <tr>
+                <th scope="col" class="px-6 py-3 font-medium">Mã SKU</th>
+                <th scope="col" class="px-6 py-3 font-medium">Tên sản phẩm</th>
+                <th scope="col" class="px-6 py-3 font-medium">Phân loại</th>
+                <th scope="col" class="px-6 py-3 text-right font-medium">Giá riêng</th>
+                <th scope="col" class="px-6 py-3 text-right font-medium">Tồn kho thực tế</th>
+                <th scope="col" class="px-6 py-3 text-right font-medium">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="stockRows" class="divide-y divide-slate-200"></tbody>
+          </table>
+        </div>
+        <p id="stockSummary" class="border-t border-slate-200 px-6 py-4 text-sm text-slate-500" aria-live="polite"></p>
+      </section>
+    </main>
+  </div>
+
+  <div id="stockModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 px-4 py-8" role="dialog" aria-modal="true" aria-labelledby="stockModalTitle">
+    <div class="max-h-full w-full max-w-lg overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-xl">
+      <div class="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
+        <div>
+          <h2 id="stockModalTitle" class="text-lg font-semibold leading-tight text-slate-900">Lập phiếu nhập kho</h2>
+          <p class="mt-1 text-sm text-slate-500">Chọn SKU và nhập số lượng bổ sung vào kho.</p>
+        </div>
+        <button type="button" data-close-modal aria-label="Đóng" class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
+        </button>
+      </div>
+      <form id="stockForm" class="space-y-5 px-6 py-6" novalidate>
+        <div>
+          <label for="stockSku" class="block text-sm font-medium text-slate-700">Mã SKU</label>
+          <select id="stockSku" required class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-100"></select>
+          <p id="stockSkuError" class="mt-1.5 hidden text-xs text-red-600"></p>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label for="stockQuantity" class="block text-sm font-medium text-slate-700">Số lượng nhập thêm</label>
+            <input id="stockQuantity" type="number" min="1" step="1" required placeholder="0" class="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-100" />
+            <p id="stockQuantityError" class="mt-1.5 hidden text-xs text-red-600"></p>
+          </div>
+          <div>
+            <label for="stockCost" class="block text-sm font-medium text-slate-700">Giá vốn (VNĐ)</label>
+            <input id="stockCost" type="number" min="0" step="1000" required placeholder="0" class="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-100" />
+            <p id="stockCostError" class="mt-1.5 hidden text-xs text-red-600"></p>
+          </div>
+        </div>
+        <div>
+          <label for="stockSupplier" class="block text-sm font-medium text-slate-700">Nhà cung cấp</label>
+          <input id="stockSupplier" type="text" required placeholder="Ví dụ: Công ty May Hòa Phát" class="mt-1.5 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-100" />
+          <p id="stockSupplierError" class="mt-1.5 hidden text-xs text-red-600"></p>
+        </div>
+        <div class="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
+          <button type="button" data-close-modal class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-500 hover:text-slate-900">Hủy</button>
+          <button type="submit" class="rounded-lg bg-blue-800 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2">Xác nhận nhập kho</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div id="toast" role="status" aria-live="polite" class="fixed bottom-5 right-5 z-[60] translate-y-4 rounded-lg bg-slate-900 px-4 py-3 text-sm text-white opacity-0 shadow-lg transition"></div>
+  <script>
+    (() => {
+      const variants = [
+        { sku: 'POLO-CMX-DEN-M', name: 'Áo Polo Nam Pique Coolmax', variant: 'Size M / Đen', price: 320000, stock: 0 },
+        { sku: 'DRESS-FLR-HON-S', name: 'Đầm Nữ Hoa Nhí', variant: 'Size S / Hồng', price: 485000, stock: 3 },
+        { sku: 'JEAN-STR-XDA-30', name: 'Quần Jeans Nam Straight', variant: 'Size 30 / Xanh đậm', price: 590000, stock: 18 },
+      ];
+      const $ = (id) => document.getElementById(id);
+      const rows = $('stockRows');
+      const modal = $('stockModal');
+      const form = $('stockForm');
+      const skuSelect = $('stockSku');
+      let lastFocused = null;
+      let toastTimer;
+
+      const formatVnd = (amount) => `${amount.toLocaleString('vi-VN')}đ`;
+      const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+      })[char]);
+
+      function renderStock() {
+        const query = $('stockSearch').value.trim().toLocaleLowerCase('vi');
+        const filtered = variants.filter((item) =>
+          item.sku.toLocaleLowerCase('vi').includes(query) || item.name.toLocaleLowerCase('vi').includes(query)
+        );
+        rows.innerHTML = filtered.length ? filtered.map((item) => {
+          const stockText = item.stock === 0
+            ? '<span class="font-semibold text-red-600">0</span><span class="ml-2 rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700">Hết hàng</span>'
+            : item.stock < 5
+              ? `<span class="font-semibold text-red-600">${item.stock}</span><span class="ml-2 rounded-full bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700">Sắp hết</span>`
+              : `<span class="font-medium text-slate-900">${item.stock}</span>`;
+          return `<tr>
+            <td class="whitespace-nowrap px-6 py-4 font-mono text-xs text-slate-700">${escapeHtml(item.sku)}</td>
+            <td class="px-6 py-4 font-medium text-slate-900">${escapeHtml(item.name)}</td>
+            <td class="whitespace-nowrap px-6 py-4 text-slate-600">${escapeHtml(item.variant)}</td>
+            <td class="whitespace-nowrap px-6 py-4 text-right text-slate-900">${formatVnd(item.price)}</td>
+            <td class="whitespace-nowrap px-6 py-4 text-right">${stockText}</td>
+            <td class="whitespace-nowrap px-6 py-4 text-right"><button type="button" data-restock="${escapeHtml(item.sku)}" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-500 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">Nhập thêm</button></td>
+          </tr>`;
+        }).join('') : '<tr><td colspan="6" class="px-6 py-12 text-center text-sm text-slate-500">Không tìm thấy sản phẩm phù hợp.</td></tr>';
+        $('stockSummary').textContent = `Hiển thị ${filtered.length} trên ${variants.length} sản phẩm`;
+      }
+
+      function openModal(sku = '') {
+        form.reset();
+        form.querySelectorAll('[aria-invalid="true"]').forEach((input) => input.removeAttribute('aria-invalid'));
+        form.querySelectorAll('[id$="Error"]').forEach((error) => error.classList.add('hidden'));
+        skuSelect.value = sku;
+        lastFocused = document.activeElement;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        (sku ? $('stockQuantity') : skuSelect).focus();
+      }
+
+      function closeModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        if (lastFocused instanceof HTMLElement) lastFocused.focus();
+      }
+
+      function setError(input, message) {
+        const error = $(`${input.id}Error`);
+        error.textContent = message;
+        error.classList.toggle('hidden', !message);
+        input.setAttribute('aria-invalid', String(Boolean(message)));
+      }
+
+      function showToast(message) {
+        const toast = $('toast');
+        toast.textContent = message;
+        toast.classList.remove('translate-y-4', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toast.classList.add('translate-y-4', 'opacity-0');
+          toast.classList.remove('translate-y-0', 'opacity-100');
+        }, 2500);
+      }
+
+      skuSelect.innerHTML = variants.map((item) => `<option value="${escapeHtml(item.sku)}">${escapeHtml(item.sku)} — ${escapeHtml(item.name)} (${escapeHtml(item.variant)})</option>`).join('');
+      $('openStockModal').addEventListener('click', () => openModal());
+      $('stockSearch').addEventListener('input', renderStock);
+      rows.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-restock]');
+        if (button) openModal(button.dataset.restock);
+      });
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const item = variants.find((variant) => variant.sku === skuSelect.value);
+        const quantity = Number($('stockQuantity').value);
+        const cost = Number($('stockCost').value);
+        const supplier = $('stockSupplier').value.trim();
+        setError(skuSelect, item ? '' : 'Vui lòng chọn mã SKU.');
+        setError($('stockQuantity'), Number.isInteger(quantity) && quantity > 0 ? '' : 'Số lượng phải là số nguyên lớn hơn 0.');
+        setError($('stockCost'), $('stockCost').value !== '' && Number.isFinite(cost) && cost >= 0 ? '' : 'Vui lòng nhập giá vốn hợp lệ.');
+        setError($('stockSupplier'), supplier ? '' : 'Vui lòng nhập nhà cung cấp.');
+        const invalid = form.querySelector('[aria-invalid="true"]');
+        if (invalid) {
+          invalid.focus();
+          return;
+        }
+        item.stock += quantity;
+        closeModal();
+        renderStock();
+        showToast(`Đã nhập thêm ${quantity} sản phẩm cho ${item.sku}`);
+      });
+      modal.addEventListener('click', (event) => {
+        if (event.target === modal || event.target.closest('[data-close-modal]')) closeModal();
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+      });
+      renderStock();
+    })();
+  </script>
+</body>
+</html>

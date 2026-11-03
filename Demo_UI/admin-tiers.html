@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hạng thành viên | Fashion Loyalty</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Be Vietnam Pro"', 'system-ui', 'sans-serif'] },
+          colors: { canvas: '#F8FAFC' },
+        },
+      },
+    };
+  </script>
+  <style>
+    .nav-item { transition: background-color 0.2s ease, color 0.2s ease; }
+  </style>
+</head>
+<body class="bg-canvas font-sans text-slate-800 antialiased">
+  <div class="flex min-h-screen flex-col lg:flex-row">
+
+    <aside class="border-b border-slate-200 bg-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-64 lg:shrink-0 lg:flex-col lg:border-b-0 lg:border-r">
+      <div class="px-6 pb-4 pt-6 lg:pb-6">
+        <p class="text-sm font-semibold tracking-[0.25em] text-slate-900">AURA STUDIO</p>
+        <p class="mt-1 text-xs text-slate-500">Quản trị Fashion Loyalty</p>
+      </div>
+      <nav aria-label="Menu quản trị" class="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:overflow-visible lg:pb-0">
+        <a href="admin.html" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5" /><rect x="14" y="3" width="7" height="5" rx="1.5" /><rect x="14" y="12" width="7" height="9" rx="1.5" /><rect x="3" y="16" width="7" height="5" rx="1.5" /></svg>
+          Tổng quan
+        </a>
+        <a href="admin-products.html" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7l8-4 8 4-8 4-8-4Z" stroke-linejoin="round" /><path d="M4 7v10l8 4 8-4V7" stroke-linejoin="round" /></svg>
+          Danh mục &amp; Sản phẩm
+        </a>
+        <a href="admin-inventory.html" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 8h18M5 8v11h14V8M9 12h6" stroke-linejoin="round" /></svg>
+          Quản lý nhập hàng
+        </a>
+        <a href="admin-orders.html" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 4h12v16l-6-3-6 3V4Z" stroke-linejoin="round" /></svg>
+          Quản lý Đơn hàng
+        </a>
+        <a href="admin-tiers.html" aria-current="page" class="nav-item flex shrink-0 items-center gap-3 rounded-lg bg-slate-100 px-3 py-2.5 text-sm font-medium text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.6 6.8 19.1l1-5.8-4.3-4.1 5.9-.9L12 3Z" stroke-linejoin="round" /></svg>
+          Cấu hình Hạng thành viên
+        </a>
+        <a href="admin-vouchers.html" class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-500 hover:bg-slate-50 hover:text-slate-900">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 9a2 2 0 0 0 0 4v2h18v-2a2 2 0 0 0 0-4V7H3v2Z" stroke-linejoin="round" /></svg>
+          Chiến dịch Voucher
+        </a>
+      </nav>
+      <div class="border-t border-slate-200 px-6 py-4 lg:mt-auto">
+        <p id="adminUserEmail" class="truncate text-xs text-slate-500"></p>
+        <button id="signOutButton" type="button" class="mt-2 text-sm font-medium text-slate-700 underline-offset-4 transition hover:text-slate-900 hover:underline">Đăng xuất</button>
+      </div>
+    </aside>
+
+    <main class="flex-1 px-6 py-8 lg:px-10 lg:py-10">
+      <header>
+        <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs text-slate-500">
+          <a href="admin.html" class="hover:text-slate-900">Tổng quan</a>
+          <span aria-hidden="true">/</span>
+          <span class="text-slate-700">Cấu hình Hạng thành viên</span>
+        </nav>
+        <h1 class="mt-2 text-2xl font-semibold leading-tight text-slate-900">Cấu hình Hạng thành viên</h1>
+        <p class="mt-2 max-w-2xl text-sm text-slate-500">Mỗi hạng có ngưỡng đạt được, tỷ lệ tích điểm và hệ số nhân riêng. Thay đổi sẽ áp dụng cho các đơn hàng mới.</p>
+      </header>
+
+      <section aria-label="Danh sách hạng" class="mt-8 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-left text-sm">
+            <thead class="bg-slate-50 text-xs uppercase tracking-wider text-slate-500">
+              <tr>
+                <th scope="col" class="px-6 py-3 font-medium">Hạng</th>
+                <th scope="col" class="px-6 py-3 text-right font-medium">Ngưỡng đạt hạng</th>
+                <th scope="col" class="px-6 py-3 text-right font-medium">Tỷ lệ tích điểm</th>
+                <th scope="col" class="px-6 py-3 text-right font-medium">Hệ số nhân</th>
+                <th scope="col" class="px-6 py-3 text-right font-medium">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="tierRows" class="divide-y divide-slate-200"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="tierModal" data-overlay class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 px-4 py-8" role="dialog" aria-modal="true" aria-labelledby="tierModalTitle">
+    <div class="w-full max-w-md rounded-xl border border-slate-200 bg-white shadow-xl">
+      <div class="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
+        <div>
+          <h2 id="tierModalTitle" class="text-lg font-semibold leading-tight text-slate-900">Chỉnh sửa hạng</h2>
+          <p class="mt-1 text-sm text-slate-500">Điều chỉnh nhanh điều kiện và quyền lợi tích điểm.</p>
+        </div>
+        <button type="button" data-close-overlay aria-label="Đóng" class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
+        </button>
+      </div>
+
+      <form id="tierForm" class="space-y-5 px-6 py-6" novalidate>
+        <div>
+          <label for="tierThreshold" class="block text-sm font-medium text-slate-700">Ngưỡng đạt hạng</label>
+          <div class="relative mt-1.5">
+            <input id="tierThreshold" type="number" min="0" step="1" class="w-full rounded-lg border border-slate-300 py-2.5 pl-3 pr-9 text-sm text-slate-900 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500" />
+            <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">đ</span>
+          </div>
+          <p id="tierThresholdHint" class="mt-1.5 text-xs text-slate-500"></p>
+          <p id="tierThresholdError" class="mt-1.5 hidden text-xs text-red-600"></p>
+        </div>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label for="tierRate" class="block text-sm font-medium text-slate-700">Tỷ lệ tích điểm</label>
+            <div class="relative mt-1.5">
+              <input id="tierRate" type="number" min="0" max="100" step="0.5" class="w-full rounded-lg border border-slate-300 py-2.5 pl-3 pr-9 text-sm text-slate-900 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-100" />
+              <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">%</span>
+            </div>
+            <p id="tierRateError" class="mt-1.5 hidden text-xs text-red-600"></p>
+          </div>
+          <div>
+            <label for="tierMultiplier" class="block text-sm font-medium text-slate-700">Hệ số nhân</label>
+            <div class="relative mt-1.5">
+              <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">x</span>
+              <input id="tierMultiplier" type="number" min="0.1" max="5" step="0.1" class="w-full rounded-lg border border-slate-300 py-2.5 pl-7 pr-3 text-sm text-slate-900 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-100" />
+            </div>
+            <p id="tierMultiplierError" class="mt-1.5 hidden text-xs text-red-600"></p>
+          </div>
+        </div>
+        <div class="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
+          <button type="button" data-close-overlay class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-500 hover:text-slate-900">Hủy</button>
+          <button type="submit" class="rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2">Lưu thay đổi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite" class="pointer-events-none fixed bottom-6 right-6 z-50 translate-y-4 rounded-lg bg-slate-900 px-4 py-3 text-sm text-white opacity-0 shadow-lg transition duration-300"></div>
+
+  <script>
+    (() => {
+      const SESSION_KEY = 'fashionLoyaltyAdminSession';
+
+      const email = localStorage.getItem(SESSION_KEY);
+      if (!email) {
+        window.location.replace('admin.html');
+        return;
+      }
+
+      const $ = (id) => document.getElementById(id);
+      const rowsEl = $('tierRows');
+      const tierModal = $('tierModal');
+      const tierForm = $('tierForm');
+      const toast = $('toast');
+
+      $('adminUserEmail').textContent = email;
+      $('signOutButton').addEventListener('click', () => {
+        localStorage.removeItem(SESSION_KEY);
+        window.location.replace('admin.html');
+      });
+
+      let tiers = [
+        { name: 'Đồng', dot: 'bg-stone-400', threshold: 0, rate: 0, multiplier: 1.0 },
+        { name: 'Bạc', dot: 'bg-slate-400', threshold: 200, rate: 3, multiplier: 1.2 },
+        { name: 'Vàng', dot: 'bg-amber-400', threshold: 500, rate: 5, multiplier: 1.5 },
+        { name: 'Kim Cương', dot: 'bg-sky-300', threshold: 1500, rate: 10, multiplier: 2.0 },
+      ];
+      let editingIndex = -1;
+      let lastFocused = null;
+      let toastTimer = null;
+
+      function escapeHtml(value) {
+        return String(value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function formatVnd(amount) {
+        return `${amount.toLocaleString('vi-VN')}đ`;
+      }
+
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.remove('translate-y-4', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toast.classList.add('translate-y-4', 'opacity-0');
+          toast.classList.remove('translate-y-0', 'opacity-100');
+        }, 2500);
+      }
+
+      function openOverlay(overlay) {
+        lastFocused = document.activeElement;
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+      }
+
+      function closeOverlay(overlay) {
+        overlay.classList.add('hidden');
+        overlay.classList.remove('flex');
+        if (lastFocused) lastFocused.focus();
+        lastFocused = null;
+      }
+
+      function render() {
+        rowsEl.innerHTML = tiers.map((tier, index) => {
+          const name = escapeHtml(tier.name);
+          return `
+            <tr class="align-middle">
+              <td class="whitespace-nowrap px-6 py-4">
+                <span class="inline-flex items-center gap-2 font-medium text-slate-900"><span class="h-2.5 w-2.5 rounded-full ${tier.dot}" aria-hidden="true"></span>${name}</span>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4 text-right text-slate-900">${formatVnd(tier.threshold)}</td>
+              <td class="whitespace-nowrap px-6 py-4 text-right text-slate-900">${tier.rate}%</td>
+              <td class="whitespace-nowrap px-6 py-4 text-right text-slate-900">x${tier.multiplier.toFixed(1)}</td>
+              <td class="whitespace-nowrap px-6 py-4 text-right">
+                <button type="button" data-edit="${index}" aria-label="Chỉnh sửa hạng ${name}" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-slate-500 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">Chỉnh sửa</button>
+              </td>
+            </tr>`;
+        }).join('');
+      }
+
+      function setError(input, message) {
+        const errorEl = $(`${input.id}Error`);
+        errorEl.textContent = message;
+        errorEl.classList.toggle('hidden', !message);
+        input.classList.toggle('border-red-500', Boolean(message));
+        input.setAttribute('aria-invalid', String(Boolean(message)));
+      }
+
+      function openEdit(index) {
+        const tier = tiers[index];
+        editingIndex = index;
+        tierForm.reset();
+        tierForm.querySelectorAll('input').forEach((input) => setError(input, ''));
+        $('tierModalTitle').textContent = `Chỉnh sửa hạng ${tier.name}`;
+
+        const thresholdInput = $('tierThreshold');
+        const isBaseTier = index === 0;
+        thresholdInput.value = tier.threshold;
+        thresholdInput.disabled = isBaseTier;
+        $('tierThresholdHint').textContent = isBaseTier
+          ? 'Hạng nền luôn bắt đầu từ 0đ.'
+          : `Phải lớn hơn ${formatVnd(tiers[index - 1].threshold)} và nhỏ hơn ${index < tiers.length - 1 ? formatVnd(tiers[index + 1].threshold) : 'không giới hạn'}.`;
+        $('tierRate').value = tier.rate;
+        $('tierMultiplier').value = tier.multiplier;
+
+        openOverlay(tierModal);
+        (isBaseTier ? $('tierRate') : thresholdInput).focus();
+      }
+
+      function validate() {
+        const index = editingIndex;
+        const thresholdInput = $('tierThreshold');
+        const rateInput = $('tierRate');
+        const multiplierInput = $('tierMultiplier');
+        const threshold = Number(thresholdInput.value);
+        const rate = Number(rateInput.value);
+        const multiplier = Number(multiplierInput.value);
+        const previous = tiers[index - 1];
+        const next = tiers[index + 1];
+
+        const thresholdValid = index === 0
+          || (thresholdInput.value !== '' && Number.isInteger(threshold)
+            && threshold > previous.threshold && (!next || threshold < next.threshold));
+
+        setError(thresholdInput, thresholdValid ? '' : 'Ngưỡng phải là số nguyên, lớn hơn hạng trước và nhỏ hơn hạng sau.');
+        setError(rateInput, rateInput.value !== '' && rate >= 0 && rate <= 100 ? '' : 'Tỷ lệ tích điểm nằm trong khoảng 0% đến 100%.');
+        setError(multiplierInput, multiplierInput.value !== '' && multiplier >= 0.1 && multiplier <= 5 ? '' : 'Hệ số nhân nằm trong khoảng x0.1 đến x5.');
+
+        return tierForm.querySelector('[aria-invalid="true"]') === null;
+      }
+
+      function saveTier(event) {
+        event.preventDefault();
+        if (!validate()) {
+          tierForm.querySelector('[aria-invalid="true"]').focus();
+          return;
+        }
+
+        const tier = tiers[editingIndex];
+        if (editingIndex > 0) tier.threshold = Number($('tierThreshold').value);
+        tier.rate = Number($('tierRate').value);
+        tier.multiplier = Number($('tierMultiplier').value);
+        closeOverlay(tierModal);
+        render();
+        showToast(`Đã cập nhật hạng ${tier.name}`);
+      }
+
+      rowsEl.addEventListener('click', (event) => {
+        const button = event.target.closest('button[data-edit]');
+        if (button) openEdit(Number(button.dataset.edit));
+      });
+
+      tierForm.addEventListener('submit', saveTier);
+
+      tierModal.addEventListener('click', (event) => {
+        if (event.target === tierModal) closeOverlay(tierModal);
+      });
+      tierModal.querySelectorAll('[data-close-overlay]').forEach((button) => {
+        button.addEventListener('click', () => closeOverlay(tierModal));
+      });
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !tierModal.classList.contains('hidden')) closeOverlay(tierModal);
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>

@@ -21,34 +21,64 @@ $maxPointsToUse = min(50, $diemKhaDung);
             <h2 id="addressTitle" class="text-xl font-semibold">Địa chỉ nhận hàng (Bảng <code>dc_dia_chi_kh</code>)</h2>
             <p class="mt-1 text-xs text-muted">Sổ địa chỉ thực tế của khách hàng <strong><?= htmlspecialchars($hoTen) ?></strong></p>
           </div>
-          <button type="button" data-dev-feature="Thêm địa chỉ nhận hàng mới vào bảng dc_dia_chi_kh"
-            class="tap-feedback rounded-full border border-stone-300 bg-white px-4 py-2 text-xs font-medium text-charcoal hover:border-charcoal">
-            + Thêm địa chỉ (Đang phát triển)
+          <button type="button" onclick="openAddressModal('create')"
+            class="tap-feedback inline-flex items-center gap-1.5 rounded-full bg-charcoal px-4 py-2 text-xs font-medium text-white hover:bg-accent transition shadow-sm">
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+            + Thêm địa chỉ mới
           </button>
         </div>
 
-        <div class="mt-6 space-y-3" id="addressList">
+        <div class="mt-6 space-y-3" id="checkoutAddressList">
           <?php if (empty($customerAddresses)): ?>
             <div class="rounded-xl border border-dashed border-stone-300 bg-white p-6 text-center text-sm text-muted">
-              Khách hàng hiện chưa có địa chỉ trong CSDL.
+              <p>Khách hàng hiện chưa có địa chỉ nhận hàng trong CSDL.</p>
+              <button type="button" onclick="openAddressModal('create')" class="mt-3 rounded-full bg-charcoal px-4 py-1.5 text-xs font-medium text-white hover:bg-accent transition">
+                + Thêm địa chỉ đầu tiên ngay
+              </button>
             </div>
           <?php else: ?>
             <?php foreach ($customerAddresses as $addr): ?>
-              <label class="flex cursor-pointer gap-4 rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:border-stone-400 has-[:checked]:border-charcoal has-[:checked]:ring-1 has-[:checked]:ring-charcoal">
-                <input type="radio" name="address" value="<?= (int)$addr['ma_dc'] ?>" <?= (int)$addr['mac_dinh'] === 1 ? 'checked' : '' ?> class="mt-1 h-4 w-4 accent-accent" />
-                <span>
-                  <span class="block text-sm font-medium text-charcoal">
-                    <?= htmlspecialchars($addr['ten_nguoi_nhan']) ?>
-                    <?php if ((int)$addr['mac_dinh'] === 1): ?>
-                      <span class="ml-2 rounded-full bg-olive/10 px-2.5 py-0.5 text-xs font-medium text-olive">Mặc định</span>
+              <div class="rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:border-stone-400 has-[:checked]:border-charcoal has-[:checked]:ring-1 has-[:checked]:ring-charcoal/10">
+                <div class="flex items-start justify-between gap-4">
+                  <label class="flex cursor-pointer gap-3.5 flex-1 items-start">
+                    <input type="radio" name="address" value="<?= (int)$addr['ma_dc'] ?>" <?= (int)$addr['mac_dinh'] === 1 ? 'checked' : '' ?> class="mt-1 h-4 w-4 accent-accent" />
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <span class="block text-sm font-semibold text-charcoal">
+                          <?= htmlspecialchars($addr['ten_nguoi_nhan']) ?>
+                        </span>
+                        <?php if ((int)$addr['mac_dinh'] === 1): ?>
+                          <span class="rounded-full bg-olive/10 px-2.5 py-0.5 text-xs font-semibold text-olive">Mặc định</span>
+                        <?php endif; ?>
+                      </div>
+                      <span class="mt-1 block text-xs font-medium text-stone-600">SĐT nhận: <?= htmlspecialchars($addr['sdt_nhan']) ?></span>
+                      <span class="mt-1 block text-sm text-muted leading-relaxed">
+                        <?= htmlspecialchars($addr['dia_chi_cu_the']) ?>, <?= htmlspecialchars($addr['phuong_xa']) ?>, <?= htmlspecialchars($addr['quan_huyen']) ?>, <?= htmlspecialchars($addr['tinh_thanh']) ?>
+                      </span>
+                    </div>
+                  </label>
+
+                  <!-- Address Action Buttons -->
+                  <div class="flex flex-col sm:flex-row items-end sm:items-center gap-2 shrink-0 pt-0.5">
+                    <?php if ((int)$addr['mac_dinh'] !== 1): ?>
+                      <button type="button" onclick="setDefaultAddress(<?= (int)$addr['ma_dc'] ?>)"
+                        class="text-xs font-medium text-stone-500 hover:text-charcoal hover:underline">
+                        Đặt mặc định
+                      </button>
+                      <span class="hidden sm:inline text-stone-300">&bull;</span>
                     <?php endif; ?>
-                  </span>
-                  <span class="mt-1 block text-sm text-muted">SĐT nhận: <?= htmlspecialchars($addr['sdt_nhan']) ?></span>
-                  <span class="mt-1 block text-sm text-muted">
-                    <?= htmlspecialchars($addr['dia_chi_cu_the']) ?>, <?= htmlspecialchars($addr['phuong_xa']) ?>, <?= htmlspecialchars($addr['quan_huyen']) ?>, <?= htmlspecialchars($addr['tinh_thanh']) ?>
-                  </span>
-                </span>
-              </label>
+                    <button type="button" onclick='openAddressModal("update", <?= htmlspecialchars(json_encode($addr, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP), ENT_QUOTES, "UTF-8") ?>)'
+                      class="text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline">
+                      Sửa
+                    </button>
+                    <span class="hidden sm:inline text-stone-300">&bull;</span>
+                    <button type="button" onclick="deleteAddress(<?= (int)$addr['ma_dc'] ?>)"
+                      class="text-xs font-medium text-red-500 hover:text-red-700 hover:underline">
+                      Xóa
+                    </button>
+                  </div>
+                </div>
+              </div>
             <?php endforeach; ?>
           <?php endif; ?>
         </div>

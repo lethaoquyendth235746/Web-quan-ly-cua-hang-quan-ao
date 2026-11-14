@@ -22,6 +22,8 @@
   </footer>
 
   <?php require __DIR__ . '/cart_drawer.php'; ?>
+  <?php require __DIR__ . '/address_modal.php'; ?>
+  <?php require __DIR__ . '/auth_modal.php'; ?>
 
   <!-- Toast thông báo trạng thái / Tính năng đang phát triển -->
   <div id="toast" role="status" aria-live="polite"

@@ -4,6 +4,7 @@
  * Kết nối dữ liệu quản trị viên từ CSDL (bảng nd_nguoi_dung & vt_vai_tro)
  */
 require_once __DIR__ . '/../../config/db.php';
+require_once __DIR__ . '/auth_middleware.php';
 require_once __DIR__ . '/../../services/admin/DashboardService.php';
 
 $dashServiceForHeader = new DashboardService();
@@ -114,10 +115,9 @@ $activeAdminMenu = $activeAdminMenu ?? 'dashboard';
         </div>
         <div class="flex items-center justify-between pt-1">
           <a href="../index.php" class="text-xs font-medium text-blue-700 hover:underline">&larr; Về Cửa hàng</a>
-          <button type="button" data-dev-feature="Đăng xuất / Phân quyền Phiên đăng nhập Quản trị"
-            class="text-xs font-medium text-slate-600 hover:text-slate-900 hover:underline">
+          <a href="../logout.php" class="text-xs font-medium text-red-600 hover:text-red-700 hover:underline">
             Đăng xuất
-          </button>
+          </a>
         </div>
       </div>
     </aside>

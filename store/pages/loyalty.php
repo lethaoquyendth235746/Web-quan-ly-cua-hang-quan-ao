@@ -231,6 +231,79 @@ $txLabels = [
     </div>
   </section>
 
+  <!-- Quản lý Sổ địa chỉ nhận hàng từ bảng dc_dia_chi_kh (Yêu cầu 1.3) -->
+  <section id="so-dia-chi" aria-labelledby="addressBookTitle" class="rounded-2xl bg-white p-6 sm:p-8 shadow-sm">
+    <div class="flex flex-wrap items-center justify-between gap-4 border-b border-stone-100 pb-5">
+      <div>
+        <h2 id="addressBookTitle" class="text-xl font-semibold text-charcoal">
+          Sổ địa chỉ nhận hàng (Bảng <code>dc_dia_chi_kh</code>)
+        </h2>
+        <p class="mt-1 text-xs text-muted">
+          Quản lý danh sách địa chỉ nhận hàng cá nhân của <strong><?= htmlspecialchars($hoTen) ?></strong>
+        </p>
+      </div>
+      <button type="button" onclick="openAddressModal('create')"
+        class="tap-feedback inline-flex items-center gap-1.5 rounded-full bg-charcoal px-4 py-2 text-xs font-medium text-white hover:bg-accent transition shadow-sm">
+        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+        + Thêm địa chỉ mới
+      </button>
+    </div>
+
+    <div class="mt-6">
+      <?php if (empty($customerAddresses)): ?>
+        <div class="rounded-xl border border-dashed border-stone-300 p-8 text-center text-sm text-muted">
+          <p>Bạn chưa lưu địa chỉ nhận hàng nào trong hệ thống.</p>
+          <button type="button" onclick="openAddressModal('create')" class="mt-3 rounded-full bg-charcoal px-4 py-2 text-xs font-medium text-white hover:bg-accent transition">
+            + Thêm địa chỉ nhận hàng đầu tiên
+          </button>
+        </div>
+      <?php else: ?>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <?php foreach ($customerAddresses as $addr): ?>
+            <div class="flex flex-col justify-between rounded-xl border border-stone-200 p-5 shadow-sm transition hover:border-stone-400 <?= (int)$addr['mac_dinh'] === 1 ? 'border-charcoal bg-stone-50/40' : 'bg-white' ?>">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-semibold text-charcoal"><?= htmlspecialchars($addr['ten_nguoi_nhan']) ?></span>
+                  <?php if ((int)$addr['mac_dinh'] === 1): ?>
+                    <span class="rounded-full bg-olive/10 px-2.5 py-0.5 text-xs font-semibold text-olive">Mặc định</span>
+                  <?php endif; ?>
+                </div>
+                <p class="mt-1 text-xs text-stone-600 font-medium">SĐT nhận: <?= htmlspecialchars($addr['sdt_nhan']) ?></p>
+                <p class="mt-2 text-xs text-muted leading-relaxed">
+                  <?= htmlspecialchars($addr['dia_chi_cu_the']) ?>, <?= htmlspecialchars($addr['phuong_xa']) ?>, <?= htmlspecialchars($addr['quan_huyen']) ?>, <?= htmlspecialchars($addr['tinh_thanh']) ?>
+                </p>
+              </div>
+
+              <div class="mt-4 flex items-center justify-between border-t border-stone-100 pt-3 text-xs">
+                <div>
+                  <?php if ((int)$addr['mac_dinh'] !== 1): ?>
+                    <button type="button" onclick="setDefaultAddress(<?= (int)$addr['ma_dc'] ?>)"
+                      class="font-medium text-stone-600 hover:text-charcoal hover:underline">
+                      Đặt làm mặc định
+                    </button>
+                  <?php else: ?>
+                    <span class="text-[11px] text-muted italic">Địa chỉ giao mặc định</span>
+                  <?php endif; ?>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick='openAddressModal("update", <?= htmlspecialchars(json_encode($addr, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP), ENT_QUOTES, "UTF-8") ?>)'
+                    class="font-medium text-blue-600 hover:underline">
+                    Sửa
+                  </button>
+                  <span class="text-stone-300">&bull;</span>
+                  <button type="button" onclick="deleteAddress(<?= (int)$addr['ma_dc'] ?>)"
+                    class="font-medium text-red-500 hover:underline">
+                    Xóa
+                  </button>
+                </div>
+              </div>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      <?php endif; ?>
+    </div>
+  </section>
+
   <!-- Danh sách Đơn đặt hàng của khách hàng từ bảng dh_don_hang -->
   <section aria-labelledby="myOrdersTitle">
     <h2 id="myOrdersTitle" class="text-xl font-semibold">Đơn hàng của <?= htmlspecialchars($hoTen) ?> (Bảng <code>dh_don_hang</code>)</h2>

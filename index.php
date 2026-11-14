@@ -22,6 +22,14 @@ $cartItems       = $checkoutService->getCustomerCart($currentUserId);
 $page = $_GET['page'] ?? 'home';
 
 switch ($page) {
+    case 'login':
+        require __DIR__ . '/login.php';
+        exit;
+
+    case 'logout':
+        require __DIR__ . '/logout.php';
+        exit;
+
     case 'product':
         $productId = isset($_GET['id']) ? (int) $_GET['id'] : 1;
         $productDetail = $productService->getProductById($productId);
@@ -40,6 +48,7 @@ switch ($page) {
         $voucherCatalog = $loyaltyService->getVoucherCatalogForCustomer($currentUserId, $customerTierId, $availablePoints);
         $pointLedger    = $loyaltyService->getPointLedgerByCard($maThe);
         $customerOrders = $loyaltyService->getCustomerOrders($currentUserId);
+        $customerAddresses = $checkoutService->getCustomerAddresses($currentUserId);
 
         require __DIR__ . '/store/includes/header.php';
         require __DIR__ . '/store/pages/loyalty.php';

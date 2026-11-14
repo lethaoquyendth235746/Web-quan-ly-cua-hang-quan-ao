@@ -44,12 +44,39 @@ function getDBConnection(): PDO
 
 /**
  * Chuyển đổi nhanh tài khoản khách hàng từ CSDL để kiểm thử các bậc Hạng thẻ
- * (Mặc định ma_nd = 4: Neàng Ra - Hạng Đồng 185/200 điểm)
+ * Đồng bộ hóa với phiên đăng nhập thực tế của hệ thống
  */
 if (isset($_GET['switch_user'])) {
     $uid = (int) $_GET['switch_user'];
     if ($uid > 0) {
-        $_SESSION['current_user_id'] = $uid;
+        $stmt = getDBConnection()->prepare("
+            SELECT nd.*, vt.ten_vt, vt.mo_ta_quyen
+            FROM nd_nguoi_dung nd
+            INNER JOIN vt_vai_tro vt ON nd.ma_vt = vt.ma_vt
+            WHERE nd.ma_nd = :id AND nd.trang_thai = 1
+            LIMIT 1
+        ");
+        $stmt->execute(['id' => $uid]);
+        $u = $stmt->fetch();
+        if ($u) {
+            unset($_SESSION['explicit_logout']);
+            $_SESSION['user'] = [
+                'ma_nd'         => (int)$u['ma_nd'],
+                'ma_vt'         => (int)$u['ma_vt'],
+                'ten_vt'        => $u['ten_vt'],
+                'ho_ten'        => $u['ho_ten'],
+                'ten_dang_nhap' => $u['ten_dang_nhap'],
+                'email'         => $u['email'],
+                'sdt'           => $u['sdt'],
+                'anh_dai_dien'  => $u['anh_dai_dien'],
+            ];
+            $_SESSION['current_user_id'] = (int)$u['ma_nd'];
+            if (in_array((int)$u['ma_vt'], [1, 2], true)) {
+                $_SESSION['current_admin_id'] = (int)$u['ma_nd'];
+            } else {
+                unset($_SESSION['current_admin_id']);
+            }
+        }
     }
     $redirect = strtok($_SERVER['REQUEST_URI'], '?');
     $queryParams = $_GET;
@@ -61,14 +88,87 @@ if (isset($_GET['switch_user'])) {
     exit;
 }
 
-function getCurrentUserId(): int
+/**
+ * Kiểm tra người dùng hiện tại đã đăng nhập hay chưa
+ */
+function isUserLoggedIn(): bool
 {
-    return isset($_SESSION['current_user_id']) ? (int) $_SESSION['current_user_id'] : 4;
+    return !empty($_SESSION['current_user_id']) && empty($_SESSION['explicit_logout']);
 }
 
+/**
+ * Lấy thông tin người dùng đang đăng nhập trong Session
+ */
+function getCurrentUser(): ?array
+{
+    if (!isUserLoggedIn()) {
+        return null;
+    }
+    if (!empty($_SESSION['user'])) {
+        return $_SESSION['user'];
+    }
+    // Nếu có ID nhưng chưa nạp đủ Session, nạp từ CSDL
+    $stmt = getDBConnection()->prepare("
+        SELECT nd.*, vt.ten_vt, vt.mo_ta_quyen
+        FROM nd_nguoi_dung nd
+        INNER JOIN vt_vai_tro vt ON nd.ma_vt = vt.ma_vt
+        WHERE nd.ma_nd = :id AND nd.trang_thai = 1
+        LIMIT 1
+    ");
+    $stmt->execute(['id' => (int)$_SESSION['current_user_id']]);
+    $u = $stmt->fetch();
+    if ($u) {
+        $_SESSION['user'] = [
+            'ma_nd'         => (int)$u['ma_nd'],
+            'ma_vt'         => (int)$u['ma_vt'],
+            'ten_vt'        => $u['ten_vt'],
+            'ho_ten'        => $u['ho_ten'],
+            'ten_dang_nhap' => $u['ten_dang_nhap'],
+            'email'         => $u['email'],
+            'sdt'           => $u['sdt'],
+            'anh_dai_dien'  => $u['anh_dai_dien'],
+        ];
+        return $_SESSION['user'];
+    }
+    return null;
+}
+
+/**
+ * Lấy mã người dùng hiện tại (nếu chưa đăng nhập và chưa từng logout, mặc định demo ID = 4)
+ */
+function getCurrentUserId(): int
+{
+    if (!empty($_SESSION['explicit_logout'])) {
+        return 0; // Đã đăng xuất chủ động
+    }
+    if (isset($_SESSION['current_user_id'])) {
+        return (int) $_SESSION['current_user_id'];
+    }
+    // Khởi tạo phiên demo mặc định (Neàng Ra - Hạng Đồng) cho lần đầu truy cập
+    $_SESSION['current_user_id'] = 4;
+    $user = getCurrentUser();
+    return 4;
+}
+
+/**
+ * Lấy mã quản trị viên/nhân viên hiện tại (chỉ trả về hợp lệ nếu có vai trò ma_vt = 1 hoặc 2)
+ */
 function getCurrentAdminId(): int
 {
-    return isset($_SESSION['current_admin_id']) ? (int) $_SESSION['current_admin_id'] : 1;
+    $u = getCurrentUser();
+    if ($u && in_array((int)$u['ma_vt'], [1, 2], true)) {
+        return (int)$u['ma_nd'];
+    }
+    return isset($_SESSION['current_admin_id']) ? (int)$_SESSION['current_admin_id'] : 0;
+}
+
+/**
+ * Kiểm tra xem người dùng hiện tại có quyền truy cập Quản trị không (Admin: 1, Nhân viên: 2)
+ */
+function hasAdminAccess(): bool
+{
+    $u = getCurrentUser();
+    return $u && in_array((int)$u['ma_vt'], [1, 2], true);
 }
 
 /**

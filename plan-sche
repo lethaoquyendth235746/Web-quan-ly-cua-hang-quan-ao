@@ -76,11 +76,11 @@ Hiện tại hệ thống đã hoàn thành **100% luồng đọc & hiển thị
 - [ ] **1.3. Quản lý Sổ địa chỉ nhận hàng (`dc_dia_chi_kh`):**
   - Thêm mới, chỉnh sửa, xóa địa chỉ nhận hàng và đặt địa chỉ mặc định (`mac_dinh = 1`) ngay tại trang Thanh toán hoặc Hồ sơ.
 
-### 2. Phân hệ Giỏ hàng & Đặt hàng Đa tầng — Bên Cửa hàng (Bảng `gh_gio_hang`, `dh_don_hang`, `ctdh_chi_tiet_dh`, `bt_bien_the_sp`)
-- [ ] **2.1. API Giỏ hàng trực tuyến (`api/cart.php`):**
+### THANH THẢO 2. Phân hệ Giỏ hàng & Đặt hàng Đa tầng — Bên Cửa hàng (Bảng `gh_gio_hang`, `dh_don_hang`, `ctdh_chi_tiet_dh`, `bt_bien_the_sp`)
+- [x] **2.1. API Giỏ hàng trực tuyến (`api/cart.php`):**
   - Thêm biến thể sản phẩm (`ma_bt`, `so_luong_mua`) vào bảng `gh_gio_hang` (nếu đã có biến thể đó trong giỏ thì cộng dồn số lượng và kiểm tra không vượt quá `so_luong_ton` trong `bt_bien_the_sp`).
   - Tăng/giảm số lượng hoặc xóa từng mặt hàng khỏi bảng `gh_gio_hang` trực tiếp trên Drawer giỏ hàng bằng Fetch API (Ajax).
-- [ ] **2.2. Transaction Đặt hàng & Khấu trừ tồn kho (`api/checkout.php`):**
+- [x] **2.2. Transaction Đặt hàng & Khấu trừ tồn kho (`api/checkout.php`):**
   - Thực hiện trong 1 **PDO Database Transaction** (`beginTransaction()` -> `commit()` / `rollBack()`):
     1. Kiểm tra và khóa số lượng tồn kho (`SELECT ... FOR UPDATE`) của từng biến thể trong `bt_bien_the_sp`.
     2. Tính toán và kiểm tra lại: Tổng tiền hàng, Tiền giảm theo Hạng thành viên (`htv_hang_thanh_vien.phan_tram_giam`), Tiền giảm Voucher (`vkh_vi_voucher_kh`), Điểm tiêu dùng (`diem_su_dung`).
@@ -89,7 +89,7 @@ Hiện tại hệ thống đã hoàn thành **100% luồng đọc & hiển thị
     5. Nếu khách có dùng Voucher từ ví: cập nhật `vkh_vi_voucher_kh.trang_thai_su_dung = 1`, `ngay_su_dung = NOW()`.
     6. Nếu khách có tiêu điểm khả dụng: trừ `diem_kha_dung` trong `ttd_the_tich_diem` và ghi 1 dòng `TRU_TIEU_DIEM` vào `lsd_lich_su_diem`.
     7. Làm trống giỏ hàng của khách trong `gh_gio_hang`.
-- [ ] **2.3. Tích hợp hiển thị mã QR Chuyển khoản (`pt_thanh_toan = 'CHUYEN_KHOAN'`):**
+- [x] **2.3. Tích hợp hiển thị mã QR Chuyển khoản (`pt_thanh_toan = 'CHUYEN_KHOAN'`):**
   - Tạo giao diện hiển thị mã VietQR theo đúng số tiền `thanh_tien` và nội dung chuyển khoản `#DHxx` sau khi đặt đơn.
 
 ### 3. Phân hệ Động cơ Khách hàng Thân thiết — Loyalty Engine (Bảng `ttd_the_tich_diem`, `htv_hang_thanh_vien`, `lsd_lich_su_diem`, `vkh_vi_voucher_kh`)

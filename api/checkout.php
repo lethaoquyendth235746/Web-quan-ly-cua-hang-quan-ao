@@ -273,18 +273,15 @@ try {
 
     // 4. Trả về kết quả JSON chuẩn
     $dhCode = 'DH' . str_pad((string) $maDh, 2, '0', STR_PAD_LEFT);
-    $bankId = 'MB';
-    $bankName = 'MB Bank (Ngân hàng TMCP Quân Đội)';
-    $bankAccount = '0901235629';
-    $bankAccountName = 'AURA STUDIO';
+    $addInfo = '#DH' . str_pad((string) $maDh, 2, '0', STR_PAD_LEFT);
 
     $vietQrUrl = sprintf(
         'https://img.vietqr.io/image/%s-%s-compact2.png?amount=%d&addInfo=%s&accountName=%s',
-        $bankId,
-        $bankAccount,
-        (int) $thanhTien,
-        urlencode($dhCode),
-        urlencode($bankAccountName)
+        VIETQR_BANK_ID,
+        VIETQR_ACCOUNT_NO,
+        (int) round($thanhTien),
+        urlencode($addInfo),
+        urlencode(VIETQR_ACCOUNT_NAME)
     );
 
     echo json_encode([
@@ -302,13 +299,14 @@ try {
         'expected_points' => $diemCongDuKien,
         'pt_thanh_toan'   => $ptThanhToan,
         'vietqr'          => [
-            'bank_id'      => $bankId,
-            'bank_name'    => $bankName,
-            'account_no'   => $bankAccount,
-            'account_name' => $bankAccountName,
-            'amount'       => (int) $thanhTien,
-            'add_info'     => $dhCode,
+            'bank_id'      => VIETQR_BANK_ID,
+            'bank_name'    => VIETQR_BANK_NAME,
+            'account_no'   => VIETQR_ACCOUNT_NO,
+            'account_name' => VIETQR_ACCOUNT_NAME,
+            'amount'       => (int) round($thanhTien),
+            'add_info'     => $addInfo,
             'qr_url'       => $vietQrUrl,
+            'qr_page_url'  => 'thanh_toan_qr.php?ma_dh=' . $maDh,
         ],
     ], JSON_UNESCAPED_UNICODE);
 

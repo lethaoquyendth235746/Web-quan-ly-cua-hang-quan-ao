@@ -276,6 +276,10 @@ $maxPointsToUse = min(50, $diemKhaDung);
           class="tap-feedback flex flex-1 items-center justify-center rounded-full bg-charcoal px-6 py-3.5 text-center text-sm font-medium text-white hover:bg-accent">
           Tôi đã chuyển khoản / Xem đơn hàng &rarr;
         </a>
+        <a id="modalQrDirectPageBtn" href="#" target="_blank"
+          class="tap-feedback flex items-center justify-center rounded-full border border-stone-300 px-5 py-3.5 text-center text-xs font-medium text-stone-700 hover:border-charcoal hover:text-charcoal transition">
+          Mở trang QR riêng ↗
+        </a>
       </div>
     </div>
   </div>
@@ -494,6 +498,11 @@ $maxPointsToUse = min(50, $diemKhaDung);
             if (qrAmount) qrAmount.textContent = formatVnd(data.thanh_tien);
             if (qrAddInfo) qrAddInfo.textContent = data.vietqr.add_info;
             if (qrBankName) qrBankName.textContent = data.vietqr.bank_name;
+
+            const qrPageBtn = document.getElementById('modalQrDirectPageBtn');
+            if (qrPageBtn) {
+              qrPageBtn.href = data.vietqr.qr_page_url || ('thanh_toan_qr.php?ma_dh=' + data.ma_dh);
+            }
 
             rawFinalTotal = data.thanh_tien;
             showModal('vietQrModal', 'vietQrPanel');

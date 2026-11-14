@@ -1,0 +1,17 @@
+# Cấu hình cơ sở dữ liệu (chứa mật khẩu/thông tin cục bộ)
+config/db.php
+
+# File môi trường
+.env
+.env.*
+!.env.example
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Vendor & logs
+/vendor/
+*.log

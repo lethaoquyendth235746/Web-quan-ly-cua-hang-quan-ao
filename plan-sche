@@ -67,13 +67,13 @@ Các giao diện ở cả Tầng Cửa hàng và Tầng Quản trị đã áp d�
 
 Hiện tại hệ thống đã hoàn thành **100% luồng đọc & hiển thị dữ liệu thực tế (Read/Query)** từ 16 bảng trong CSDL. Các thao tác **ghi/cập nhật dữ liệu (Write/Mutation/API)** hiện đang gắn nhãn **"Đang phát triển"** trên giao diện. Dưới đây là danh sách chi tiết các gói công việc nhóm cần làm tiếp theo:
 
-### 1. Phân hệ Xác thực, Tài khoản & Sổ địa chỉ (Bảng `vt_vai_tro`, `nd_nguoi_dung`, `dc_dia_chi_kh`, `ttd_the_tich_diem`)
-- [ ] **1.1. Đăng nhập & Đăng xuất thực tế (Client & Admin):**
+###NeangRa 1. Phân hệ Xác thực, Tài khoản & Sổ địa chỉ (Bảng `vt_vai_tro`, `nd_nguoi_dung`, `dc_dia_chi_kh`, `ttd_the_tich_diem`)
+- [x] **1.1. Đăng nhập & Đăng xuất thực tế (Client & Admin):**
   - Xây dựng trang/modal đăng nhập xác thực với bảng `nd_nguoi_dung` (`ten_dang_nhap` / `email` + `mat_khau`).
   - Phân quyền Middleware: Chỉ cho phép `ma_vt = 1` (Admin) và `ma_vt = 2` (Nhân viên) truy cập thư mục `admin/`.
-- [ ] **1.2. Đăng ký thành viên mới & Tự động mở thẻ Hạng Đồng:**
+- [x] **1.2. Đăng ký thành viên mới & Tự động mở thẻ Hạng Đồng:**
   - Khi khách đăng ký tài khoản mới (`ma_vt = 3`), sử dụng Transaction tạo bản ghi trong `nd_nguoi_dung` và tự động sinh thẻ tích điểm mới trong `ttd_the_tich_diem` (`ma_hang = 1`, `ma_so_the = THE-AGU-...`, `tong_diem_tich_luy = 0`, `diem_kha_dung = 0`).
-- [ ] **1.3. Quản lý Sổ địa chỉ nhận hàng (`dc_dia_chi_kh`):**
+- [x] **1.3. Quản lý Sổ địa chỉ nhận hàng (`dc_dia_chi_kh`):**
   - Thêm mới, chỉnh sửa, xóa địa chỉ nhận hàng và đặt địa chỉ mặc định (`mac_dinh = 1`) ngay tại trang Thanh toán hoặc Hồ sơ.
 
 ### 2. Phân hệ Giỏ hàng & Đặt hàng Đa tầng — Bên Cửa hàng (Bảng `gh_gio_hang`, `dh_don_hang`, `ctdh_chi_tiet_dh`, `bt_bien_the_sp`)

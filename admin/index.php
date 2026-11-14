@@ -4,6 +4,7 @@
  * Đổ dữ liệu thực tế từ DashboardService, OrderAdminService, TierAdminService
  */
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/includes/auth_middleware.php';
 require_once __DIR__ . '/../services/admin/DashboardService.php';
 require_once __DIR__ . '/../services/admin/OrderAdminService.php';
 require_once __DIR__ . '/../services/admin/TierAdminService.php';

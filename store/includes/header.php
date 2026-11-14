@@ -205,25 +205,59 @@ $cartTotalCount = array_sum(array_column($cartItems, 'so_luong_mua'));
           </span>
         </button>
 
-        <!-- Bộ chuyển đổi tài khoản khách hàng thực tế trong CSDL -->
+        <!-- Bộ tài khoản người dùng & Chuyển đổi kiểm thử CSDL -->
+        <?php $isLoggedIn = isUserLoggedIn(); ?>
+        <?php if (!$isLoggedIn): ?>
+          <button type="button" onclick="openAuthModal('login')"
+            class="tap-feedback hidden sm:inline-flex items-center gap-1.5 rounded-full bg-charcoal px-3.5 py-1.5 text-xs font-medium text-white hover:bg-accent transition shadow-sm">
+            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
+            Đăng nhập
+          </button>
+        <?php endif; ?>
+
         <div class="relative">
           <button type="button" id="userSwitchBtn" aria-expanded="false" aria-controls="userSwitchPanel"
             class="tap-feedback flex items-center gap-2 rounded-full border border-stone-200 bg-white p-1 pr-3 text-left transition hover:border-stone-300">
             <span class="flex h-7 w-7 items-center justify-center rounded-full bg-olive text-xs font-semibold text-white">
               <?= htmlspecialchars(mb_substr($loyaltyProfile['ho_ten'] ?? 'K', 0, 1)) ?>
             </span>
-            <span class="hidden text-xs font-medium text-charcoal xl:inline"><?= htmlspecialchars($loyaltyProfile['ho_ten'] ?? 'Khách hàng') ?></span>
+            <span class="hidden text-xs font-medium text-charcoal xl:inline"><?= htmlspecialchars($loyaltyProfile['ho_ten'] ?? ($isLoggedIn ? 'Thành viên' : 'Khách vãng lai')) ?></span>
             <svg class="h-3.5 w-3.5 text-muted" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
           </button>
 
           <div id="userSwitchPanel" class="popover-origin popover-hidden absolute right-0 top-full z-50 mt-3 w-80 rounded-xl border border-stone-200 bg-white p-4 shadow-lg">
             <div class="border-b border-stone-100 pb-3">
-              <p class="text-xs font-semibold uppercase tracking-wider text-muted">Tài khoản đang chọn (Từ CSDL)</p>
-              <p class="mt-1 text-sm font-semibold text-charcoal"><?= htmlspecialchars($loyaltyProfile['ho_ten'] ?? '') ?></p>
+              <div class="flex items-center justify-between">
+                <p class="text-xs font-semibold uppercase tracking-wider text-muted">
+                  <?= $isLoggedIn ? 'Tài khoản đang đăng nhập' : 'Phiên khách mẫu (CSDL)' ?>
+                </p>
+                <?php if ($isLoggedIn): ?>
+                  <span class="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">Đã đăng nhập</span>
+                <?php else: ?>
+                  <span class="rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-medium text-stone-600">Khách demo</span>
+                <?php endif; ?>
+              </div>
+              <p class="mt-1 text-sm font-semibold text-charcoal"><?= htmlspecialchars($loyaltyProfile['ho_ten'] ?? 'Chưa đăng nhập') ?></p>
               <p class="text-xs text-muted"><?= htmlspecialchars($loyaltyProfile['email'] ?? '') ?> &middot; <?= htmlspecialchars($loyaltyProfile['sdt'] ?? '') ?></p>
             </div>
-            <p class="mt-3 text-[11px] font-medium uppercase tracking-wider text-muted">Chuyển nhanh khách hàng trong DB để test:</p>
-            <div class="mt-2 space-y-1.5">
+
+            <div class="mt-2.5 flex items-center justify-between text-xs">
+              <a href="index.php?page=loyalty#so-dia-chi" class="font-medium text-accent hover:underline">
+                Sổ địa chỉ nhận hàng &rarr;
+              </a>
+              <?php if (hasAdminAccess()): ?>
+                <a href="admin/index.php" class="font-semibold text-purple-700 hover:underline">
+                  Vào Quản trị (Admin) &rarr;
+                </a>
+              <?php else: ?>
+                <a href="admin/index.php" class="text-stone-500 hover:underline">
+                  Thử vào Quản trị &rarr;
+                </a>
+              <?php endif; ?>
+            </div>
+
+            <p class="mt-3 border-t border-stone-100 pt-3 text-[11px] font-medium uppercase tracking-wider text-muted">Chuyển nhanh khách hàng trong DB để test:</p>
+            <div class="mt-2 space-y-1.5 max-h-48 overflow-y-auto">
               <?php foreach ($demoCustomers as $cus): ?>
                 <?php $isCurrent = ((int)$cus['ma_nd'] === (int)($loyaltyProfile['ma_nd'] ?? 0)); ?>
                 <a href="index.php?page=<?= urlencode($currentPage) ?><?= isset($_GET['id']) ? '&id=' . (int)$_GET['id'] : '' ?>&switch_user=<?= (int)$cus['ma_nd'] ?>"
@@ -238,12 +272,17 @@ $cartTotalCount = array_sum(array_column($cartItems, 'so_luong_mua'));
                 </a>
               <?php endforeach; ?>
             </div>
+
             <div class="mt-3 border-t border-stone-100 pt-3 flex items-center justify-between">
-              <button type="button" data-dev-feature="Đăng nhập / Đăng ký tài khoản khách hàng"
-                class="text-xs font-medium text-accent hover:underline">
-                Đăng nhập tài khoản khác (Đang phát triển)
+              <button type="button" onclick="openAuthModal('login')"
+                class="text-xs font-semibold text-charcoal hover:text-accent hover:underline">
+                <?= $isLoggedIn ? 'Đổi tài khoản' : 'Đăng nhập / Đăng ký' ?>
               </button>
-              <a href="admin/index.php" class="text-xs font-medium text-charcoal hover:underline">Vào Quản trị &rarr;</a>
+              <?php if ($isLoggedIn): ?>
+                <a href="logout.php" class="text-xs font-medium text-red-600 hover:underline">Đăng xuất</a>
+              <?php else: ?>
+                <a href="login.php" class="text-xs font-medium text-accent hover:underline">Mở trang Login &rarr;</a>
+              <?php endif; ?>
             </div>
           </div>
         </div>

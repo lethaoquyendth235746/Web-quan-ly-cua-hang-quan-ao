@@ -4,6 +4,7 @@
  * Đổ dữ liệu thực tế từ bảng bt_bien_the_sp (20 SKU) và pnk_phieu_nhap_kho (20 phiếu nhập)
  */
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/includes/auth_middleware.php';
 require_once __DIR__ . '/../services/admin/InventoryAdminService.php';
 
 $inventoryService = new InventoryAdminService();

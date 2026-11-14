@@ -4,6 +4,7 @@
  * Đổ dữ liệu thực tế từ bảng dm_danh_muc_sp, sp_san_pham, bt_bien_the_sp
  */
 require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/includes/auth_middleware.php';
 require_once __DIR__ . '/../services/admin/ProductAdminService.php';
 
 $productAdminService = new ProductAdminService();

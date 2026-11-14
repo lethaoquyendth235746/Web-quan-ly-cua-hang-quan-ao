@@ -5,14 +5,22 @@
  */
 
 require_once __DIR__ . '/../../config/db.php';
+require_once __DIR__ . '/AddressService.php';
 
 class CartCheckoutService
 {
     private PDO $pdo;
+    private AddressService $addressService;
 
     public function __construct()
     {
         $this->pdo = getDBConnection();
+        $this->addressService = new AddressService();
+    }
+
+    public function getAddressService(): AddressService
+    {
+        return $this->addressService;
     }
 
     /**
@@ -67,14 +75,32 @@ class CartCheckoutService
      */
     public function getCustomerAddresses(int $maNd): array
     {
-        $stmt = $this->pdo->prepare("
-            SELECT *
-            FROM dc_dia_chi_kh
-            WHERE ma_nd = :ma_nd
-            ORDER BY mac_dinh DESC, ma_dc ASC
-        ");
-        $stmt->execute(['ma_nd' => $maNd]);
-        return $stmt->fetchAll();
+        return $this->addressService->getAddressesByUserId($maNd);
+    }
+
+    public function getAddressById(int $maDc, int $maNd): ?array
+    {
+        return $this->addressService->getAddressById($maDc, $maNd);
+    }
+
+    public function addAddress(int $maNd, array $data): array
+    {
+        return $this->addressService->createAddress($maNd, $data);
+    }
+
+    public function updateAddress(int $maDc, int $maNd, array $data): array
+    {
+        return $this->addressService->updateAddress($maDc, $maNd, $data);
+    }
+
+    public function deleteAddress(int $maDc, int $maNd): array
+    {
+        return $this->addressService->deleteAddress($maDc, $maNd);
+    }
+
+    public function setDefaultAddress(int $maDc, int $maNd): array
+    {
+        return $this->addressService->setDefaultAddress($maDc, $maNd);
     }
 
     /**

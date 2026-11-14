@@ -1,0 +1,136 @@
+# KẾ HOẠCH TRIỂN KHAI & DANH SÁCH TÍNH NĂNG CẦN PHÁT TRIỂN (PLAN-SCHE)
+**Dự án:** Hệ thống Quản lý Cửa hàng Quần áo & Chương trình Khách hàng Thân thiết (Fashion Loyalty Web)
+**Cơ sở dữ liệu:** `csdl_cua_hang_quan_ao` (16 bảng chuẩn hóa 3NF — `SQL/file_mau-duLieu.sql`)
+**Nhóm thực hiện:** Lê Minh Đức, Lê Thảo Quyên, Huỳnh Thị Thanh Thảo, Neàng Ra
+
+---
+
+## I. KIẾN TRÚC PHÂN TẦNG ĐÃ TRIỂN KHAI (MODULE HÓA HOÀN TẤT)
+
+Hệ thống đã được tách hoàn toàn khỏi các file HTML dữ liệu tĩnh trong `Demo_UI/` và phân tầng rõ nét thành 5 lớp chuẩn mực, kết nối và đổ 100% dữ liệu thực tế từ MySQL (`csdl_cua_hang_quan_ao`):
+
+```text
+Web-quan-ly-cua-hang-quan-ao/
+├── index.php                                 # [ĐIỂM VÀO CHÍNH] Bộ điều hướng (Router) tầng cửa hàng
+├── config/                                   # [1. TẦNG KẾT NỐI]
+│   └── db.php                                # Kết nối PDO MySQL, quản lý phiên, helper tiền tệ/ngày/ảnh
+├── services/                                 # [2. TẦNG DỊCH VỤ]
+│   ├── store/                                # 2.1. Dịch vụ bên Cửa hàng (Client Services)
+│   │   ├── ProductStoreService.php           # Truy vấn danh mục, sản phẩm, 20 biến thể SKU, ảnh, đánh giá
+│   │   ├── LoyaltyStoreService.php           # Truy vấn thẻ tích điểm, hạng TV, kho voucher, sổ cái điểm
+│   │   └── CartCheckoutService.php           # Truy vấn giỏ hàng, sổ địa chỉ, ví voucher, tính ưu đãi đa tầng
+│   └── admin/                                # 2.2. Dịch vụ bên Quản trị (Admin Services)
+│       ├── DashboardService.php              # KPI doanh thu, đơn chờ duyệt, biểu đồ tháng & phân bổ hạng
+│       ├── ProductAdminService.php           # Quản lý danh mục đa cấp & danh sách sản phẩm + tồn kho
+│       ├── InventoryAdminService.php         # Đối soát tồn kho 20 SKU & lịch sử 20 phiếu nhập kho
+│       ├── OrderAdminService.php             # Quản lý 6 đơn hàng, chi tiết mặt hàng & mô phỏng xét hạng
+│       ├── TierAdminService.php              # Cấu hình 4 bậc hạng thành viên & danh sách thẻ khách hàng
+│       └── VoucherAdminService.php           # Chiến dịch phiếu giảm giá & lịch sử ví voucher khách hàng
+├── store/                                    # [3. TẦNG CỬA HÀNG (CLIENT VIEWS)]
+│   ├── includes/
+│   │   ├── header.php                        # Header, tìm kiếm, Popover Hạng thẻ & Chuyển nhanh khách DB
+│   │   ├── cart_drawer.php                   # Drawer giỏ hàng trượt ngang (Slide-in) từ bảng gh_gio_hang
+│   │   └── footer.php                        # Footer & bộ điều khiển hiệu ứng chuyển động + Toast thông báo
+│   └── pages/
+│       ├── home.php                          # Trang chủ, Top 4 gợi ý lượt xem cao & Bộ lọc sản phẩm CSDL
+│       ├── product_detail.php                # Chi tiết SP, chọn Màu/Size thực tế, bảng SKU & đánh giá CSDL
+│       ├── loyalty.php                       # Trung tâm thành viên, thẻ điện tử, đổi voucher & sổ cái điểm
+│       └── checkout.php                      # Thanh toán đa tầng (Giảm Hạng + Voucher ví + Tiêu điểm)
+└── admin/                                    # [4. TẦNG QUẢN TRỊ (ADMIN VIEWS)]
+    ├── includes/
+    │   ├── header.php                        # Layout quản trị, Sidebar điều hướng & thông tin Admin từ DB
+    │   └── footer.php                        # Footer quản trị & Toast cảnh báo tính năng đang phát triển
+    ├── index.php                             # Tổng quan Dashboard, KPI & Biểu đồ Chart.js từ dữ liệu thật
+    ├── products.php                          # Quản lý 10 sản phẩm & 7 danh mục từ CSDL
+    ├── inventory.php                         # Quản lý tồn kho 20 biến thể SKU & 20 phiếu nhập kho
+    ├── orders.php                            # Quản lý 6 đơn đặt hàng, Modal chi tiết & tiến độ nâng hạng
+    ├── tiers.php                             # Cấu hình 4 bậc hạng thành viên & danh sách thẻ tích điểm
+    └── vouchers.php                          # Quản lý 4 chiến dịch Voucher & ví voucher khách hàng
+```
+
+---
+
+## II. TUÂN THỦ KỸ NĂNG CHUYỂN ĐỘNG (`animation-vocabulary`)
+
+Các giao diện ở cả Tầng Cửa hàng và Tầng Quản trị đã áp dụng nhất quán hệ thống thuật ngữ và triết lý chuyển động từ `SKILL.md`:
+1. **Fade in + Translate (`fade-up`) & Stagger:** Các thẻ sản phẩm, thẻ voucher và ô chỉ số KPI xuất hiện tuần tự có độ trễ (`--stagger`) với đường cong `cubic-bezier(0.16, 1, 0.3, 1)` (**Ease-out**).
+2. **Origin-aware animation:** Popover thông tin Hạng thành viên (`#loyaltyPanel`) và Popover chuyển đổi tài khoản (`#userSwitchPanel`) phóng ra đúng từ góc nút bấm (`transform-origin: top right`, kết hợp `scale` + `opacity`).
+3. **Slide in Drawer:** Ngăn kéo giỏ hàng (`#cartDrawer`) trượt mượt từ cạnh phải màn hình.
+4. **Press / Tap feedback:** Mọi nút tương tác đều có hiệu ứng nhấn vật lý (`transform: scale(0.97)` khi nhấn).
+5. **Accordion / Collapse:** Khu vực thông tin chi tiết sản phẩm đóng/mở mượt mà kèm xoay biểu tượng `+`.
+6. **Tabular numbers (`tabular-nums`):** Áp dụng cho toàn bộ giá tiền, điểm thưởng, phần trăm tiến trình và số lượng tồn kho để số liệu không bị giật ngang khi thay đổi.
+7. **Hardware acceleration & Reduced motion:** Chỉ animate `transform` và `opacity`, đồng thời tôn trọng cài đặt `@media (prefers-reduced-motion: reduce)`.
+
+---
+
+## III. DANH SÁCH CÁC TÍNH NĂNG CHƯA CÓ — CẦN TRIỂN KHAI TIẾP (BACKLOG CÔNG VIỆC)
+
+Hiện tại hệ thống đã hoàn thành **100% luồng đọc & hiển thị dữ liệu thực tế (Read/Query)** từ 16 bảng trong CSDL. Các thao tác **ghi/cập nhật dữ liệu (Write/Mutation/API)** hiện đang gắn nhãn **"Đang phát triển"** trên giao diện. Dưới đây là danh sách chi tiết các gói công việc nhóm cần làm tiếp theo:
+
+### 1. Phân hệ Xác thực, Tài khoản & Sổ địa chỉ (Bảng `vt_vai_tro`, `nd_nguoi_dung`, `dc_dia_chi_kh`, `ttd_the_tich_diem`)
+- [ ] **1.1. Đăng nhập & Đăng xuất thực tế (Client & Admin):**
+  - Xây dựng trang/modal đăng nhập xác thực với bảng `nd_nguoi_dung` (`ten_dang_nhap` / `email` + `mat_khau`).
+  - Phân quyền Middleware: Chỉ cho phép `ma_vt = 1` (Admin) và `ma_vt = 2` (Nhân viên) truy cập thư mục `admin/`.
+- [ ] **1.2. Đăng ký thành viên mới & Tự động mở thẻ Hạng Đồng:**
+  - Khi khách đăng ký tài khoản mới (`ma_vt = 3`), sử dụng Transaction tạo bản ghi trong `nd_nguoi_dung` và tự động sinh thẻ tích điểm mới trong `ttd_the_tich_diem` (`ma_hang = 1`, `ma_so_the = THE-AGU-...`, `tong_diem_tich_luy = 0`, `diem_kha_dung = 0`).
+- [ ] **1.3. Quản lý Sổ địa chỉ nhận hàng (`dc_dia_chi_kh`):**
+  - Thêm mới, chỉnh sửa, xóa địa chỉ nhận hàng và đặt địa chỉ mặc định (`mac_dinh = 1`) ngay tại trang Thanh toán hoặc Hồ sơ.
+
+### 2. Phân hệ Giỏ hàng & Đặt hàng Đa tầng — Bên Cửa hàng (Bảng `gh_gio_hang`, `dh_don_hang`, `ctdh_chi_tiet_dh`, `bt_bien_the_sp`)
+- [ ] **2.1. API Giỏ hàng trực tuyến (`api/cart.php`):**
+  - Thêm biến thể sản phẩm (`ma_bt`, `so_luong_mua`) vào bảng `gh_gio_hang` (nếu đã có biến thể đó trong giỏ thì cộng dồn số lượng và kiểm tra không vượt quá `so_luong_ton` trong `bt_bien_the_sp`).
+  - Tăng/giảm số lượng hoặc xóa từng mặt hàng khỏi bảng `gh_gio_hang` trực tiếp trên Drawer giỏ hàng bằng Fetch API (Ajax).
+- [ ] **2.2. Transaction Đặt hàng & Khấu trừ tồn kho (`api/checkout.php`):**
+  - Thực hiện trong 1 **PDO Database Transaction** (`beginTransaction()` -> `commit()` / `rollBack()`):
+    1. Kiểm tra và khóa số lượng tồn kho (`SELECT ... FOR UPDATE`) của từng biến thể trong `bt_bien_the_sp`.
+    2. Tính toán và kiểm tra lại: Tổng tiền hàng, Tiền giảm theo Hạng thành viên (`htv_hang_thanh_vien.phan_tram_giam`), Tiền giảm Voucher (`vkh_vi_voucher_kh`), Điểm tiêu dùng (`diem_su_dung`).
+    3. Tạo hóa đơn trong `dh_don_hang` (trạng thái `CHO_XAC_NHAN`) và lưu từng dòng vào `ctdh_chi_tiet_dh`.
+    4. Trừ `so_luong_ton` tương ứng trong `bt_bien_the_sp`.
+    5. Nếu khách có dùng Voucher từ ví: cập nhật `vkh_vi_voucher_kh.trang_thai_su_dung = 1`, `ngay_su_dung = NOW()`.
+    6. Nếu khách có tiêu điểm khả dụng: trừ `diem_kha_dung` trong `ttd_the_tich_diem` và ghi 1 dòng `TRU_TIEU_DIEM` vào `lsd_lich_su_diem`.
+    7. Làm trống giỏ hàng của khách trong `gh_gio_hang`.
+- [ ] **2.3. Tích hợp hiển thị mã QR Chuyển khoản (`pt_thanh_toan = 'CHUYEN_KHOAN'`):**
+  - Tạo giao diện hiển thị mã VietQR theo đúng số tiền `thanh_tien` và nội dung chuyển khoản `#DHxx` sau khi đặt đơn.
+
+### 3. Phân hệ Động cơ Khách hàng Thân thiết — Loyalty Engine (Bảng `ttd_the_tich_diem`, `htv_hang_thanh_vien`, `lsd_lich_su_diem`, `vkh_vi_voucher_kh`)
+- [ ] **3.1. Duyệt đơn hàng hoàn thành -> Tự động Cộng điểm & Xét nâng hạng (`services/admin/LoyaltyEngineService.php`):**
+  - Khi Admin bấm **"Duyệt hoàn thành"** cho đơn hàng (ví dụ Đơn `#DH04` của khách Neàng Ra đang có 185/200 điểm, cộng +24 điểm):
+    1. Chuyển `dh_don_hang.trang_thai_dh` sang `'HOAN_THANH'`.
+    2. Cộng `diem_cong_du_kien` vào **cả 2 quỹ điểm** trên bảng `ttd_the_tich_diem`: `tong_diem_tich_luy += diem` và `diem_kha_dung += diem`.
+    3. Ghi sổ cái biến động điểm vào bảng `lsd_lich_su_diem` (`loai_giao_dich = 'CONG_MUA_HANG'`, lưu `so_du_sau_gd` mới).
+    4. Đối chiếu `tong_diem_tich_luy` mới với bảng `htv_hang_thanh_vien`: nếu vượt mốc hạng cao hơn (VD: 185 + 24 = 209 >= 200 điểm), tự động cập nhật `ttd_the_tich_diem.ma_hang = 2` (Thăng lên **Hạng Bạc**).
+- [ ] **3.2. Đổi điểm khả dụng lấy Voucher (`api/redeem_voucher.php`):**
+  - Kiểm tra điều kiện: `diem_kha_dung >= diem_can_doi`, `ma_hang >= ma_hang_yeu_cau`, `so_luong > 0`, và khách chưa đổi mã này.
+  - Thực hiện Transaction:
+    1. Trừ `diem_kha_dung` trong `ttd_the_tich_diem` (**giữ nguyên** `tong_diem_tich_luy` để khách không bị tụt hạng).
+    2. Giảm `so_luong` chiến dịch trong `pgg_phieu_giam_gia` đi 1.
+    3. Thêm bản ghi mới vào ví `vkh_vi_voucher_kh` (`trang_thai_su_dung = 0`).
+    4. Ghi sổ cái `lsd_lich_su_diem` (`loai_giao_dich = 'TRU_DOI_VOUCHER'`, số điểm âm).
+- [ ] **3.3. Đánh giá sản phẩm sau mua hàng & Thưởng nóng +10 điểm (`api/review_product.php`):**
+  - Cho phép khách hàng đã có đơn `HOAN_THANH` chấm sao (`1-5`) và viết nhận xét cho mặt hàng trong `ctdh_chi_tiet_dh` (khi `da_cong_diem_dg = 0`).
+  - Lưu `so_sao_danh_gia`, `noi_dung_danh_gia`, đặt `da_cong_diem_dg = 1`, đồng thời cộng **+10 điểm** vào `ttd_the_tich_diem` và ghi vào `lsd_lich_su_diem` (`CONG_DANH_GIA`).
+
+### 4. Phân hệ Quản trị Sản phẩm, Kho SKU, Hạng thẻ & Chiến dịch Voucher (Bên Admin)
+- [ ] **4.1. CRUD Danh mục & Sản phẩm (`admin/products.php`):**
+  - Xử lý form Thêm mới / Chỉnh sửa / Ẩn-Hiện / Xóa sản phẩm trong bảng `sp_san_pham` và danh mục trong `dm_danh_muc_sp`.
+  - Xử lý upload file hình ảnh thực tế vào thư mục `assets/images/` và lưu tên file vào `sp_san_pham.anh_chinh` cùng `ha_hinh_anh_sp`.
+  - Quản lý thêm/sửa biến thể Size & Màu (`bt_bien_the_sp`) ngay trong trang quản trị sản phẩm.
+- [ ] **4.2. Lập phiếu nhập kho & Cộng tồn tự động (`admin/inventory.php`):**
+  - Xử lý form **"Lập phiếu nhập kho"**: thêm chứng từ vào bảng `pnk_phieu_nhap_kho` (`ma_bt`, `ma_nd_nhap`, `so_luong_nhap`, `gia_nhap`, `nha_cung_cap`, `ghi_chu`) và đồng thời cộng `so_luong_ton += so_luong_nhap` trong bảng `bt_bien_the_sp`.
+- [ ] **4.3. Cập nhật Cấu hình 4 Bậc Hạng Thành Viên (`admin/tiers.php`):**
+  - Cho phép Admin chỉnh sửa `diem_toi_thieu`, `phan_tram_giam`, `he_so_tich_diem`, `mo_ta_uu_dai` trong bảng `htv_hang_thanh_vien` (ràng buộc mốc điểm hạng sau phải lớn hơn hạng trước).
+- [ ] **4.4. Quản lý Chiến dịch Voucher (`admin/vouchers.php`):**
+  - Thêm chiến dịch mới vào bảng `pgg_phieu_giam_gia` (`ma_code`, `ten_pgg`, `loai_giam`, `gia_tri_giam`, `don_toi_thieu`, `diem_can_doi`, `ma_hang_yeu_cau`, `so_luong`, `ngay_bd`, `ngay_kt`).
+  - Cho phép chỉnh sửa số lượng phát hành hoặc gia hạn/kết thúc sớm chiến dịch.
+
+---
+
+## IV. BẢNG PHÂN CÔNG ĐỀ XUẤT THEO MODULE CHO 4 THÀNH VIÊN NHÓM
+
+| Thành viên | Phụ trách Tầng Dịch vụ & Nghiệp vụ chính | Các File trọng tâm |
+| :--- | :--- | :--- |
+| **1. Lê Minh Đức** | Kiến trúc hệ thống, Loyalty Engine (Duyệt đơn cộng điểm & tự động nâng hạng), Dashboard thống kê & Cấu hình Hạng thành viên | `config/db.php`, `services/admin/DashboardService.php`, `services/admin/TierAdminService.php`, `admin/index.php`, `admin/tiers.php` |
+| **2. Lê Thảo Quyên** | Quản lý Danh mục, Sản phẩm, Biến thể SKU & Lập phiếu nhập kho cộng tồn tự động | `services/admin/ProductAdminService.php`, `services/admin/InventoryAdminService.php`, `admin/products.php`, `admin/inventory.php` |
+| **3. Huỳnh Thị Thanh Thảo** | Quản lý Đơn hàng, Giỏ hàng trực tuyến, Sổ địa chỉ & Transaction Thanh toán đa tầng | `services/store/CartCheckoutService.php`, `services/admin/OrderAdminService.php`, `store/pages/checkout.php`, `admin/orders.php` |
+| **4. Neàng Ra** | Giao diện Cửa hàng, Bộ lọc sản phẩm, Chi tiết biến thể, Trung tâm Thành viên, Đổi điểm Voucher & Đánh giá nhận thưởng | `services/store/ProductStoreService.php`, `services/store/LoyaltyStoreService.php`, `services/admin/VoucherAdminService.php`, `store/pages/home.php`, `store/pages/product_detail.php`, `store/pages/loyalty.php`, `admin/vouchers.php` |
+

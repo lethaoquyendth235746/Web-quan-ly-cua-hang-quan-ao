@@ -140,9 +140,8 @@ if ($reviewCount > 0) {
 
       <div class="mt-8 grid gap-3 sm:grid-cols-2">
         <button type="button" id="addToCartBtn"
-          data-dev-feature="Ghi sản phẩm vào bảng gh_gio_hang trong CSDL"
-          class="tap-feedback rounded-full bg-charcoal px-6 py-4 text-sm font-medium text-white hover:bg-accent">
-          Thêm vào giỏ hàng (Đang phát triển)
+          class="tap-feedback rounded-full bg-charcoal px-6 py-4 text-sm font-medium text-white hover:bg-accent disabled:cursor-not-allowed disabled:bg-stone-300">
+          Thêm vào giỏ hàng
         </button>
         <a href="index.php?page=checkout"
           class="tap-feedback flex items-center justify-center rounded-full border border-charcoal px-6 py-4 text-sm font-medium text-charcoal hover:border-accent hover:text-accent">
@@ -308,6 +307,16 @@ if ($reviewCount > 0) {
           : `<span class="h-2 w-2 rounded-full bg-red-500"></span>Tạm hết hàng`;
       }
 
+      const addToCartBtn = document.getElementById('addToCartBtn');
+      if (addToCartBtn) {
+        addToCartBtn.disabled = stock <= 0;
+        if (stock <= 0) {
+          addToCartBtn.textContent = 'Tạm hết hàng';
+        } else {
+          addToCartBtn.textContent = 'Thêm vào giỏ hàng';
+        }
+      }
+
       // Đổi ảnh theo màu nếu có trong ha_hinh_anh_sp
       const colorImg = images.find((img) => img.mau_sac_lien_ket === currentColor);
       if (colorImg && mainImage) {
@@ -371,6 +380,48 @@ if ($reviewCount > 0) {
       currentQty = Math.min(maxStock, currentQty + 1);
       if (qtyValue) qtyValue.textContent = String(currentQty);
     });
+
+    const addToCartBtn = document.getElementById('addToCartBtn');
+    if (addToCartBtn) {
+      addToCartBtn.addEventListener('click', async () => {
+        const matched = findVariant(currentColor, currentSize);
+        if (!matched) {
+          window.showStoreToast?.('Vui lòng chọn màu sắc và kích cỡ hợp lệ');
+          return;
+        }
+
+        const stock = Number(matched.so_luong_ton || 0);
+        if (stock <= 0) {
+          window.showStoreToast?.('Sản phẩm đã hết hàng trong kho');
+          return;
+        }
+
+        addToCartBtn.disabled = true;
+        const originalText = addToCartBtn.innerHTML;
+        addToCartBtn.innerHTML = `
+          <span class="inline-flex items-center gap-2">
+            <svg class="h-4 w-4 animate-spin text-white" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
+            Đang thêm...
+          </span>
+        `;
+
+        try {
+          const res = await window.cartAPI.add(matched.ma_bt, currentQty);
+          if (res && res.success) {
+            window.showStoreToast?.(res.message || 'Đã thêm sản phẩm vào giỏ hàng!');
+            window.openCartDrawer?.();
+          } else {
+            window.showStoreToast?.(res?.message || 'Có lỗi khi thêm vào giỏ hàng');
+          }
+        } catch (err) {
+          console.error(err);
+          window.showStoreToast?.('Không thể kết nối đến máy chủ');
+        } finally {
+          addToCartBtn.disabled = false;
+          addToCartBtn.innerHTML = originalText;
+        }
+      });
+    }
 
     updateVariantUI();
   })();

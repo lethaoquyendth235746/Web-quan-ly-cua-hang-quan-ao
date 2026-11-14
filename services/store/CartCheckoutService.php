@@ -56,10 +56,208 @@ class CartCheckoutService
             $imgFile = $item['anh_theo_mau'] ?: $item['anh_chinh'];
             $item['image_url'] = resolveProductImage($imgFile);
             $item['thanh_tien'] = (float) $item['gia_ban_rieng'] * (int) $item['so_luong_mua'];
+            $item['formatted_price'] = formatVND($item['gia_ban_rieng']);
+            $item['formatted_total'] = formatVND($item['thanh_tien']);
         }
         unset($item);
 
         return $items;
+    }
+
+    /**
+     * Lấy tổng kết giỏ hàng kèm thông tin ưu đãi hạng thành viên (Dùng cho API Giỏ hàng)
+     */
+    public function getCartSummary(int $maNd): array
+    {
+        $cartItems = $this->getCustomerCart($maNd);
+        $totalQty = 0;
+        $subtotal = 0;
+        foreach ($cartItems as $item) {
+            $totalQty += (int) $item['so_luong_mua'];
+            $subtotal += (float) $item['thanh_tien'];
+        }
+
+        // Lấy hệ số tích điểm từ thẻ tích điểm của khách hàng
+        $stmtTier = $this->pdo->prepare("
+            SELECT ttd.ma_hang, htv.ten_hang, htv.he_so_tich_diem, htv.phan_tram_giam
+            FROM ttd_the_tich_diem ttd
+            INNER JOIN htv_hang_thanh_vien htv ON ttd.ma_hang = htv.ma_hang
+            WHERE ttd.ma_nd = :ma_nd
+            LIMIT 1
+        ");
+        $stmtTier->execute(['ma_nd' => $maNd]);
+        $tier = $stmtTier->fetch();
+
+        $tierMultiplier = (float) ($tier['he_so_tich_diem'] ?? 1.0);
+        $tierName = $tier['ten_hang'] ?? 'Hạng Đồng';
+        $expectedPoints = (int) floor(($subtotal / POINTS_PER_VND) * $tierMultiplier);
+
+        return [
+            'items'              => $cartItems,
+            'total_qty'          => $totalQty,
+            'subtotal'           => $subtotal,
+            'formatted_subtotal' => formatVND($subtotal),
+            'expected_points'    => $expectedPoints,
+            'tier_name'          => $tierName,
+            'tier_multiplier'    => $tierMultiplier,
+        ];
+    }
+
+    /**
+     * Thêm sản phẩm biến thể vào giỏ hàng (Action: add)
+     */
+    public function addToCart(int $maNd, int $maBt, int $soLuongMua = 1): array
+    {
+        if ($soLuongMua <= 0) {
+            $soLuongMua = 1;
+        }
+
+        // 1. Kiểm tra tồn tại biến thể và số lượng tồn kho trong bt_bien_the_sp
+        $stmtBt = $this->pdo->prepare("
+            SELECT bt.ma_bt, bt.ma_sp, bt.ma_sku, bt.kich_co, bt.mau_sac, bt.gia_ban_rieng, bt.so_luong_ton, bt.trang_thai, sp.ten_sp
+            FROM bt_bien_the_sp bt
+            INNER JOIN sp_san_pham sp ON bt.ma_sp = sp.ma_sp
+            WHERE bt.ma_bt = :ma_bt
+        ");
+        $stmtBt->execute(['ma_bt' => $maBt]);
+        $variant = $stmtBt->fetch();
+
+        if (!$variant || (int) $variant['trang_thai'] === 0) {
+            throw new Exception("Biến thể sản phẩm không tồn tại hoặc đã ngừng kinh doanh.");
+        }
+
+        $stock = (int) $variant['so_luong_ton'];
+        if ($stock <= 0) {
+            throw new Exception("Sản phẩm \"{$variant['ten_sp']}\" ({$variant['mau_sac']} - {$variant['kich_co']}) hiện đã hết hàng.");
+        }
+
+        // 2. Kiểm tra xem biến thể đã có trong gh_gio_hang của khách hàng chưa
+        $stmtCheck = $this->pdo->prepare("
+            SELECT ma_gh, so_luong_mua
+            FROM gh_gio_hang
+            WHERE ma_nd = :ma_nd AND ma_bt = :ma_bt
+        ");
+        $stmtCheck->execute(['ma_nd' => $maNd, 'ma_bt' => $maBt]);
+        $existing = $stmtCheck->fetch();
+
+        $notice = null;
+        if ($existing) {
+            $currentQty = (int) $existing['so_luong_mua'];
+            if ($currentQty >= $stock) {
+                throw new Exception("Bạn đã có {$currentQty} sản phẩm trong giỏ, đạt mức tồn kho tối đa ({$stock}).");
+            }
+
+            $newQty = $currentQty + $soLuongMua;
+            if ($newQty > $stock) {
+                $newQty = $stock;
+                $notice = "Đã giới hạn số lượng bằng tồn kho tối đa ({$stock} sản phẩm).";
+            }
+
+            $stmtUpdate = $this->pdo->prepare("
+                UPDATE gh_gio_hang
+                SET so_luong_mua = :so_luong, ngay_them = NOW()
+                WHERE ma_gh = :ma_gh
+            ");
+            $stmtUpdate->execute(['so_luong' => $newQty, 'ma_gh' => $existing['ma_gh']]);
+        } else {
+            $buyQty = $soLuongMua;
+            if ($buyQty > $stock) {
+                $buyQty = $stock;
+                $notice = "Số lượng yêu cầu vượt quá tồn kho. Đã thêm tối đa {$stock} sản phẩm.";
+            }
+
+            $stmtInsert = $this->pdo->prepare("
+                INSERT INTO gh_gio_hang (ma_nd, ma_bt, so_luong_mua, ngay_them)
+                VALUES (:ma_nd, :ma_bt, :so_luong, NOW())
+            ");
+            $stmtInsert->execute([
+                'ma_nd'    => $maNd,
+                'ma_bt'    => $maBt,
+                'so_luong' => $buyQty,
+            ]);
+        }
+
+        $summary = $this->getCartSummary($maNd);
+        return [
+            'message' => $notice ?: "Đã thêm sản phẩm \"{$variant['ten_sp']}\" vào giỏ hàng thành công!",
+            'summary' => $summary,
+        ];
+    }
+
+    /**
+     * Cập nhật số lượng sản phẩm trong giỏ (Action: update)
+     * Nếu số lượng <= 0 thì tự động xóa dòng đó khỏi giỏ.
+     */
+    public function updateCartQuantity(int $maNd, int $maBt, int $soLuongMoi): array
+    {
+        if ($soLuongMoi <= 0) {
+            $stmtDel = $this->pdo->prepare("DELETE FROM gh_gio_hang WHERE ma_nd = :ma_nd AND ma_bt = :ma_bt");
+            $stmtDel->execute(['ma_nd' => $maNd, 'ma_bt' => $maBt]);
+            return [
+                'action'  => 'removed',
+                'message' => 'Đã xóa sản phẩm khỏi giỏ hàng.',
+                'summary' => $this->getCartSummary($maNd),
+            ];
+        }
+
+        // Kiểm tra tồn kho
+        $stmtBt = $this->pdo->prepare("
+            SELECT bt.so_luong_ton, sp.ten_sp
+            FROM bt_bien_the_sp bt
+            INNER JOIN sp_san_pham sp ON bt.ma_sp = sp.ma_sp
+            WHERE bt.ma_bt = :ma_bt
+        ");
+        $stmtBt->execute(['ma_bt' => $maBt]);
+        $variant = $stmtBt->fetch();
+
+        if (!$variant) {
+            throw new Exception("Biến thể sản phẩm không tồn tại.");
+        }
+
+        $stock = (int) $variant['so_luong_ton'];
+        $notice = null;
+        $validQty = $soLuongMoi;
+        if ($validQty > $stock) {
+            $validQty = $stock;
+            $notice = "Số lượng đã được tự động điều chỉnh về mức tồn kho tối đa ({$stock}).";
+        }
+
+        $stmtUp = $this->pdo->prepare("
+            UPDATE gh_gio_hang
+            SET so_luong_mua = :so_luong
+            WHERE ma_nd = :ma_nd AND ma_bt = :ma_bt
+        ");
+        $stmtUp->execute(['so_luong' => $validQty, 'ma_nd' => $maNd, 'ma_bt' => $maBt]);
+
+        return [
+            'action'  => 'updated',
+            'message' => $notice ?: 'Đã cập nhật số lượng thành công!',
+            'summary' => $this->getCartSummary($maNd),
+        ];
+    }
+
+    /**
+     * Xóa sản phẩm khỏi giỏ hàng (Action: remove)
+     */
+    public function removeFromCart(int $maNd, int $maBt): array
+    {
+        $stmtDel = $this->pdo->prepare("DELETE FROM gh_gio_hang WHERE ma_nd = :ma_nd AND ma_bt = :ma_bt");
+        $stmtDel->execute(['ma_nd' => $maNd, 'ma_bt' => $maBt]);
+
+        return [
+            'action'  => 'removed',
+            'message' => 'Đã xóa sản phẩm khỏi giỏ hàng.',
+            'summary' => $this->getCartSummary($maNd),
+        ];
+    }
+
+    /**
+     * Làm trống toàn bộ giỏ hàng
+     */
+    public function clearCart(int $maNd): bool
+    {
+        $stmt = $this->pdo->prepare("DELETE FROM gh_gio_hang WHERE ma_nd = :ma_nd");
+        return $stmt->execute(['ma_nd' => $maNd]);
     }
 
     /**
@@ -154,4 +352,3 @@ class CartCheckoutService
         ];
     }
 }
-

@@ -10,7 +10,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 define('DB_HOST', '127.0.0.1');
-define('DB_PORT', '3307');
+define('DB_PORT', '3308');
 define('DB_NAME', 'csdl_cua_hang_quan_ao');
 define('DB_USER', 'root');
 define('DB_PASS', '');

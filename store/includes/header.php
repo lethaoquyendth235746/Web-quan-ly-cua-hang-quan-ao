@@ -162,7 +162,7 @@ $cartTotalCount = array_sum(array_column($cartItems, 'so_luong_mua'));
 
           <div id="loyaltyPanel" class="popover-origin popover-hidden absolute right-0 top-full z-50 mt-3 w-80 rounded-xl border border-stone-200 bg-white p-5 shadow-lg">
             <div class="flex items-center justify-between">
-              <p class="text-xs uppercase tracking-wider text-muted">Thẻ thành viên CSDL</p>
+              <p class="text-xs uppercase tracking-wider text-muted">Thẻ thành viên</p>
               <span class="font-mono text-xs font-medium text-accent"><?= htmlspecialchars($loyaltyProfile['ma_so_the'] ?? 'CHƯA CẤP') ?></span>
             </div>
             <p class="mt-1 text-lg font-semibold text-charcoal"><?= htmlspecialchars($tierName) ?></p>
@@ -229,7 +229,7 @@ $cartTotalCount = array_sum(array_column($cartItems, 'so_luong_mua'));
             <div class="border-b border-stone-100 pb-3">
               <div class="flex items-center justify-between">
                 <p class="text-xs font-semibold uppercase tracking-wider text-muted">
-                  <?= $isLoggedIn ? 'Tài khoản đang đăng nhập' : 'Phiên khách mẫu (CSDL)' ?>
+                  <?= $isLoggedIn ? 'Tài khoản đang đăng nhập' : 'Phiên khách' ?>
                 </p>
                 <?php if ($isLoggedIn): ?>
                   <span class="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">Đã đăng nhập</span>
@@ -247,30 +247,9 @@ $cartTotalCount = array_sum(array_column($cartItems, 'so_luong_mua'));
               </a>
               <?php if (hasAdminAccess()): ?>
                 <a href="admin/index.php" class="font-semibold text-purple-700 hover:underline">
-                  Vào Quản trị (Admin) &rarr;
-                </a>
-              <?php else: ?>
-                <a href="admin/index.php" class="text-stone-500 hover:underline">
-                  Thử vào Quản trị &rarr;
+                  Trang Quản trị &rarr;
                 </a>
               <?php endif; ?>
-            </div>
-
-            <p class="mt-3 border-t border-stone-100 pt-3 text-[11px] font-medium uppercase tracking-wider text-muted">Chuyển nhanh khách hàng trong DB để test:</p>
-            <div class="mt-2 space-y-1.5 max-h-48 overflow-y-auto">
-              <?php foreach ($demoCustomers as $cus): ?>
-                <?php $isCurrent = ((int)$cus['ma_nd'] === (int)($loyaltyProfile['ma_nd'] ?? 0)); ?>
-                <a href="index.php?page=<?= urlencode($currentPage) ?><?= isset($_GET['id']) ? '&id=' . (int)$_GET['id'] : '' ?>&switch_user=<?= (int)$cus['ma_nd'] ?>"
-                  class="flex items-center justify-between rounded-lg px-3 py-2 text-xs transition <?= $isCurrent ? 'bg-stone-100 font-semibold text-charcoal' : 'text-muted hover:bg-stone-50 hover:text-charcoal' ?>">
-                  <div>
-                    <p class="text-charcoal font-medium"><?= htmlspecialchars($cus['ho_ten']) ?></p>
-                    <p class="text-[11px] text-muted"><?= htmlspecialchars($cus['ten_hang'] ?? 'Chưa mở thẻ') ?></p>
-                  </div>
-                  <span class="tabular-nums rounded-full bg-gold px-2 py-0.5 text-[11px] font-medium text-charcoal">
-                    <?= number_format((int)($cus['diem_kha_dung'] ?? 0), 0, ',', '.') ?> đ
-                  </span>
-                </a>
-              <?php endforeach; ?>
             </div>
 
             <div class="mt-3 border-t border-stone-100 pt-3 flex items-center justify-between">

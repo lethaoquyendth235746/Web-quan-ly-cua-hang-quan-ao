@@ -57,51 +57,8 @@ function getDBConnection(): PDO
     return $pdo;
 }
 
-/**
- * Chuyển đổi nhanh tài khoản khách hàng từ CSDL để kiểm thử các bậc Hạng thẻ
- * Đồng bộ hóa với phiên đăng nhập thực tế của hệ thống
- */
-if (isset($_GET['switch_user'])) {
-    $uid = (int) $_GET['switch_user'];
-    if ($uid > 0) {
-        $stmt = getDBConnection()->prepare("
-            SELECT nd.*, vt.ten_vt, vt.mo_ta_quyen
-            FROM nd_nguoi_dung nd
-            INNER JOIN vt_vai_tro vt ON nd.ma_vt = vt.ma_vt
-            WHERE nd.ma_nd = :id AND nd.trang_thai = 1
-            LIMIT 1
-        ");
-        $stmt->execute(['id' => $uid]);
-        $u = $stmt->fetch();
-        if ($u) {
-            unset($_SESSION['explicit_logout']);
-            $_SESSION['user'] = [
-                'ma_nd'         => (int)$u['ma_nd'],
-                'ma_vt'         => (int)$u['ma_vt'],
-                'ten_vt'        => $u['ten_vt'],
-                'ho_ten'        => $u['ho_ten'],
-                'ten_dang_nhap' => $u['ten_dang_nhap'],
-                'email'         => $u['email'],
-                'sdt'           => $u['sdt'],
-                'anh_dai_dien'  => $u['anh_dai_dien'],
-            ];
-            $_SESSION['current_user_id'] = (int)$u['ma_nd'];
-            if (in_array((int)$u['ma_vt'], [1, 2], true)) {
-                $_SESSION['current_admin_id'] = (int)$u['ma_nd'];
-            } else {
-                unset($_SESSION['current_admin_id']);
-            }
-        }
-    }
-    $redirect = strtok($_SERVER['REQUEST_URI'], '?');
-    $queryParams = $_GET;
-    unset($queryParams['switch_user']);
-    if (!empty($queryParams)) {
-        $redirect .= '?' . http_build_query($queryParams);
-    }
-    header('Location: ' . $redirect);
-    exit;
-}
+// Cơ chế switch_user trực tiếp qua URL đã bị vô hiệu hóa vì lý do bảo mật.
+
 
 /**
  * Kiểm tra người dùng hiện tại đã đăng nhập hay chưa
@@ -149,20 +106,14 @@ function getCurrentUser(): ?array
 }
 
 /**
- * Lấy mã người dùng hiện tại (nếu chưa đăng nhập và chưa từng logout, mặc định demo ID = 4)
+ * Lấy mã người dùng hiện tại từ Session (trả về 0 nếu chưa đăng nhập)
  */
 function getCurrentUserId(): int
 {
-    if (!empty($_SESSION['explicit_logout'])) {
-        return 0; // Đã đăng xuất chủ động
-    }
-    if (isset($_SESSION['current_user_id'])) {
+    if (isset($_SESSION['current_user_id']) && empty($_SESSION['explicit_logout'])) {
         return (int) $_SESSION['current_user_id'];
     }
-    // Khởi tạo phiên demo mặc định (Neàng Ra - Hạng Đồng) cho lần đầu truy cập
-    $_SESSION['current_user_id'] = 4;
-    $user = getCurrentUser();
-    return 4;
+    return 0;
 }
 
 /**

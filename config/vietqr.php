@@ -13,11 +13,11 @@ if (!defined('VIETQR_BANK_NAME')) {
 }
 
 if (!defined('VIETQR_ACCOUNT_NO')) {
-    define('VIETQR_ACCOUNT_NO', '0901235629'); // Số tài khoản ngân hàng nhận thanh toán
+    define('VIETQR_ACCOUNT_NO', '0357185269'); // Số tài khoản ngân hàng nhận thanh toán
 }
 
 if (!defined('VIETQR_ACCOUNT_NAME')) {
-    define('VIETQR_ACCOUNT_NAME', 'AURA STUDIO'); // Tên chủ tài khoản (không dấu)
+    define('VIETQR_ACCOUNT_NAME', 'HUYNH THI THANH THAO'); // Tên chủ tài khoản (không dấu)
 }
 
 /**

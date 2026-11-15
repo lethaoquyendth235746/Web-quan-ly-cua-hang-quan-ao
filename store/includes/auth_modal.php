@@ -39,7 +39,7 @@
             Tên đăng nhập / Email <span class="text-red-500">*</span>
           </label>
           <input type="text" id="modalLoginId" name="identifier" required
-            placeholder="VD: admin_duc, neangra hoặc email..."
+            placeholder="Nhập tên đăng nhập hoặc email của bạn"
             class="w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2 text-sm text-charcoal focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 transition" />
         </div>
 
@@ -48,7 +48,6 @@
             <label for="modalLoginPass" class="block text-xs font-semibold uppercase tracking-wider text-charcoal">
               Mật khẩu <span class="text-red-500">*</span>
             </label>
-            <span class="text-[11px] text-muted">Pass mẫu: <code>123456</code></span>
           </div>
           <input type="password" id="modalLoginPass" name="password" required
             placeholder="Nhập mật khẩu..."
@@ -60,25 +59,6 @@
           Đăng nhập ngay
         </button>
       </form>
-
-      <!-- Quick test pills in modal -->
-      <div class="mt-4 pt-3 border-t border-stone-100">
-        <p class="text-[11px] font-semibold text-muted uppercase tracking-wider mb-2">Đăng nhập nhanh để test:</p>
-        <div class="grid grid-cols-2 gap-2 text-xs">
-          <button type="button" onclick="modalQuickFill('admin_duc', '123456')" class="p-2 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-900 font-medium text-left truncate">
-            👑 Admin Đức
-          </button>
-          <button type="button" onclick="modalQuickFill('staff_quyen', '123456')" class="p-2 rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-900 font-medium text-left truncate">
-            💼 NV Quyên
-          </button>
-          <button type="button" onclick="modalQuickFill('neangra', '123456')" class="p-2 rounded-lg border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-900 font-medium text-left truncate">
-            🥉 Neàng Ra (Đồng)
-          </button>
-          <button type="button" onclick="modalQuickFill('hoangnam_lx', '123456')" class="p-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 font-medium text-left truncate">
-            🥈 Hoàng Nam (Bạc)
-          </button>
-        </div>
-      </div>
     </div>
 
     <!-- TAB 2: MODAL ĐĂNG KÝ -->
@@ -178,12 +158,6 @@
       tabRegisterBtn.classList.remove('border-charcoal', 'text-charcoal');
       tabRegisterBtn.classList.add('border-transparent', 'text-muted');
     }
-  }
-
-  function modalQuickFill(username, password) {
-    document.getElementById('modalLoginId').value = username;
-    document.getElementById('modalLoginPass').value = password;
-    document.getElementById('modalLoginForm').dispatchEvent(new Event('submit', { cancelable: true }));
   }
 
   async function handleModalLogin(e) {

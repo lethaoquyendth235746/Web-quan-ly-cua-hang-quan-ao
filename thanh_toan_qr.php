@@ -120,7 +120,7 @@ $isCOD = ($order['pt_thanh_toan'] === 'COD');
         </div>
       </div>
     <?php else: ?>
-      <div class="overflow-hidden rounded-2xl bg-white shadow-sm border border-stone-200">
+      <div id="qrMainCard" class="overflow-hidden rounded-2xl bg-white shadow-sm border border-stone-200">
         <!-- Banner Tiêu đề -->
         <div class="border-b border-stone-100 bg-stone-50 px-6 py-5 text-center sm:px-8">
           <span class="inline-block rounded-full bg-olive/10 px-3.5 py-1 text-xs font-semibold text-olive">
@@ -130,7 +130,16 @@ $isCOD = ($order['pt_thanh_toan'] === 'COD');
             Chuyển khoản thanh toán Đơn hàng <span class="font-mono text-accent">#<?= htmlspecialchars($dhCode) ?></span>
           </h1>
           <p class="mt-1 text-xs text-muted">
-            Khách hàng: <strong><?= htmlspecialchars($order['ho_ten']) ?></strong> &middot; Trạng thái đơn: <span class="font-medium text-amber-700"><?= htmlspecialchars($order['trang_thai_dh']) ?></span>
+            <?php
+              $qrStatusMap = [
+                  'CHO_XAC_NHAN' => 'Chờ xác nhận',
+                  'DANG_GIAO'    => 'Đang giao hàng',
+                  'HOAN_THANH'   => 'Hoàn thành',
+                  'DA_HUY'       => 'Đã hủy',
+              ];
+              $vnOrderStatus = $qrStatusMap[$order['trang_thai_dh'] ?? ''] ?? ($order['trang_thai_dh'] ?? 'Chờ xác nhận');
+            ?>
+            Khách hàng: <strong><?= htmlspecialchars($order['ho_ten']) ?></strong> &middot; Trạng thái đơn: <span class="rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-800"><?= htmlspecialchars($vnOrderStatus) ?></span>
           </p>
         </div>
 
@@ -197,17 +206,76 @@ $isCOD = ($order['pt_thanh_toan'] === 'COD');
               <span>Vui lòng chuyển <strong>chính xác số tiền</strong> và giữ nguyên cú pháp <strong><?= htmlspecialchars($addInfo) ?></strong> để hệ thống đối soát tự động.</span>
             </div>
 
-            <!-- Nút hành động -->
-            <div class="pt-2 flex flex-col gap-2.5">
-              <a href="index.php?page=loyalty#myOrdersTitle"
-                class="tap-feedback flex items-center justify-center rounded-full bg-charcoal px-6 py-3.5 text-center text-sm font-medium text-white hover:bg-accent transition shadow-sm">
-                Tôi đã chuyển khoản / Xem đơn hàng &rarr;
-              </a>
-              <a href="index.php" class="tap-feedback rounded-full border border-stone-300 py-2.5 text-center text-xs font-medium text-muted hover:border-charcoal hover:text-charcoal transition">
-                Quay lại Trang chủ
-              </a>
+            <!-- Trạng thái chờ hệ thống ngân hàng xác nhận (Thay thế nút bấm tay) -->
+            <div id="paymentPendingBox" class="space-y-3 pt-1">
+              <div class="rounded-xl border border-blue-200 bg-blue-50/70 p-4 text-center">
+                <div class="flex items-center justify-center gap-2 text-sm font-semibold text-blue-900">
+                  <svg class="h-4 w-4 animate-spin text-blue-600" viewBox="0 0 24 24" fill="none">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                  </svg>
+                  <span>Đang chờ hệ thống ngân hàng xác nhận thanh toán...</span>
+                </div>
+                <p class="mt-1 text-xs text-blue-700">Mã QR giữ đơn trong: <strong id="countdownTimer" class="font-mono text-sm font-bold text-blue-950">15:00</strong></p>
+                <p class="mt-1 text-[11px] text-muted">Hệ thống tự động phát hiện giao dịch 24/7 và xác nhận ngay lập tức.</p>
+              </div>
+
+              <!-- Nút hỗ trợ Demo / Báo cáo đồ án -->
+              <div class="rounded-xl border border-dashed border-stone-300 bg-stone-50 p-3 text-center">
+                <p class="text-[11px] text-muted mb-1.5 font-medium">Chế độ Kiểm thử / Báo cáo đồ án:</p>
+                <button type="button" id="simulatePaymentBtn" class="tap-feedback inline-flex items-center gap-1.5 rounded-full bg-emerald-700 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-800 transition shadow-sm">
+                  <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                  </svg>
+                  ⚡ Giả lập Quét QR &amp; Thanh toán thành công
+                </button>
+              </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Màn hình thông báo Thanh toán Thành công (Tự động hiển thị khi paid === true) -->
+      <div id="paymentSuccessScreen" class="hidden overflow-hidden rounded-2xl bg-white shadow-sm border border-stone-200 p-8 sm:p-12 text-center">
+        <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 shadow-md">
+          <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h2 class="mt-5 text-2xl font-bold text-charcoal sm:text-3xl">Thanh toán &amp; Đặt hàng thành công!</h2>
+        <p class="mt-2 text-sm text-muted">Hệ thống đã nhận được tiền chuyển khoản cho đơn hàng <strong class="font-mono text-charcoal">#<?= htmlspecialchars($dhCode) ?></strong></p>
+
+        <div class="mx-auto mt-6 max-w-sm rounded-xl bg-stone-50 p-4 text-left text-xs sm:text-sm space-y-2 border border-stone-200/70">
+          <div class="flex justify-between">
+            <span class="text-muted">Mã đơn hàng:</span>
+            <span class="font-mono font-bold text-charcoal">#<?= htmlspecialchars($dhCode) ?></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-muted">Số tiền đã nhận:</span>
+            <span class="font-bold text-emerald-700"><?= formatVND($thanhTien) ?></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-muted">Điểm thưởng tích lũy:</span>
+            <span class="font-semibold text-emerald-700">+<?= (int)$order['diem_cong_du_kien'] ?> điểm</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-muted">Trạng thái:</span>
+            <span class="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">Đã thanh toán (Hoàn thành)</span>
+          </div>
+        </div>
+
+        <div class="mt-6 flex items-center justify-center gap-2 text-xs text-muted">
+          <svg class="h-4 w-4 animate-spin text-charcoal" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+          <span>Tự động chuyển đến đơn hàng của bạn trong <strong id="redirectCountdown" class="font-bold text-charcoal">3</strong> giây...</span>
+        </div>
+
+        <div class="mt-6">
+          <a href="index.php?page=loyalty#myOrdersTitle" class="tap-feedback inline-block rounded-full bg-charcoal px-8 py-3 text-sm font-semibold text-white hover:bg-accent transition shadow">
+            Xem lịch sử đơn hàng ngay &rarr;
+          </a>
         </div>
       </div>
     <?php endif; ?>
@@ -264,6 +332,129 @@ $isCOD = ($order['pt_thanh_toan'] === 'COD');
       document.getElementById('copyAmountBtn')?.addEventListener('click', function() {
         const val = this.dataset.value || '';
         copyText(val, this);
+      });
+
+      // =====================================================================
+      // CƠ CHẾ POLLING TỰ ĐỘNG XÁC NHẬN THANH TOÁN (MỖI 3 GIÂY)
+      // =====================================================================
+      const orderId = <?= (int)$order['ma_dh'] ?>;
+      const orderAmount = <?= (float)$thanhTien ?>;
+      const initialPaid = <?= ($order['trang_thai_dh'] === 'HOAN_THANH' || $order['trang_thai_dh'] === 'DANG_GIAO') ? 'true' : 'false' ?>;
+
+      const qrMainCard = document.getElementById('qrMainCard');
+      const paymentSuccessScreen = document.getElementById('paymentSuccessScreen');
+      const timerEl = document.getElementById('countdownTimer');
+      const redirectCountdownEl = document.getElementById('redirectCountdown');
+
+      let pollInterval = null;
+      let countdownInterval = null;
+      let hasFinished = false;
+
+      function onPaymentSuccess(data) {
+        if (hasFinished) return;
+        hasFinished = true;
+
+        if (pollInterval) clearInterval(pollInterval);
+        if (countdownInterval) clearInterval(countdownInterval);
+
+        if (qrMainCard) qrMainCard.classList.add('hidden');
+        if (paymentSuccessScreen) {
+          paymentSuccessScreen.classList.remove('hidden');
+        }
+
+        // Đếm ngược 3 giây tự động chuyển hướng sang trang đơn hàng
+        let redirectSeconds = 3;
+        if (redirectCountdownEl) redirectCountdownEl.textContent = String(redirectSeconds);
+        const redirTimer = setInterval(() => {
+          redirectSeconds--;
+          if (redirectCountdownEl) redirectCountdownEl.textContent = String(redirectSeconds);
+          if (redirectSeconds <= 0) {
+            clearInterval(redirTimer);
+            window.location.href = 'index.php?page=loyalty#myOrdersTitle';
+          }
+        }, 1000);
+      }
+
+      async function checkPaymentStatus() {
+        if (hasFinished) return;
+        try {
+          const res = await fetch(`api/check_payment.php?ma_dh=${orderId}`);
+          const data = await res.json();
+          if (data.success && data.paid) {
+            onPaymentSuccess(data);
+          }
+        } catch (err) {
+          console.warn('Lỗi kiểm tra trạng thái thanh toán:', err);
+        }
+      }
+
+      // Khởi động đồng hồ đếm ngược 15:00
+      let timeLeft = 15 * 60; // 900 giây
+      countdownInterval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+          clearInterval(countdownInterval);
+          if (pollInterval) clearInterval(pollInterval);
+          if (timerEl) timerEl.textContent = 'Hết hạn';
+          return;
+        }
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        if (timerEl) {
+          timerEl.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+      }, 1000);
+
+      // Nếu đơn đã thanh toán từ trước
+      if (initialPaid) {
+        onPaymentSuccess();
+      } else {
+        // Polling mỗi 3 giây gọi API check_payment.php
+        pollInterval = setInterval(checkPaymentStatus, 3000);
+        // Kiểm tra ngay sau 1 giây
+        setTimeout(checkPaymentStatus, 1000);
+      }
+
+      // =====================================================================
+      // NÚT MÔ PHỎNG KIỂM THỬ ĐỒ ÁN (GIẢ LẬP TÍN HIỆU NGÂN HÀNG BÁO CÓ)
+      // =====================================================================
+      document.getElementById('simulatePaymentBtn')?.addEventListener('click', async function() {
+        this.disabled = true;
+        const originalHtml = this.innerHTML;
+        this.innerHTML = `
+          <svg class="h-3.5 w-3.5 animate-spin text-white inline-block" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+          Đang gửi webhook ngân hàng...
+        `;
+
+        try {
+          const res = await fetch('api/payment_webhook.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ma_dh: orderId,
+              so_tien: orderAmount,
+              content: `#DH${orderId}`
+            })
+          });
+          const data = await res.json();
+          if (data.success) {
+            showToast('✓ Ngân hàng báo có thành công!');
+            // Lập tức gọi checkPaymentStatus để kích hoạt chuyển màn hình
+            await checkPaymentStatus();
+          } else {
+            alert(data.message || 'Mô phỏng thanh toán thất bại');
+            this.disabled = false;
+            this.innerHTML = originalHtml;
+          }
+        } catch (e) {
+          console.error(e);
+          alert('Lỗi kết nối khi gửi mô phỏng webhook');
+          this.disabled = false;
+          this.innerHTML = originalHtml;
+        }
       });
     })();
   </script>

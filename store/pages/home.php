@@ -15,7 +15,7 @@ $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
       <p class="text-xs font-medium uppercase tracking-[0.2em] text-accent">Bộ sưu tập Thời trang &amp; Loyalty 2026</p>
       <h1 class="mt-4 text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl">Ấm áp cho những ngày se lạnh</h1>
       <p class="mt-5 max-w-md text-base leading-relaxed text-muted">
-        Tích điểm mỗi ngày — Thăng hạng nhận ngay ưu đãi tự động đến 10% và nhân đôi điểm thưởng. Dữ liệu kết nối trực tiếp từ CSDL thực tế.
+        Tích điểm mỗi ngày — Thăng hạng nhận ngay ưu đãi tự động đến 10% và nhân đôi điểm thưởng.
       </p>
       <div class="mt-8 flex flex-wrap gap-3">
         <a href="#cua-hang" class="tap-feedback rounded-full bg-charcoal px-6 py-3 text-sm font-medium text-white hover:bg-accent">Khám phá <?= count($allProducts) ?> sản phẩm</a>
@@ -34,7 +34,7 @@ $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
       <div>
         <h2 id="goi-y-title" class="text-2xl font-semibold leading-tight">Gợi ý riêng cho bạn</h2>
         <p class="mt-2 inline-flex items-center rounded-full bg-olive/10 px-3 py-1 text-xs font-medium text-olive">
-          Top 4 sản phẩm có lượt xem cao nhất từ bảng <code class="mx-1 font-semibold">sp_san_pham</code> (Thuật toán AI cá nhân hóa: Đang phát triển)
+          Top 4 sản phẩm có lượt xem cao nhất
         </p>
       </div>
     </div>
@@ -53,9 +53,10 @@ $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
             <span class="tabular-nums absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-medium text-charcoal backdrop-blur">
               <?= number_format((int)$p['luot_xem'], 0, ',', '.') ?> lượt xem
             </span>
-            <button type="button" data-dev-feature="Thêm nhanh sản phẩm #<?= (int)$p['ma_sp'] ?> vào giỏ hàng"
+            <button type="button"
+              onclick="addRecommendedToCart(<?= (int)$p['ma_sp'] ?>)"
               class="tap-feedback absolute bottom-3 right-3 rounded-full bg-white px-4 py-2 text-xs font-medium text-charcoal opacity-100 shadow-sm transition duration-300 hover:bg-charcoal hover:text-white md:translate-y-2 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100">
-              + Thêm vào giỏ (Đang phát triển)
+              + Thêm vào giỏ
             </button>
           </div>
           <div class="mt-4 space-y-2">
@@ -88,7 +89,7 @@ $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
     <aside class="lg:col-span-1">
       <div class="space-y-8 rounded-xl bg-white p-6 shadow-sm lg:sticky lg:top-24">
         <div class="flex items-center justify-between">
-          <h2 class="text-base font-semibold">Bộ lọc CSDL</h2>
+          <h2 class="text-base font-semibold">Bộ lọc sản phẩm</h2>
           <button type="button" id="resetFilters" class="text-xs font-medium text-accent transition hover:underline">Xóa tất cả</button>
         </div>
 
@@ -124,9 +125,9 @@ $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
           </div>
         </fieldset>
 
-        <!-- Lọc theo Kích cỡ thực tế từ bt_bien_the_sp -->
+        <!-- Lọc theo Kích cỡ thực tế -->
         <fieldset>
-          <legend class="mb-3 text-sm font-medium text-charcoal">Kích cỡ (SKU)</legend>
+          <legend class="mb-3 text-sm font-medium text-charcoal">Kích cỡ</legend>
           <div class="flex flex-wrap gap-2">
             <?php foreach ($filterOptions['sizes'] as $size): ?>
               <button type="button" data-filter-size="<?= htmlspecialchars($size) ?>" aria-pressed="false"
@@ -159,7 +160,7 @@ $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
             <?php
               if ($currentGender === 'nam') echo 'Thời trang Nam';
               elseif ($currentGender === 'nu') echo 'Thời trang Nữ';
-              else echo 'Tất cả sản phẩm trong CSDL';
+              else echo 'Tất cả sản phẩm';
             ?>
           </h2>
           <p id="resultCount" class="tabular-nums mt-1 text-sm text-muted">Hiển thị <?= count($allProducts) ?> sản phẩm</p>
@@ -201,7 +202,8 @@ $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
               <span class="tabular-nums absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-medium text-charcoal backdrop-blur">
                 Tồn: <?= (int)$p['tong_ton_kho'] ?>
               </span>
-              <button type="button" data-dev-feature="Thêm sản phẩm '<?= htmlspecialchars($p['ten_sp']) ?>' vào bảng gh_gio_hang"
+              <button type="button"
+                onclick="addFirstVariantToCart(<?= (int)$p['ma_sp'] ?>)"
                 class="tap-feedback absolute bottom-3 right-3 rounded-full bg-white px-4 py-2 text-xs font-medium text-charcoal opacity-100 shadow-sm transition duration-300 hover:bg-charcoal hover:text-white md:translate-y-2 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100">
                 + Thêm vào giỏ
               </button>
@@ -233,7 +235,7 @@ $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
       </div>
 
       <div id="emptyState" class="mt-16 hidden text-center">
-        <p class="text-base font-medium text-charcoal">Không tìm thấy sản phẩm phù hợp trong CSDL</p>
+        <p class="text-base font-medium text-charcoal">Không tìm thấy sản phẩm phù hợp</p>
         <p class="mt-2 text-sm text-muted">Hãy thử thay đổi bộ lọc danh mục, kích cỡ, màu sắc hoặc từ khóa tìm kiếm.</p>
         <button type="button" id="emptyResetBtn" class="tap-feedback mt-6 rounded-full border border-charcoal/20 px-6 py-2.5 text-sm font-medium hover:border-accent hover:text-accent">
           Xóa bộ lọc
@@ -302,7 +304,7 @@ $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
         grid.appendChild(card);
       });
 
-      resultCount.textContent = `Hiển thị ${matched.length} trên ${cards.length} sản phẩm trong CSDL`;
+      resultCount.textContent = `Hiển thị ${matched.length} trên ${cards.length} sản phẩm`;
       emptyState.classList.toggle('hidden', matched.length > 0);
     }
 
@@ -380,5 +382,33 @@ $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
 
     applyFilterAndSort();
   })();
+
+  // Hàm thêm sản phẩm nhanh từ trang chủ vào giỏ hàng
+  window.addRecommendedToCart = window.addFirstVariantToCart = async function(maSp) {
+    // Nếu sản phẩm có phân loại, tìm biến thể khả dụng đầu tiên hoặc chuyển đến trang chi tiết
+    try {
+      // Gọi fetch lấy biến thể khả dụng hoặc gọi api/cart.php
+      const res = await fetch('api/cart.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'add_by_product', ma_sp: Number(maSp), so_luong_mua: 1 })
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        if (window.renderCartDrawer) window.renderCartDrawer(data.data);
+        if (window.showStoreToast) window.showStoreToast(data.message || 'Đã thêm sản phẩm vào giỏ!');
+        if (window.openCartDrawer) window.openCartDrawer();
+      } else {
+        if (data.require_login) {
+          if (window.openAuthModal) window.openAuthModal('login');
+        } else {
+          // Nếu cần chọn size/màu chi tiết
+          window.location.href = `index.php?page=product&id=${maSp}`;
+        }
+      }
+    } catch (e) {
+      window.location.href = `index.php?page=product&id=${maSp}`;
+    }
+  };
 </script>
 

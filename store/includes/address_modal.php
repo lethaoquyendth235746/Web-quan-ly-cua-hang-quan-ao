@@ -13,7 +13,7 @@
     <div class="flex items-center justify-between border-b border-stone-200 pb-4">
       <div>
         <h3 id="addressModalTitle" class="text-lg font-semibold text-charcoal">Thêm địa chỉ nhận hàng</h3>
-        <p class="text-xs text-muted mt-0.5">Lưu trữ vào bảng <code>dc_dia_chi_kh</code> liên kết tài khoản của bạn</p>
+        <p class="text-xs text-muted mt-0.5">Lưu trữ địa chỉ nhận hàng liên kết với tài khoản của bạn</p>
       </div>
       <button type="button" onclick="closeAddressModal()" class="rounded-full p-1.5 text-stone-400 hover:bg-stone-100 hover:text-charcoal transition">
         <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -46,21 +46,13 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label for="addrTinhThanh" class="block text-xs font-semibold uppercase tracking-wider text-charcoal mb-1">
             Tỉnh / Thành phố <span class="text-red-500">*</span>
           </label>
           <input type="text" id="addrTinhThanh" name="tinh_thanh" required
             placeholder="VD: An Giang"
-            class="w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2 text-sm text-charcoal focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 transition" />
-        </div>
-        <div>
-          <label for="addrQuanHuyen" class="block text-xs font-semibold uppercase tracking-wider text-charcoal mb-1">
-            Quận / Huyện <span class="text-red-500">*</span>
-          </label>
-          <input type="text" id="addrQuanHuyen" name="quan_huyen" required
-            placeholder="VD: TP. Long Xuyên"
             class="w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2 text-sm text-charcoal focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 transition" />
         </div>
         <div>
@@ -85,7 +77,7 @@
       <div class="pt-1">
         <label class="flex items-center gap-2 cursor-pointer select-none">
           <input type="checkbox" id="addrMacDinh" name="mac_dinh" value="1" class="h-4 w-4 rounded border-stone-300 text-charcoal accent-accent focus:ring-accent" />
-          <span class="text-xs font-medium text-charcoal">Đặt làm địa chỉ nhận hàng mặc định (mac_dinh = 1)</span>
+          <span class="text-xs font-medium text-charcoal">Đặt làm địa chỉ nhận hàng mặc định</span>
         </label>
       </div>
 
@@ -125,7 +117,6 @@
       document.getElementById('addrTenNguoiNhan').value = data.ten_nguoi_nhan || '';
       document.getElementById('addrSdtNhan').value = data.sdt_nhan || '';
       document.getElementById('addrTinhThanh').value = data.tinh_thanh || '';
-      document.getElementById('addrQuanHuyen').value = data.quan_huyen || '';
       document.getElementById('addrPhuongXa').value = data.phuong_xa || '';
       document.getElementById('addrDiaChiCuThe').value = data.dia_chi_cu_the || '';
       document.getElementById('addrMacDinh').checked = (parseInt(data.mac_dinh, 10) === 1);

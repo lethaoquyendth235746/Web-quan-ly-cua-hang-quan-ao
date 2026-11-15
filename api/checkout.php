@@ -41,6 +41,15 @@ try {
     $ptThanhToan = strtoupper(trim($data['pt_thanh_toan'] ?? 'COD'));
     $maPgg = !empty($data['ma_pgg']) ? (int) $data['ma_pgg'] : null;
     $dungDiem = !empty($data['dung_diem']);
+    // Selective checkout: danh sách ma_gh được chọn (nếu trống = lấy tất cả)
+    $selectedMaGhRaw = $data['selected_ma_gh'] ?? [];
+    $selectedMaGh = [];
+    if (is_array($selectedMaGhRaw)) {
+        foreach ($selectedMaGhRaw as $v) {
+            $id = (int) $v;
+            if ($id > 0) $selectedMaGh[] = $id;
+        }
+    }
 
     if (!in_array($ptThanhToan, ['COD', 'CHUYEN_KHOAN'], true)) {
         throw new Exception('Phương thức thanh toán không hợp lệ.');
@@ -59,18 +68,35 @@ try {
         throw new Exception('Vui lòng chọn địa chỉ nhận hàng hợp lệ.');
     }
 
-    // 3.2. Lấy danh sách sản phẩm trong giỏ hàng và khóa dòng dữ liệu (Pessimistic Locking)
-    $stmtCart = $pdo->prepare("
-        SELECT gh.ma_gh, gh.ma_nd, gh.ma_bt, gh.so_luong_mua,
-               bt.ma_sku, bt.gia_ban_rieng, bt.so_luong_ton, bt.trang_thai,
-               sp.ten_sp
-        FROM gh_gio_hang gh
-        INNER JOIN bt_bien_the_sp bt ON gh.ma_bt = bt.ma_bt
-        INNER JOIN sp_san_pham sp ON bt.ma_sp = sp.ma_sp
-        WHERE gh.ma_nd = ?
-        FOR UPDATE
-    ");
-    $stmtCart->execute([$currentUserId]);
+    // 3.2. Lấy danh sách sản phẩm trong giỏ hàng (selective hoặc toàn bộ) và khóa dòng (Pessimistic Locking)
+    if (!empty($selectedMaGh)) {
+        // Chỉ lấy các sản phẩm được chọn
+        $inPlaceholders = implode(',', array_fill(0, count($selectedMaGh), '?'));
+        $stmtCart = $pdo->prepare("
+            SELECT gh.ma_gh, gh.ma_nd, gh.ma_bt, gh.so_luong_mua,
+                   bt.ma_sku, bt.gia_ban_rieng, bt.so_luong_ton, bt.trang_thai,
+                   sp.ten_sp
+            FROM gh_gio_hang gh
+            INNER JOIN bt_bien_the_sp bt ON gh.ma_bt = bt.ma_bt
+            INNER JOIN sp_san_pham sp ON bt.ma_sp = sp.ma_sp
+            WHERE gh.ma_nd = ? AND gh.ma_gh IN ($inPlaceholders)
+            FOR UPDATE
+        ");
+        $stmtCart->execute(array_merge([$currentUserId], $selectedMaGh));
+    } else {
+        // Lấy toàn bộ giỏ hàng (backward compat)
+        $stmtCart = $pdo->prepare("
+            SELECT gh.ma_gh, gh.ma_nd, gh.ma_bt, gh.so_luong_mua,
+                   bt.ma_sku, bt.gia_ban_rieng, bt.so_luong_ton, bt.trang_thai,
+                   sp.ten_sp
+            FROM gh_gio_hang gh
+            INNER JOIN bt_bien_the_sp bt ON gh.ma_bt = bt.ma_bt
+            INNER JOIN sp_san_pham sp ON bt.ma_sp = sp.ma_sp
+            WHERE gh.ma_nd = ?
+            FOR UPDATE
+        ");
+        $stmtCart->execute([$currentUserId]);
+    }
     $cartItems = $stmtCart->fetchAll();
 
     if (empty($cartItems)) {
@@ -264,9 +290,13 @@ try {
         ]);
     }
 
-    // 3.9. Làm trống giỏ hàng trực tuyến của khách hàng (gh_gio_hang)
-    $stmtClearCart = $pdo->prepare("DELETE FROM gh_gio_hang WHERE ma_nd = ?");
-    $stmtClearCart->execute([$currentUserId]);
+    // 3.9. Xóa chỉ các sản phẩm đã đặt hàng khỏi giỏ hàng (selective)
+    $processedMaGh = array_column($cartItems, 'ma_gh');
+    if (!empty($processedMaGh)) {
+        $delPlaceholders = implode(',', array_fill(0, count($processedMaGh), '?'));
+        $stmtClearCart = $pdo->prepare("DELETE FROM gh_gio_hang WHERE ma_nd = ? AND ma_gh IN ($delPlaceholders)");
+        $stmtClearCart->execute(array_merge([$currentUserId], $processedMaGh));
+    }
 
     // 3.10. Hoàn tất và Commit Transaction
     $pdo->commit();

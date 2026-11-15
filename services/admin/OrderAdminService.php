@@ -104,5 +104,141 @@ class OrderAdminService
 
         return $orders;
     }
+
+    /**
+     * Duyệt đơn hàng & Kích hoạt Loyalty Engine (1 PDO Transaction)
+     * - Cập nhật trạng thái đơn hàng sang HOAN_THANH
+     * - Cộng điểm tích lũy & điểm khả dụng vào thẻ thành viên
+     * - Ghi lịch sử giao dịch điểm CONG_MUA_HANG
+     * - Tự động đối soát và thăng hạng thành viên
+     */
+    public function approveOrder(int $maDh, string $newStatus = 'HOAN_THANH'): array
+    {
+        if ($maDh <= 0) {
+            throw new Exception("Mã đơn hàng không hợp lệ.");
+        }
+
+        $this->pdo->beginTransaction();
+
+        try {
+            // 1. Khóa và lấy thông tin đơn hàng
+            $stmtOrder = $this->pdo->prepare("SELECT * FROM dh_don_hang WHERE ma_dh = ? FOR UPDATE");
+            $stmtOrder->execute([$maDh]);
+            $order = $stmtOrder->fetch();
+
+            if (!$order) {
+                throw new Exception("Đơn hàng #DH" . sprintf('%02d', $maDh) . " không tồn tại.");
+            }
+
+            if ($order['trang_thai_dh'] === 'HOAN_THANH') {
+                throw new Exception("Đơn hàng #DH" . sprintf('%02d', $maDh) . " đã ở trạng thái Hoàn thành.");
+            }
+
+            if ($order['trang_thai_dh'] === 'DA_HUY') {
+                throw new Exception("Đơn hàng #DH" . sprintf('%02d', $maDh) . " đã bị hủy, không thể duyệt.");
+            }
+
+            // 2. Cập nhật trạng thái đơn hàng
+            $stmtUpdateOrder = $this->pdo->prepare("UPDATE dh_don_hang SET trang_thai_dh = ? WHERE ma_dh = ?");
+            $stmtUpdateOrder->execute([$newStatus, $maDh]);
+
+            $diemCong = (int) $order['diem_cong_du_kien'];
+            $maNd = (int) $order['ma_nd'];
+            $isUpgraded = false;
+            $tenHangMoi = '';
+            $newTongDiem = 0;
+            $newDiemKhaDung = 0;
+
+            // 3. Nếu chuyển sang HOAN_THANH -> Kích hoạt Loyalty Engine
+            if ($newStatus === 'HOAN_THANH') {
+                // Khóa thẻ tích điểm của khách hàng
+                $stmtCard = $this->pdo->prepare("SELECT * FROM ttd_the_tich_diem WHERE ma_nd = ? FOR UPDATE");
+                $stmtCard->execute([$maNd]);
+                $card = $stmtCard->fetch();
+
+                if (!$card) {
+                    // Tạo mới thẻ thành viên nếu chưa có
+                    $cardNo = 'AUR' . str_pad((string)$maNd, 5, '0', STR_PAD_LEFT);
+                    $stmtCreateCard = $this->pdo->prepare("
+                        INSERT INTO ttd_the_tich_diem (ma_nd, ma_hang, ma_so_the, tong_diem_tich_luy, diem_kha_dung, ngay_cap, ngay_cap_nhat)
+                        VALUES (?, 1, ?, 0, 0, NOW(), NOW())
+                    ");
+                    $stmtCreateCard->execute([$maNd, $cardNo]);
+                    $stmtCard->execute([$maNd]);
+                    $card = $stmtCard->fetch();
+                }
+
+                $oldMaHang = (int) $card['ma_hang'];
+                $newTongDiem = (int) $card['tong_diem_tich_luy'] + $diemCong;
+                $newDiemKhaDung = (int) $card['diem_kha_dung'] + $diemCong;
+
+                // Tự động kiểm tra bậc hạng mới nhất dựa trên tổng điểm tích lũy
+                $stmtTier = $this->pdo->prepare("
+                    SELECT ma_hang, ten_hang 
+                    FROM htv_hang_thanh_vien 
+                    WHERE diem_toi_thieu <= ? 
+                    ORDER BY diem_toi_thieu DESC 
+                    LIMIT 1
+                ");
+                $stmtTier->execute([$newTongDiem]);
+                $targetTier = $stmtTier->fetch();
+
+                $targetMaHang = $targetTier ? (int) $targetTier['ma_hang'] : $oldMaHang;
+                $tenHangMoi = $targetTier ? $targetTier['ten_hang'] : '';
+                $isUpgraded = ($targetMaHang > $oldMaHang);
+
+                // Cập nhật thẻ tích điểm
+                $stmtUpdateCard = $this->pdo->prepare("
+                    UPDATE ttd_the_tich_diem 
+                    SET tong_diem_tich_luy = ?, diem_kha_dung = ?, ma_hang = ?, ngay_cap_nhat = NOW() 
+                    WHERE ma_the = ?
+                ");
+                $stmtUpdateCard->execute([$newTongDiem, $newDiemKhaDung, $targetMaHang, $card['ma_the']]);
+
+                // Ghi lịch sử giao dịch điểm nếu có cộng điểm
+                if ($diemCong > 0) {
+                    $dhCode = sprintf('DH%02d', $maDh);
+                    $stmtLedger = $this->pdo->prepare("
+                        INSERT INTO lsd_lich_su_diem (ma_the, ma_dh, loai_giao_dich, so_diem_thay_doi, so_du_sau_gd, noi_dung, thoi_gian)
+                        VALUES (?, ?, 'CONG_MUA_HANG', ?, ?, ?, NOW())
+                    ");
+                    $stmtLedger->execute([
+                        $card['ma_the'],
+                        $maDh,
+                        $diemCong,
+                        $newDiemKhaDung,
+                        "Cộng {$diemCong} điểm mua hàng khi hoàn thành đơn #{$dhCode}"
+                    ]);
+                }
+            }
+
+            $this->pdo->commit();
+
+            $dhCode = sprintf('DH%02d', $maDh);
+            $msg = "Đã duyệt đơn #{$dhCode} sang Hoàn thành!";
+            if ($diemCong > 0) {
+                $msg .= " Đã cộng +{$diemCong} điểm cho khách hàng.";
+            }
+            if ($isUpgraded) {
+                $msg .= " 🎉 Khách hàng đã được tự động nâng lên {$tenHangMoi}!";
+            }
+
+            return [
+                'success'           => true,
+                'message'           => $msg,
+                'ma_dh'             => $maDh,
+                'ma_dh_code'        => $dhCode,
+                'new_status'        => $newStatus,
+                'diem_cong'         => $diemCong,
+                'tong_diem_moi'     => $newTongDiem,
+                'diem_kha_dung_moi' => $newDiemKhaDung,
+                'is_upgraded'       => $isUpgraded,
+                'ten_hang_moi'      => $tenHangMoi
+            ];
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
+    }
 }
 

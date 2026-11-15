@@ -10,13 +10,15 @@
     <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-8 text-sm text-muted sm:flex-row lg:px-8">
       <div>
         <p class="font-semibold tracking-[0.25em] text-charcoal">AURA STUDIO</p>
-        <p class="mt-1 text-xs text-muted">Hệ thống Quản lý Cửa hàng Quần áo &amp; Khách hàng Thân thiết (CSDL: <code>csdl_cua_hang_quan_ao</code>)</p>
+        <p class="mt-1 text-xs text-muted">Hệ thống Quản lý Cửa hàng Quần áo &amp; Khách hàng Thân thiết</p>
       </div>
       <div class="flex flex-wrap items-center gap-4">
         <a href="index.php?page=home" class="text-xs text-muted hover:text-charcoal hover:underline">Cửa hàng</a>
         <a href="index.php?page=loyalty" class="text-xs text-muted hover:text-charcoal hover:underline">Thẻ thành viên</a>
         <a href="index.php?page=checkout" class="text-xs text-muted hover:text-charcoal hover:underline">Thanh toán</a>
-        <a href="admin/index.php" class="rounded-full bg-charcoal px-3.5 py-1.5 text-xs font-medium text-white transition hover:bg-accent">Phân hệ Quản trị &rarr;</a>
+        <?php if (hasAdminAccess()): ?>
+          <a href="admin/index.php" class="rounded-full bg-charcoal px-3.5 py-1.5 text-xs font-medium text-white transition hover:bg-accent">Phân hệ Quản trị &rarr;</a>
+        <?php endif; ?>
       </div>
     </div>
   </footer>

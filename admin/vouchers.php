@@ -77,7 +77,7 @@ require __DIR__ . '/includes/header.php';
     <div>
       <h1 class="text-2xl font-semibold leading-tight text-slate-900">Quản lý Chiến dịch Voucher Loyalty</h1>
       <p class="mt-1 text-sm text-slate-500">
-        Dữ liệu thực tế từ bảng <code>pgg_phieu_giam_gia</code> (<?= count($vouchers) ?> chiến dịch) và lịch sử đổi ví <code>vkh_vi_voucher_kh</code>.
+        Danh sách <?= count($vouchers) ?> chiến dịch Voucher và lịch sử đổi thưởng của khách hàng.
       </p>
     </div>
     <button type="button" onclick="openCreateVoucherModal()"
@@ -188,7 +188,7 @@ require __DIR__ . '/includes/header.php';
 <!-- Lịch sử Ví Voucher khách hàng đã đổi từ bảng vkh_vi_voucher_kh -->
 <section aria-labelledby="walletLogTitle" class="fade-up mt-8 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
   <div class="border-b border-slate-200 px-6 py-5">
-    <h2 id="walletLogTitle" class="text-base font-semibold text-slate-900">Ví Voucher Khách hàng đã đổi (Bảng <code>vkh_vi_voucher_kh</code>)</h2>
+    <h2 id="walletLogTitle" class="text-base font-semibold text-slate-900">Ví Voucher Khách hàng đã đổi</h2>
     <p class="mt-1 text-sm text-slate-500">Theo dõi các mã giảm giá khách hàng đã dùng điểm khả dụng để đổi về ví cá nhân.</p>
   </div>
   <div class="overflow-x-auto">
@@ -243,7 +243,7 @@ require __DIR__ . '/includes/header.php';
       <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
         <div>
           <h3 class="text-lg font-semibold text-slate-900">Tạo chiến dịch Voucher mới</h3>
-          <p class="text-xs text-slate-500 mt-0.5">Lưu vào bảng <code>pgg_phieu_giam_gia</code></p>
+          <p class="text-xs text-slate-500 mt-0.5">Thiết lập chương trình khuyến mãi và đổi điểm</p>
         </div>
         <button type="button" onclick="closeCreateVoucherModal()" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors">
           <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>

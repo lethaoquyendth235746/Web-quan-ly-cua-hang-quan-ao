@@ -30,6 +30,10 @@ switch ($page) {
         require __DIR__ . '/logout.php';
         exit;
 
+    case 'thanh_toan_qr':
+        require __DIR__ . '/thanh_toan_qr.php';
+        exit;
+
     case 'product':
         $productId = isset($_GET['id']) ? (int) $_GET['id'] : 1;
         $productDetail = $productService->getProductById($productId);

@@ -165,7 +165,7 @@ require __DIR__ . '/includes/header.php';
     <div>
       <h1 class="text-2xl font-semibold leading-tight text-slate-900">Quản lý Danh mục &amp; Sản phẩm thời trang</h1>
       <p class="mt-1 text-sm text-slate-500">
-        Dữ liệu thực tế từ bảng <code>sp_san_pham</code> (<?= count($products) ?> sản phẩm) và <code>dm_danh_muc_sp</code> (<?= count($categories) ?> danh mục).
+        Danh sách <?= count($products) ?> sản phẩm và <?= count($categories) ?> danh mục đang lưu hành.
       </p>
     </div>
     <button type="button" id="btnOpenAddProduct"
@@ -187,7 +187,7 @@ require __DIR__ . '/includes/header.php';
   <div>
     <label for="categoryFilter" class="sr-only">Lọc theo danh mục</label>
     <select id="categoryFilter" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-100 sm:w-64">
-      <option value="">Tất cả danh mục trong CSDL</option>
+      <option value="">Tất cả danh mục</option>
       <?php foreach ($categories as $cat): ?>
         <option value="<?= (int)$cat['ma_dm'] ?>">
           <?= $cat['ma_dm_cha'] ? '&mdash; ' : '' ?><?= htmlspecialchars($cat['ten_dm']) ?> (<?= (int)$cat['so_san_pham'] ?>)
@@ -225,7 +225,7 @@ require __DIR__ . '/includes/header.php';
         <?php if (empty($products)): ?>
           <tr>
             <td colspan="8" class="px-6 py-12 text-center text-slate-400">
-              Chưa có sản phẩm nào trong CSDL. Hãy bấm nút "Thêm sản phẩm mới" để bắt đầu!
+              Chưa có sản phẩm nào. Hãy bấm nút "Thêm sản phẩm mới" để bắt đầu!
             </td>
           </tr>
         <?php endif; ?>
@@ -236,7 +236,7 @@ require __DIR__ . '/includes/header.php';
             data-status="<?= (int)$p['trang_thai'] ?>">
             <td class="px-6 py-4">
               <img src="<?= htmlspecialchars($p['anh_chinh_url']) ?>" alt="<?= htmlspecialchars($p['ten_sp']) ?>"
-                class="h-12 w-12 rounded-lg object-cover border border-slate-200 bg-slate-100"
+                class="w-16 h-20 rounded-lg object-cover border border-slate-200 bg-slate-100 shadow-sm"
                 onerror="this.src='https://images.pexels.com/photos/9968526/pexels-photo-9968526.jpeg?auto=compress&cs=tinysrgb&h=650&w=940';" />
             </td>
             <td class="px-6 py-4">
@@ -310,7 +310,7 @@ require __DIR__ . '/includes/header.php';
     </table>
   </div>
   <div class="border-t border-slate-200 px-6 py-4 flex items-center justify-between text-sm text-slate-500">
-    <p id="resultSummary">Hiển thị <?= count($products) ?> sản phẩm trong CSDL</p>
+    <p id="resultSummary">Hiển thị <?= count($products) ?> sản phẩm</p>
   </div>
 </section>
 
@@ -318,7 +318,7 @@ require __DIR__ . '/includes/header.php';
 <section aria-labelledby="catTableTitle" class="fade-up mt-8 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
   <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-6 py-5">
     <div>
-      <h2 id="catTableTitle" class="text-base font-semibold text-slate-900">Cây Danh mục sản phẩm đa cấp (Bảng <code>dm_danh_muc_sp</code>)</h2>
+      <h2 id="catTableTitle" class="text-base font-semibold text-slate-900">Cây Danh mục sản phẩm đa cấp</h2>
       <p class="mt-1 text-sm text-slate-500">Quản lý trọn vẹn danh mục cha - con và thứ tự hiển thị ngoài website.</p>
     </div>
     <button type="button" id="btnOpenAddCategory"
@@ -396,7 +396,7 @@ require __DIR__ . '/includes/header.php';
       <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
         <div>
           <h3 id="productModalTitle" class="text-lg font-semibold text-slate-900">Thêm sản phẩm mới</h3>
-          <p class="text-xs text-slate-500 mt-0.5">Lưu trực tiếp vào bảng <code>sp_san_pham</code> &amp; thư mục <code>assets/images/</code></p>
+          <p class="text-xs text-slate-500 mt-0.5">Thêm thông tin sản phẩm và hình ảnh đại diện</p>
         </div>
         <button type="button" onclick="closeProductModal()" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
           <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
@@ -459,7 +459,7 @@ require __DIR__ . '/includes/header.php';
             <div class="flex-1">
               <input type="file" name="anh_chinh" id="prodAnhChinh" accept=".jpg,.jpeg,.png,.webp"
                 class="block w-full text-xs text-slate-500 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-xs file:font-medium file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
-              <p class="mt-1 text-xs text-slate-500">Chấp nhận JPG, JPEG, PNG, WEBP (tối đa 5MB). File sẽ được lưu vật lý vào <code>assets/images/</code>.</p>
+              <p class="mt-1 text-xs text-slate-500">Chấp nhận JPG, JPEG, PNG, WEBP (tối đa 5MB).</p>
               <p id="currentImageHint" class="mt-1 text-xs text-blue-600 hidden">Đang giữ ảnh hiện tại nếu không chọn file mới.</p>
             </div>
           </div>
@@ -508,7 +508,7 @@ require __DIR__ . '/includes/header.php';
             <h3 id="variantModalTitle" class="text-lg font-semibold text-slate-900">Quản lý Biến thể SKU</h3>
             <span id="variantProductCode" class="font-mono rounded bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700">SP-001</span>
           </div>
-          <p id="variantProductSubtitle" class="text-xs text-slate-500 mt-0.5">Sản phẩm: Áo Khoác Gió &middot; Bảng <code>bt_bien_the_sp</code></p>
+          <p id="variantProductSubtitle" class="text-xs text-slate-500 mt-0.5">Sản phẩm: Áo Khoác Gió</p>
         </div>
         <button type="button" onclick="closeVariantModal()" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
           <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
@@ -649,7 +649,7 @@ require __DIR__ . '/includes/header.php';
       <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
         <div>
           <h3 id="categoryModalTitle" class="text-lg font-semibold text-slate-900">Thêm danh mục mới</h3>
-          <p class="text-xs text-slate-500 mt-0.5">Bảng <code>dm_danh_muc_sp</code></p>
+          <p class="text-xs text-slate-500 mt-0.5">Phân loại danh mục sản phẩm</p>
         </div>
         <button type="button" onclick="closeCategoryModal()" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
           <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
@@ -771,7 +771,7 @@ require __DIR__ . '/includes/header.php';
       });
 
       if (summary) {
-        summary.textContent = `Hiển thị ${visibleCount} trên ${rows.length} sản phẩm trong CSDL`;
+        summary.textContent = `Hiển thị ${visibleCount} trên ${rows.length} sản phẩm`;
       }
     }
 

@@ -34,8 +34,8 @@ $statusBadges = [
 ?>
 <header class="flex flex-wrap items-end justify-between gap-4">
   <div>
-    <h1 class="text-2xl font-semibold leading-tight text-slate-900">Tổng quan Hệ thống (Dữ liệu CSDL thực tế)</h1>
-    <p class="mt-1 text-sm text-slate-500">Số liệu trực tiếp từ CSDL <code>csdl_cua_hang_quan_ao</code> (16 bảng)</p>
+    <h1 class="text-2xl font-semibold leading-tight text-slate-900">Tổng quan Hệ thống</h1>
+    <p class="mt-1 text-sm text-slate-500">Báo cáo số liệu kinh doanh và vận hành cửa hàng</p>
   </div>
   <div class="flex items-center gap-2">
     <a href="orders.php" class="tap-feedback rounded-lg bg-slate-900 px-4 py-2 text-xs font-medium text-white hover:bg-slate-700">
@@ -59,7 +59,7 @@ $statusBadges = [
   <div class="fade-up rounded-xl border border-slate-200 bg-white p-6" style="--stagger: 2">
     <p class="text-sm text-slate-500">Tổng thành viên Loyalty</p>
     <p class="tabular-nums mt-3 text-2xl font-semibold text-slate-900"><?= $kpis['tong_thanh_vien'] ?> khách</p>
-    <p class="mt-2 text-xs text-slate-500">Đã mở thẻ trong bảng <code>ttd_the_tich_diem</code></p>
+    <p class="mt-2 text-xs text-slate-500">Thành viên có tài khoản tích điểm</p>
   </div>
   <div class="fade-up rounded-xl border border-slate-200 bg-white p-6" style="--stagger: 3">
     <p class="text-sm text-slate-500">Tổng điểm khả dụng đang lưu hành</p>
@@ -71,13 +71,13 @@ $statusBadges = [
 <!-- Biểu đồ thống kê thực tế từ CSDL -->
 <section aria-label="Biểu đồ" class="fade-up mt-6 grid gap-4 lg:grid-cols-3" style="--stagger: 4">
   <div class="rounded-xl border border-slate-200 bg-white p-6 lg:col-span-2">
-    <h2 class="text-base font-semibold text-slate-900">Doanh thu &amp; Số đơn theo tháng (Từ bảng <code>dh_don_hang</code>)</h2>
+    <h2 class="text-base font-semibold text-slate-900">Doanh thu &amp; Số đơn theo tháng</h2>
     <div class="relative mt-6 h-72">
       <canvas id="revenueChart" role="img" aria-label="Biểu đồ cột doanh thu và đường số đơn hàng theo tháng"></canvas>
     </div>
   </div>
   <div class="rounded-xl border border-slate-200 bg-white p-6">
-    <h2 class="text-base font-semibold text-slate-900">Phân bổ khách theo hạng (<code>ttd_the_tich_diem</code>)</h2>
+    <h2 class="text-base font-semibold text-slate-900">Phân bổ khách theo hạng thành viên</h2>
     <div class="relative mt-6 h-72">
       <canvas id="tierChart" role="img" aria-label="Biểu đồ tròn phân bổ khách hàng theo hạng thành viên"></canvas>
     </div>
@@ -88,7 +88,7 @@ $statusBadges = [
 <section aria-labelledby="ordersTitle" class="fade-up mt-6 rounded-xl border border-slate-200 bg-white" style="--stagger: 5">
   <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-6 py-5">
     <div>
-      <h2 id="ordersTitle" class="text-base font-semibold text-slate-900">Đơn đặt hàng &amp; Đối soát điểm thưởng (Bảng <code>dh_don_hang</code>)</h2>
+      <h2 id="ordersTitle" class="text-base font-semibold text-slate-900">Đơn đặt hàng &amp; Đối soát điểm thưởng</h2>
       <p class="mt-1 text-sm text-slate-500">Duyệt đơn sang hoàn thành để kích hoạt cộng điểm và xét nâng hạng tự động.</p>
     </div>
     <a href="orders.php" class="text-xs font-medium text-blue-700 hover:underline">Xem toàn bộ <?= count($recentOrders) ?> đơn &rarr;</a>
@@ -131,10 +131,13 @@ $statusBadges = [
             <td class="px-6 py-4 text-right">
               <?php if ($od['trang_thai_dh'] !== 'HOAN_THANH' && $od['trang_thai_dh'] !== 'DA_HUY'): ?>
                 <button type="button"
-                  data-dev-feature="Duyệt hoàn thành đơn #<?= htmlspecialchars($od['ma_dh_code']) ?> (+<?= (int)$od['diem_cong_du_kien'] ?> điểm &amp; xét nâng hạng tự động)"
-                  class="tap-feedback rounded-lg bg-slate-900 px-4 py-2 text-left text-xs font-medium leading-snug text-white hover:bg-slate-700">
+                  data-approve-order="<?= (int)$od['ma_dh'] ?>"
+                  data-order-code="<?= htmlspecialchars($od['ma_dh_code']) ?>"
+                  class="tap-feedback inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 transition">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
                   Duyệt hoàn thành
-                  <span class="block font-normal text-slate-300">+ cộng điểm &amp; xét hạng (Đang phát triển)</span>
                 </button>
               <?php else: ?>
                 <span class="text-xs text-slate-500">Đã đối soát sổ cái</span>
@@ -151,7 +154,7 @@ $statusBadges = [
 <section aria-labelledby="tierTitle" class="fade-up mt-6 rounded-xl border border-slate-200 bg-white" style="--stagger: 6">
   <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-6 py-5">
     <div>
-      <h2 id="tierTitle" class="text-base font-semibold text-slate-900">Cấu hình 4 Bậc Hạng Thành Viên (Bảng <code>htv_hang_thanh_vien</code>)</h2>
+      <h2 id="tierTitle" class="text-base font-semibold text-slate-900">Cấu hình 4 Bậc Hạng Thành Viên</h2>
       <p class="mt-1 text-sm text-slate-500">Mốc điểm tối thiểu, phần trăm giảm trực tiếp và hệ số nhân điểm tích lũy.</p>
     </div>
     <a href="tiers.php" class="text-xs font-medium text-blue-700 hover:underline">Quản lý chi tiết &rarr;</a>
@@ -249,6 +252,54 @@ $statusBadges = [
         cutout: '64%',
         plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, color: '#475569' } } },
       },
+    });
+
+    // Xử lý duyệt đơn hàng thật qua API & Loyalty Engine
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-approve-order]');
+      if (!btn) return;
+
+      const maDh = btn.dataset.approveOrder;
+      const orderCode = btn.dataset.orderCode || maDh;
+
+      if (!confirm(`Xác nhận duyệt HOÀN THÀNH đơn hàng #${orderCode} và kích hoạt cộng điểm tích lũy cho khách hàng?`)) {
+        return;
+      }
+
+      btn.disabled = true;
+      const originalHtml = btn.innerHTML;
+      btn.innerHTML = `
+        <svg class="h-4 w-4 animate-spin text-white" viewBox="0 0 24 24" fill="none">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+        Đang xử lý...
+      `;
+
+      try {
+        const res = await fetch('../api/admin_order.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'approve', ma_dh: Number(maDh), trang_thai_dh: 'HOAN_THANH' })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          window.showAdminToast(data.message);
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        } else {
+          alert(data.message || 'Có lỗi xảy ra khi duyệt đơn.');
+          btn.disabled = false;
+          btn.innerHTML = originalHtml;
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Lỗi kết nối khi gửi yêu cầu duyệt đơn.');
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+      }
     });
   })();
 </script>

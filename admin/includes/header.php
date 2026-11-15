@@ -71,7 +71,7 @@ $activeAdminMenu = $activeAdminMenu ?? 'dashboard';
     <aside class="border-b border-slate-200 bg-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:w-64 lg:shrink-0 lg:flex-col lg:border-b-0 lg:border-r">
       <div class="px-6 pb-4 pt-6 lg:pb-6">
         <a href="../index.php" class="text-sm font-semibold tracking-[0.25em] text-slate-900 hover:text-blue-700">AURA STUDIO</a>
-        <p class="mt-1 text-xs text-slate-500">Quản trị Fashion Loyalty (CSDL)</p>
+        <p class="mt-1 text-xs text-slate-500">Hệ thống Quản trị Cửa hàng</p>
       </div>
 
       <nav aria-label="Menu quản trị" class="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:overflow-visible lg:pb-0">

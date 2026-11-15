@@ -114,9 +114,9 @@ if ($reviewCount > 0) {
           </div>
         </div>
 
-        <!-- Chọn kích cỡ từ bt_bien_the_sp -->
+        <!-- Chọn kích cỡ -->
         <div>
-          <p class="text-sm font-medium">Kích cỡ (Biến thể thực tế trong kho)</p>
+          <p class="text-sm font-medium">Kích cỡ</p>
           <div id="sizeOptions" class="mt-3 flex flex-wrap gap-3">
             <?php foreach ($p['sizes'] as $sIdx => $sizeName): ?>
               <button type="button" data-size="<?= htmlspecialchars($sizeName) ?>"
@@ -153,7 +153,7 @@ if ($reviewCount > 0) {
       <div class="mt-10 divide-y divide-stone-200 border-y border-stone-200 text-sm">
         <details class="group py-4" open>
           <summary class="flex cursor-pointer list-none items-center justify-between font-medium">
-            Mô tả chi tiết sản phẩm (Từ CSDL)
+            Mô tả chi tiết sản phẩm
             <span class="accordion-icon text-xl leading-none text-muted">+</span>
           </summary>
           <p class="mt-4 leading-relaxed text-muted"><?= nl2br(htmlspecialchars($p['mo_ta_chi_tiet'] ?? 'Đang cập nhật')) ?></p>
@@ -167,7 +167,7 @@ if ($reviewCount > 0) {
         </details>
         <details class="group py-4">
           <summary class="flex cursor-pointer list-none items-center justify-between font-medium">
-            Danh sách toàn bộ biến thể SKU của sản phẩm này (<?= count($variants) ?> SKU)
+            Danh sách phân loại sản phẩm (<?= count($variants) ?> phân loại)
             <span class="accordion-icon text-xl leading-none text-muted">+</span>
           </summary>
           <div class="mt-4 overflow-x-auto">
@@ -203,10 +203,10 @@ if ($reviewCount > 0) {
   <section class="mt-20 border-t border-stone-200 pt-12" aria-labelledby="reviewTitle">
     <div class="grid gap-10 lg:grid-cols-3">
       <div class="lg:col-span-1">
-        <h2 id="reviewTitle" class="text-xl font-semibold">Đánh giá thực tế từ CSDL</h2>
+        <h2 id="reviewTitle" class="text-xl font-semibold">Đánh giá sản phẩm</h2>
         <?php if ($reviewCount > 0): ?>
           <p class="mt-2 text-sm text-amber-700 tabular-nums">
-            ★★★★★ <span class="text-muted"><?= $avgRating ?> trên 5 &middot; <?= $reviewCount ?> đánh giá trong <code>ctdh_chi_tiet_dh</code></span>
+            ★★★★★ <span class="text-muted"><?= $avgRating ?> trên 5 &middot; <?= $reviewCount ?> đánh giá thực tế</span>
           </p>
         <?php else: ?>
           <p class="mt-2 text-sm text-muted">Chưa có lượt đánh giá nào cho sản phẩm này trong CSDL.</p>

@@ -78,51 +78,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Danh sách tài khoản mẫu để chấm điểm / kiểm thử nhanh
-$demoAccounts = [
-    [
-        'label'    => 'Lê Minh Đức (Quản trị viên)',
-        'username' => 'admin_duc',
-        'role'     => 'Admin (ma_vt = 1)',
-        'color'    => 'bg-purple-100 text-purple-800 border-purple-200',
-        'desc'     => 'Toàn quyền truy cập phân hệ Quản trị',
-    ],
-    [
-        'label'    => 'Lê Thảo Quyên (Nhân viên)',
-        'username' => 'staff_quyen',
-        'role'     => 'Nhân viên (ma_vt = 2)',
-        'color'    => 'bg-blue-100 text-blue-800 border-blue-200',
-        'desc'     => 'Quản lý sản phẩm, tồn kho và đơn hàng',
-    ],
-    [
-        'label'    => 'Neàng Ra (Khách hàng - Đồng)',
-        'username' => 'neangra',
-        'role'     => 'Khách hàng (ma_vt = 3)',
-        'color'    => 'bg-amber-100 text-amber-800 border-amber-200',
-        'desc'     => '185/200 điểm - Chờ duyệt để lên Hạng Bạc',
-    ],
-    [
-        'label'    => 'Hoàng Nam (Khách hàng - Bạc)',
-        'username' => 'hoangnam_lx',
-        'role'     => 'Khách hàng (ma_vt = 3)',
-        'color'    => 'bg-slate-100 text-slate-800 border-slate-300',
-        'desc'     => '303 điểm - Giảm 3% & x1.2 điểm thưởng',
-    ],
-    [
-        'label'    => 'Bảo Trân (Khách hàng - Vàng)',
-        'username' => 'baotran_vip',
-        'role'     => 'Khách hàng (ma_vt = 3)',
-        'color'    => 'bg-yellow-100 text-yellow-800 border-yellow-300',
-        'desc'     => '672 điểm - Giảm 5% & x1.5 điểm thưởng',
-    ],
-    [
-        'label'    => 'Quốc Huy (Khách mới mở thẻ)',
-        'username' => 'quochuy_99',
-        'role'     => 'Khách hàng (ma_vt = 3)',
-        'color'    => 'bg-emerald-100 text-emerald-800 border-emerald-200',
-        'desc'     => '0 điểm - Mới kích hoạt thẻ thành viên',
-    ],
-];
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -229,8 +184,8 @@ $demoAccounts = [
     <?php endif; ?>
 
     <div class="grid gap-8 lg:grid-cols-12">
-      <!-- Form Box (Col 7) -->
-      <div class="lg:col-span-7 bg-white rounded-2xl border border-stone-200 p-6 sm:p-8 shadow-sm">
+      <!-- Form Box (Col 12 / Max width centered) -->
+      <div class="lg:col-span-8 lg:col-start-3 bg-white rounded-2xl border border-stone-200 p-6 sm:p-8 shadow-sm">
         
         <!-- Tab selector -->
         <div class="flex border-b border-stone-200 mb-6">
@@ -254,7 +209,7 @@ $demoAccounts = [
                 Tên đăng nhập hoặc Email <span class="text-red-500">*</span>
               </label>
               <input type="text" id="loginIdentifier" name="identifier" required
-                placeholder="VD: admin_duc, neangra hoặc email..."
+                placeholder="Nhập tên đăng nhập hoặc email của bạn"
                 value="<?= htmlspecialchars($_POST['identifier'] ?? '') ?>"
                 class="w-full rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-sm text-charcoal placeholder:text-stone-400 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 transition" />
             </div>
@@ -264,7 +219,6 @@ $demoAccounts = [
                 <label for="loginPassword" class="block text-xs font-semibold uppercase tracking-wider text-charcoal">
                   Mật khẩu <span class="text-red-500">*</span>
                 </label>
-                <span class="text-[11px] text-muted">(Mặc định dữ liệu mẫu: <code>123456</code>)</span>
               </div>
               <input type="password" id="loginPassword" name="password" required
                 placeholder="Nhập mật khẩu của bạn..."
@@ -378,53 +332,11 @@ $demoAccounts = [
         </div>
 
       </div>
-
-      <!-- Quick Demo Login Column (Col 5) -->
-      <div class="lg:col-span-5 space-y-4">
-        <div class="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
-          <div class="flex items-center justify-between mb-3">
-            <h2 class="text-xs font-semibold uppercase tracking-wider text-charcoal">Kiểm thử nhanh (Demo One-Click)</h2>
-            <span class="text-[10px] bg-stone-100 text-stone-600 px-2 py-0.5 rounded-full font-mono">Pass: 123456</span>
-          </div>
-          <p class="text-xs text-muted mb-4 leading-relaxed">
-            Nhấp vào bất kỳ tài khoản nào bên dưới để tự động điền và đăng nhập ngay lập tức:
-          </p>
-
-          <div class="space-y-2">
-            <?php foreach ($demoAccounts as $acc): ?>
-              <button type="button"
-                onclick="quickLogin('<?= htmlspecialchars($acc['username']) ?>', '123456')"
-                class="tap-feedback w-full text-left p-3 rounded-xl border border-stone-200 hover:border-charcoal hover:bg-stone-50 transition flex items-center justify-between group">
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs font-semibold text-charcoal group-hover:text-accent transition">
-                      <?= htmlspecialchars($acc['label']) ?>
-                    </span>
-                  </div>
-                  <p class="text-[11px] text-muted mt-0.5"><?= htmlspecialchars($acc['desc']) ?></p>
-                  <p class="text-[10px] font-mono text-stone-400 mt-0.5">User: <code><?= htmlspecialchars($acc['username']) ?></code></p>
-                </div>
-                <span class="text-xs text-charcoal shrink-0 font-medium ml-2 opacity-0 group-hover:opacity-100 transition">
-                  Chọn &rarr;
-                </span>
-              </button>
-            <?php endforeach; ?>
-          </div>
-        </div>
-
-        <div class="rounded-xl border border-dashed border-stone-300 p-4 text-xs text-muted leading-relaxed">
-          <p class="font-semibold text-charcoal mb-1">Kiến trúc phân quyền (Middleware):</p>
-          <ul class="list-disc pl-4 space-y-1">
-            <li><strong>Admin (ma_vt = 1)</strong> và <strong>Nhân viên (ma_vt = 2)</strong> được truy cập thư mục <code>admin/</code>.</li>
-            <li><strong>Khách hàng (ma_vt = 3)</strong> truy cập <code>admin/</code> sẽ bị chặn bởi trang lỗi <strong>HTTP 403 Forbidden</strong>.</li>
-          </ul>
-        </div>
-      </div>
     </div>
   </main>
 
   <footer class="border-t border-stone-200 bg-white py-6 text-center text-xs text-muted">
-    AURA STUDIO &middot; Phân hệ Xác thực, Tài khoản &amp; Sổ địa chỉ (Bảng <code>vt_vai_tro</code>, <code>nd_nguoi_dung</code>, <code>dc_dia_chi_kh</code>, <code>ttd_the_tich_diem</code>)
+    AURA STUDIO &middot; Hệ thống Quản lý Cửa hàng Quần áo &amp; Khách hàng Thân thiết
   </footer>
 
   <script>
@@ -448,18 +360,6 @@ $demoAccounts = [
         tabLoginBtn.classList.remove('border-transparent', 'text-muted');
         tabRegisterBtn.classList.remove('border-charcoal', 'text-charcoal');
         tabRegisterBtn.classList.add('border-transparent', 'text-muted');
-      }
-    }
-
-    function quickLogin(username, password) {
-      switchAuthTab('login');
-      const idInput = document.getElementById('loginIdentifier');
-      const passInput = document.getElementById('loginPassword');
-      if (idInput && passInput) {
-        idInput.value = username;
-        passInput.value = password;
-        // Tự động submit form
-        idInput.form.submit();
       }
     }
   </script>

@@ -20,8 +20,9 @@ try {
     if ($currentUserId <= 0) {
         http_response_code(401);
         echo json_encode([
-            'success' => false,
-            'message' => 'Vui lòng đăng nhập để thao tác giỏ hàng!'
+            'success'       => false,
+            'require_login' => true,
+            'message'       => 'Vui lòng đăng nhập để thao tác giỏ hàng!'
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
@@ -70,6 +71,34 @@ try {
             ], JSON_UNESCAPED_UNICODE);
             break;
 
+        case 'add_by_product':
+            $maSp = (int) ($requestData['ma_sp'] ?? 0);
+            $soLuong = (int) ($requestData['so_luong_mua'] ?? 1);
+            if ($maSp <= 0) {
+                throw new Exception('Sản phẩm không hợp lệ.');
+            }
+            // Tìm biến thể còn hàng đầu tiên
+            $pdo = getDBConnection();
+            $stmtFirstBt = $pdo->prepare("
+                SELECT ma_bt, so_luong_ton 
+                FROM bt_bien_the_sp 
+                WHERE ma_sp = ? AND trang_thai = 1 AND so_luong_ton > 0 
+                ORDER BY ma_bt ASC 
+                LIMIT 1
+            ");
+            $stmtFirstBt->execute([$maSp]);
+            $foundBt = $stmtFirstBt->fetch();
+            if (!$foundBt) {
+                throw new Exception('Sản phẩm này tạm thời hết hàng hoặc chưa có phân loại.');
+            }
+            $result = $cartService->addToCart($currentUserId, (int)$foundBt['ma_bt'], $soLuong);
+            echo json_encode([
+                'success' => true,
+                'message' => $result['message'],
+                'data'    => $result['summary'],
+            ], JSON_UNESCAPED_UNICODE);
+            break;
+
         case 'update':
             $maBt = (int) ($requestData['ma_bt'] ?? 0);
             $soLuong = (int) ($requestData['so_luong_mua'] ?? $requestData['so_luong'] ?? 0);
@@ -99,6 +128,17 @@ try {
                 'action'  => $result['action'],
                 'message' => $result['message'],
                 'data'    => $result['summary'],
+            ], JSON_UNESCAPED_UNICODE);
+            break;
+
+        case 'clear':
+            $cartService->clearCart($currentUserId);
+            $summary = $cartService->getCartSummary($currentUserId);
+            echo json_encode([
+                'success' => true,
+                'action'  => 'clear',
+                'message' => 'Đã xóa toàn bộ sản phẩm trong giỏ hàng thành công.',
+                'data'    => $summary,
             ], JSON_UNESCAPED_UNICODE);
             break;
 

@@ -29,7 +29,7 @@ $statusBadges = [
     <span class="text-slate-700">Quản lý Đơn hàng</span>
   </nav>
   <h1 class="mt-2 text-2xl font-semibold leading-tight text-slate-900">Quản lý Đơn hàng &amp; Kích hoạt Loyalty Engine</h1>
-  <p class="mt-1 text-sm text-slate-500">Danh sách <?= count($orders) ?> đơn đặt hàng từ bảng <code>dh_don_hang</code> và chi tiết <code>ctdh_chi_tiet_dh</code>.</p>
+  <p class="mt-1 text-sm text-slate-500">Quản lý và cập nhật trạng thái các đơn đặt hàng của khách.</p>
 </header>
 
 <section aria-label="Công cụ lọc" class="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -104,8 +104,12 @@ $statusBadges = [
                 </button>
                 <?php if ($od['trang_thai_dh'] !== 'HOAN_THANH' && $od['trang_thai_dh'] !== 'DA_HUY'): ?>
                   <button type="button"
-                    data-dev-feature="Duyệt hoàn thành đơn #<?= htmlspecialchars($od['ma_dh_code']) ?> (+<?= (int)$od['diem_cong_du_kien'] ?> điểm &amp; xét hạng tự động)"
-                    class="tap-feedback rounded-lg bg-blue-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-800">
+                    data-approve-order="<?= (int)$od['ma_dh'] ?>"
+                    data-order-code="<?= htmlspecialchars($od['ma_dh_code']) ?>"
+                    class="tap-feedback inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 transition">
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
                     Duyệt đơn
                   </button>
                 <?php endif; ?>
@@ -117,7 +121,7 @@ $statusBadges = [
     </table>
   </div>
   <p id="orderSummary" class="border-t border-slate-200 px-6 py-4 text-sm text-slate-500">
-    Hiển thị <?= count($orders) ?> trên <?= count($orders) ?> đơn hàng trong CSDL
+    Hiển thị <?= count($orders) ?> trên <?= count($orders) ?> đơn hàng
   </p>
 </section>
 
@@ -127,7 +131,7 @@ $statusBadges = [
     <div class="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
       <div>
         <p id="orderModalCode" class="font-mono text-xs font-semibold uppercase tracking-wider text-blue-700"></p>
-        <h2 id="orderModalTitle" class="mt-1 text-lg font-semibold leading-tight text-slate-900">Chi tiết đơn đặt hàng (Từ CSDL)</h2>
+        <h2 id="orderModalTitle" class="mt-1 text-lg font-semibold leading-tight text-slate-900">Chi tiết đơn đặt hàng</h2>
       </div>
       <button type="button" id="closeOrderModalBtn" aria-label="Đóng" class="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900">
         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
@@ -155,7 +159,7 @@ $statusBadges = [
       </dl>
 
       <div>
-        <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-500">Danh sách mặt hàng (Bảng <code>ctdh_chi_tiet_dh</code>)</h3>
+        <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-500">Danh sách mặt hàng đã đặt</h3>
         <div class="mt-2 overflow-x-auto rounded-lg border border-slate-200">
           <table class="min-w-full text-left text-xs">
             <thead class="bg-slate-50 text-slate-500">
@@ -183,9 +187,11 @@ $statusBadges = [
       <div class="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
         <button type="button" id="closeOrderModalFooterBtn" class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:border-slate-500">Đóng</button>
         <button type="button" id="modalApproveBtn"
-          data-dev-feature="Duyệt hoàn thành đơn &amp; Kích hoạt Loyalty Engine cộng điểm tự động"
-          class="tap-feedback rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-800">
-          Duyệt hoàn thành (Đang phát triển)
+          class="tap-feedback inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 transition">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          Duyệt hoàn thành
         </button>
       </div>
     </div>
@@ -212,7 +218,7 @@ $statusBadges = [
         row.classList.toggle('hidden', !show);
         if (show) count++;
       });
-      if (summary) summary.textContent = `Hiển thị ${count} trên ${rows.length} đơn hàng trong CSDL`;
+      if (summary) summary.textContent = `Hiển thị ${count} trên ${rows.length} đơn hàng`;
     }
 
     searchInput?.addEventListener('input', filterOrders);
@@ -254,6 +260,8 @@ $statusBadges = [
 
       const approveBtn = document.getElementById('modalApproveBtn');
       approveBtn.classList.toggle('hidden', order.trang_thai_dh === 'HOAN_THANH' || order.trang_thai_dh === 'DA_HUY');
+      approveBtn.dataset.approveOrder = order.ma_dh;
+      approveBtn.dataset.orderCode = order.ma_dh_code;
 
       modal.classList.remove('hidden');
       modal.classList.add('flex');
@@ -264,11 +272,57 @@ $statusBadges = [
       modal.classList.remove('flex');
     }
 
+    async function handleApproveOrder(maDh, orderCode, triggerBtn) {
+      if (!confirm(`Xác nhận duyệt HOÀN THÀNH đơn hàng #${orderCode} và kích hoạt cộng điểm tích lũy cho khách hàng?`)) {
+        return;
+      }
+
+      triggerBtn.disabled = true;
+      const originalHtml = triggerBtn.innerHTML;
+      triggerBtn.innerHTML = `
+        <svg class="h-4 w-4 animate-spin text-white inline-block mr-1" viewBox="0 0 24 24" fill="none">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+        Đang xử lý...
+      `;
+
+      try {
+        const res = await fetch('../api/admin_order.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'approve', ma_dh: Number(maDh), trang_thai_dh: 'HOAN_THANH' })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          window.showAdminToast(data.message);
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        } else {
+          alert(data.message || 'Có lỗi xảy ra khi duyệt đơn.');
+          triggerBtn.disabled = false;
+          triggerBtn.innerHTML = originalHtml;
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Lỗi kết nối khi gửi yêu cầu duyệt đơn.');
+        triggerBtn.disabled = false;
+        triggerBtn.innerHTML = originalHtml;
+      }
+    }
+
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-open-order]');
       if (btn) openOrderModal(btn.dataset.openOrder);
       if (e.target === modal || e.target.closest('#closeOrderModalBtn') || e.target.closest('#closeOrderModalFooterBtn')) {
         closeOrderModal();
+      }
+
+      const approveBtn = e.target.closest('[data-approve-order]');
+      if (approveBtn) {
+        handleApproveOrder(approveBtn.dataset.approveOrder, approveBtn.dataset.orderCode || approveBtn.dataset.approveOrder, approveBtn);
       }
     });
   })();

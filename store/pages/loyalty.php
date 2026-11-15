@@ -19,6 +19,13 @@ $txLabels = [
     'TRU_DOI_VOUCHER' => ['label' => 'Đổi voucher',     'class' => 'text-orange-700',  'bg' => 'bg-amber-50 text-amber-800'],
     'TRU_TIEU_DIEM'   => ['label' => 'Tiêu điểm đơn',   'class' => 'text-orange-700',  'bg' => 'bg-amber-50 text-amber-800'],
 ];
+
+$orderStatusBadges = [
+    'CHO_XAC_NHAN' => ['label' => 'Chờ xác nhận',  'class' => 'bg-amber-100 text-amber-800'],
+    'DANG_GIAO'    => ['label' => 'Đang giao hàng', 'class' => 'bg-blue-100 text-blue-800'],
+    'HOAN_THANH'   => ['label' => 'Hoàn thành',    'class' => 'bg-emerald-100 text-emerald-800'],
+    'DA_HUY'       => ['label' => 'Đã hủy',        'class' => 'bg-rose-100 text-rose-800'],
+];
 ?>
 <div id="loyaltyView" class="fade-up space-y-16">
   <!-- Thẻ tích điểm điện tử & Tiến trình nâng hạng từ CSDL -->
@@ -33,7 +40,7 @@ $txLabels = [
         <p class="mt-12 font-mono text-xl tracking-[0.2em] text-white"><?= htmlspecialchars($maSoThe) ?></p>
         <div class="mt-10 flex items-end justify-between gap-6">
           <div>
-            <p class="text-xs uppercase tracking-wider text-stone-300">Chủ thẻ (ma_nd = <?= (int)($loyaltyProfile['ma_nd'] ?? 0) ?>)</p>
+            <p class="text-xs uppercase tracking-wider text-stone-300">Chủ thẻ</p>
             <p class="mt-1 text-base font-semibold uppercase"><?= htmlspecialchars($hoTen) ?></p>
           </div>
           <div class="text-right">
@@ -53,7 +60,7 @@ $txLabels = [
         </div>
         <div class="rounded-xl bg-white p-6 shadow-sm">
           <p class="text-sm text-muted">Điểm khả dụng đổi quà</p>
-          <p class="tabular-nums mt-2 text-3xl font-semibold text-olive">
+          <p id="loyaltyAvailablePoints" class="tabular-nums mt-2 text-3xl font-semibold text-olive">
             <?= number_format($diemKhaDung, 0, ',', '.') ?> <span class="text-base font-normal text-muted">điểm</span>
           </p>
           <p class="mt-1 text-xs text-muted">Dùng đổi Voucher hoặc trừ tiền đơn</p>
@@ -111,7 +118,7 @@ $txLabels = [
   <section aria-labelledby="voucherTitle">
     <div class="flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h2 id="voucherTitle" class="text-xl font-semibold">Kho Đổi điểm nhận Voucher (Từ CSDL <code>pgg_phieu_giam_gia</code>)</h2>
+        <h2 id="voucherTitle" class="text-xl font-semibold">Kho Đổi điểm nhận Voucher</h2>
         <p class="mt-1 text-sm text-muted">Chọn chiến dịch Voucher phù hợp với số điểm khả dụng (<strong class="tabular-nums text-charcoal"><?= $diemKhaDung ?> điểm</strong>) và hạng hiện tại của bạn.</p>
       </div>
     </div>
@@ -161,9 +168,12 @@ $txLabels = [
                 Thiếu <?= (int)$v['diem_can_doi'] - $diemKhaDung ?> điểm khả dụng
               </button>
             <?php else: ?>
-              <button type="button" data-dev-feature="Đổi <?= (int)$v['diem_can_doi'] ?> điểm lấy mã <?= htmlspecialchars($v['ma_code']) ?> vào bảng vkh_vi_voucher_kh"
-                class="tap-feedback w-full rounded-full bg-charcoal px-4 py-2.5 text-xs font-medium text-white hover:bg-accent">
-                Đổi ngay (-<?= (int)$v['diem_can_doi'] ?> điểm) &middot; Đang phát triển
+              <button type="button"
+                data-redeem-btn="<?= (int)$v['ma_pgg'] ?>"
+                data-voucher-code="<?= htmlspecialchars($v['ma_code']) ?>"
+                data-points-needed="<?= (int)$v['diem_can_doi'] ?>"
+                class="tap-feedback w-full rounded-full bg-charcoal px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-accent transition">
+                Đổi ngay (-<?= number_format((int)$v['diem_can_doi'], 0, ',', '.') ?> điểm)
               </button>
             <?php endif; ?>
           </div>
@@ -176,7 +186,7 @@ $txLabels = [
   <section aria-labelledby="ledgerTitle">
     <div class="flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h2 id="ledgerTitle" class="text-xl font-semibold">Lịch sử biến động điểm (Bảng <code>lsd_lich_su_diem</code>)</h2>
+        <h2 id="ledgerTitle" class="text-xl font-semibold">Lịch sử biến động điểm</h2>
         <p class="mt-1 text-sm text-muted">Sổ cái đối soát từng điểm thưởng cộng vào và trừ ra của thẻ <strong><?= htmlspecialchars($maSoThe) ?></strong>.</p>
       </div>
     </div>
@@ -184,7 +194,7 @@ $txLabels = [
     <div class="mt-6 overflow-x-auto rounded-xl bg-white shadow-sm">
       <?php if (empty($pointLedger)): ?>
         <div class="p-10 text-center">
-          <p class="text-base font-medium text-charcoal">Chưa có phát sinh giao dịch điểm nào trong CSDL</p>
+          <p class="text-base font-medium text-charcoal">Chưa có phát sinh giao dịch điểm nào</p>
           <p class="mt-1 text-sm text-muted">Khách hàng <strong><?= htmlspecialchars($hoTen) ?></strong> hiện chưa có lịch sử biến động điểm.</p>
         </div>
       <?php else: ?>
@@ -236,7 +246,7 @@ $txLabels = [
     <div class="flex flex-wrap items-center justify-between gap-4 border-b border-stone-100 pb-5">
       <div>
         <h2 id="addressBookTitle" class="text-xl font-semibold text-charcoal">
-          Sổ địa chỉ nhận hàng (Bảng <code>dc_dia_chi_kh</code>)
+          Sổ địa chỉ nhận hàng
         </h2>
         <p class="mt-1 text-xs text-muted">
           Quản lý danh sách địa chỉ nhận hàng cá nhân của <strong><?= htmlspecialchars($hoTen) ?></strong>
@@ -270,7 +280,7 @@ $txLabels = [
                 </div>
                 <p class="mt-1 text-xs text-stone-600 font-medium">SĐT nhận: <?= htmlspecialchars($addr['sdt_nhan']) ?></p>
                 <p class="mt-2 text-xs text-muted leading-relaxed">
-                  <?= htmlspecialchars($addr['dia_chi_cu_the']) ?>, <?= htmlspecialchars($addr['phuong_xa']) ?>, <?= htmlspecialchars($addr['quan_huyen']) ?>, <?= htmlspecialchars($addr['tinh_thanh']) ?>
+                  <?= htmlspecialchars($addr['dia_chi_cu_the']) ?>, <?= htmlspecialchars($addr['phuong_xa']) ?>, <?= htmlspecialchars($addr['tinh_thanh']) ?>
                 </p>
               </div>
 
@@ -306,10 +316,10 @@ $txLabels = [
 
   <!-- Danh sách Đơn đặt hàng của khách hàng từ bảng dh_don_hang -->
   <section aria-labelledby="myOrdersTitle">
-    <h2 id="myOrdersTitle" class="text-xl font-semibold">Đơn hàng của <?= htmlspecialchars($hoTen) ?> (Bảng <code>dh_don_hang</code>)</h2>
+    <h2 id="myOrdersTitle" class="text-xl font-semibold">Đơn hàng của <?= htmlspecialchars($hoTen) ?></h2>
     <div class="mt-6 overflow-x-auto rounded-xl bg-white shadow-sm">
       <?php if (empty($customerOrders)): ?>
-        <div class="p-10 text-center text-sm text-muted">Khách hàng chưa có đơn đặt hàng nào trong CSDL.</div>
+        <div class="p-10 text-center text-sm text-muted">Bạn chưa có đơn đặt hàng nào.</div>
       <?php else: ?>
         <table class="min-w-full text-left text-sm">
           <thead class="border-b border-stone-200 text-xs uppercase tracking-wider text-muted">
@@ -337,7 +347,13 @@ $txLabels = [
                 <td class="whitespace-nowrap px-6 py-4 text-right font-semibold text-charcoal"><?= formatVND($od['thanh_tien']) ?></td>
                 <td class="whitespace-nowrap px-6 py-4 text-right font-medium text-emerald-700">+<?= (int)$od['diem_cong_du_kien'] ?> điểm</td>
                 <td class="whitespace-nowrap px-6 py-4">
-                  <span class="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-charcoal"><?= htmlspecialchars($od['trang_thai_dh']) ?></span>
+                  <?php
+                    $stKey = $od['trang_thai_dh'] ?? 'CHO_XAC_NHAN';
+                    $stBadge = $orderStatusBadges[$stKey] ?? ['label' => $stKey, 'class' => 'bg-stone-100 text-charcoal'];
+                  ?>
+                  <span class="rounded-full px-3 py-1 text-xs font-semibold <?= $stBadge['class'] ?>">
+                    <?= htmlspecialchars($stBadge['label']) ?>
+                  </span>
                 </td>
               </tr>
             <?php endforeach; ?>
@@ -347,4 +363,94 @@ $txLabels = [
     </div>
   </section>
 </div>
+
+<script>
+  (() => {
+    // Xử lý đổi điểm lấy Voucher thật qua API redeem_voucher.php
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-redeem-btn]');
+      if (!btn) return;
+
+      const maPgg = btn.dataset.redeemBtn;
+      const code = btn.dataset.voucherCode || 'VOUCHER';
+      const pointsNeeded = Number(btn.dataset.pointsNeeded || 0);
+
+      if (!confirm(`Xác nhận dùng ${pointsNeeded.toLocaleString('vi-VN')} điểm khả dụng để đổi Voucher "${code}"?`)) {
+        return;
+      }
+
+      btn.disabled = true;
+      const originalHtml = btn.innerHTML;
+      btn.innerHTML = `
+        <span class="inline-flex items-center gap-1.5">
+          <svg class="h-3.5 w-3.5 animate-spin text-white" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+          Đang đổi voucher...
+        </span>
+      `;
+
+      try {
+        const res = await fetch('api/redeem_voucher.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ma_pgg: Number(maPgg) })
+        });
+        const data = await res.json();
+
+        if (data.require_login) {
+          if (window.openAuthModal) {
+            window.openAuthModal('login');
+          } else {
+            window.location.href = 'login.php';
+          }
+          btn.disabled = false;
+          btn.innerHTML = originalHtml;
+          return;
+        }
+
+        if (data.success) {
+          if (window.showStoreToast) {
+            window.showStoreToast('🎉 ' + data.message);
+          }
+
+          // Cập nhật số điểm khả dụng trên giao diện
+          const newPoints = data.data?.diem_kha_dung_moi;
+          if (newPoints !== undefined) {
+            const ptsEl = document.getElementById('loyaltyAvailablePoints');
+            if (ptsEl) {
+              ptsEl.innerHTML = `${Number(newPoints).toLocaleString('vi-VN')} <span class="text-base font-normal text-muted">điểm</span>`;
+            }
+          }
+
+          // Đổi nút thành link Xem giỏ hàng/Thanh toán
+          const parentDiv = btn.parentElement;
+          if (parentDiv) {
+            parentDiv.innerHTML = `
+              <a href="index.php?page=checkout" class="tap-feedback block w-full rounded-full bg-olive px-4 py-2.5 text-center text-xs font-semibold text-white hover:opacity-95 shadow-sm">
+                Đã có trong Ví &rarr; Dùng ngay
+              </a>
+            `;
+          }
+
+          // Tải lại sau 1.2s để đồng bộ toàn bộ thẻ và lịch sử điểm
+          setTimeout(() => {
+            window.location.reload();
+          }, 1200);
+
+        } else {
+          alert(data.message || 'Đổi voucher không thành công.');
+          btn.disabled = false;
+          btn.innerHTML = originalHtml;
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Lỗi kết nối khi gửi yêu cầu đổi voucher.');
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+      }
+    });
+  })();
+</script>
 

@@ -13,15 +13,13 @@ require_once __DIR__ . '/../services/store/CartCheckoutService.php';
 try {
     // 1. Kiểm tra xác thực phiên đăng nhập của khách hàng
     $currentUserId = getCurrentUserId();
-    if (!isset($_SESSION['current_user_id'])) {
-        $_SESSION['current_user_id'] = $currentUserId;
-    }
 
     if ($currentUserId <= 0) {
         http_response_code(401);
         echo json_encode([
-            'success' => false,
-            'message' => 'Vui lòng đăng nhập để tiến hành đặt hàng.'
+            'success'       => false,
+            'require_login' => true,
+            'message'       => 'Vui lòng đăng nhập để thực hiện thao tác này.'
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }

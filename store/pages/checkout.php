@@ -598,7 +598,11 @@ $maxPointsToUse = min(50, $diemKhaDung);
           const data = await res.json();
 
           if (!data.success) {
-            window.showStoreToast?.(data.message || 'Đặt hàng không thành công');
+            if (data.require_login && window.openAuthModal) {
+              window.openAuthModal('login');
+            } else {
+              window.showStoreToast?.(data.message || 'Đặt hàng không thành công');
+            }
             placeOrderBtn.disabled = false;
             placeOrderBtn.innerHTML = originalBtnHtml;
             return;

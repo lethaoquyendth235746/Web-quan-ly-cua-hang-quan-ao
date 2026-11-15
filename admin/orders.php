@@ -158,6 +158,16 @@ $statusBadges = [
         </div>
       </dl>
 
+      <!-- Thông tin giao hàng -->
+      <div class="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm">
+        <h3 class="text-xs font-semibold uppercase tracking-wider text-blue-700 mb-2">📦 Thông tin giao hàng</h3>
+        <dl class="space-y-1 text-slate-700">
+          <div class="flex gap-2"><dt class="w-36 shrink-0 text-slate-500">Người nhận:</dt><dd id="orderRecipientName" class="font-medium"></dd></div>
+          <div class="flex gap-2"><dt class="w-36 shrink-0 text-slate-500">Số điện thoại:</dt><dd id="orderRecipientPhone" class="font-medium"></dd></div>
+          <div class="flex gap-2"><dt class="w-36 shrink-0 text-slate-500">Địa chỉ giao:</dt><dd id="orderRecipientAddress" class="leading-relaxed"></dd></div>
+        </dl>
+      </div>
+
       <div>
         <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-500">Danh sách mặt hàng đã đặt</h3>
         <div class="mt-2 overflow-x-auto rounded-lg border border-slate-200">
@@ -233,6 +243,12 @@ $statusBadges = [
       document.getElementById('orderDate').textContent = order.ngay_dat;
       document.getElementById('orderPayment').textContent = order.pt_thanh_toan;
       document.getElementById('orderTotal').textContent = Number(order.thanh_tien).toLocaleString('vi-VN') + 'đ';
+
+      // Thông tin giao hàng
+      document.getElementById('orderRecipientName').textContent = order.ten_nguoi_nhan || order.ten_khach_hang || '—';
+      document.getElementById('orderRecipientPhone').textContent = order.sdt_nguoi_nhan || order.sdt_khach_hang || '—';
+      const diaChiParts = [order.dia_chi_cu_the, order.phuong_xa, order.quan_huyen, order.tinh_thanh].filter(Boolean);
+      document.getElementById('orderRecipientAddress').textContent = diaChiParts.length > 0 ? diaChiParts.join(', ') : 'Khách chưa cập nhật địa chỉ mặc định';
 
       const tbody = document.getElementById('orderItemsBody');
       tbody.innerHTML = (order.items || []).map((item) => `

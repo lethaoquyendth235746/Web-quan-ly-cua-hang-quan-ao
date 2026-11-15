@@ -37,3 +37,17 @@ if (!in_array($maVt, [1, 2], true)) {
 
 // 4. Nếu hợp lệ, gán chắc chắn $_SESSION['current_admin_id']
 $_SESSION['current_admin_id'] = (int)$currentUser['ma_nd'];
+
+// Alias để các trang admin dùng thống nhất
+$adminCurrentUser = $currentUser;
+
+/**
+ * Kiểm tra người dùng hiện tại có phải Quản trị viên cấp cao (ma_vt = 1) không.
+ * Dùng để phân biệt quyền Super-Admin và Nhân viên.
+ */
+function isSuperAdminRole(): bool
+{
+    global $adminCurrentUser;
+    return isset($adminCurrentUser['ma_vt']) && (int)$adminCurrentUser['ma_vt'] === 1;
+}
+

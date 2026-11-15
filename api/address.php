@@ -37,7 +37,7 @@ if ($currentUserId <= 0 || !isUserLoggedIn()) {
     $resp = [
         'success'       => false,
         'require_login' => true,
-        'message'       => 'Vui lòng đăng nhập tài khoản để quản lý sổ địa chỉ.',
+        'message'       => 'Vui lòng đăng nhập để thực hiện thao tác này.',
     ];
     if ($isAjax) {
         echo json_encode($resp, JSON_UNESCAPED_UNICODE);

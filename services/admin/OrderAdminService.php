@@ -35,12 +35,19 @@ class OrderAdminService
                 htv.he_so_tich_diem,
                 htv.mau_sac_the,
                 pgg.ma_code AS ma_voucher_code,
-                pgg.ten_pgg AS ten_voucher
+                pgg.ten_pgg AS ten_voucher,
+                COALESCE(dc.ten_nguoi_nhan, nd.ho_ten) AS ten_nguoi_nhan,
+                COALESCE(dc.sdt_nhan, nd.sdt) AS sdt_nguoi_nhan,
+                dc.dia_chi_cu_the,
+                dc.phuong_xa,
+                dc.quan_huyen,
+                dc.tinh_thanh
             FROM dh_don_hang dh
             INNER JOIN nd_nguoi_dung nd ON dh.ma_nd = nd.ma_nd
             LEFT JOIN ttd_the_tich_diem ttd ON nd.ma_nd = ttd.ma_nd
             LEFT JOIN htv_hang_thanh_vien htv ON ttd.ma_hang = htv.ma_hang
             LEFT JOIN pgg_phieu_giam_gia pgg ON dh.ma_pgg = pgg.ma_pgg
+            LEFT JOIN dc_dia_chi_kh dc ON nd.ma_nd = dc.ma_nd AND dc.mac_dinh = 1
             ORDER BY 
                 CASE WHEN dh.trang_thai_dh = 'CHO_XAC_NHAN' THEN 0 ELSE 1 END ASC,
                 dh.ngay_dat DESC,

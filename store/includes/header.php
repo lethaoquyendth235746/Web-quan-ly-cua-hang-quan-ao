@@ -133,19 +133,24 @@ $cartTotalCount = array_sum(array_column($cartItems, 'so_luong_mua'));
         </nav>
       </div>
 
-      <div class="mx-auto hidden max-w-md flex-1 lg:block">
-        <form action="index.php" method="GET" class="relative block">
+      <div class="mx-auto hidden flex-1 max-w-md shrink-0 lg:block min-w-[240px] w-60 lg:w-72">
+        <form action="index.php" method="GET" class="relative block" id="searchHeaderForm">
           <input type="hidden" name="page" value="home" />
           <?php if ($currentGender !== 'all'): ?>
             <input type="hidden" name="gender" value="<?= htmlspecialchars($currentGender) ?>" />
           <?php endif; ?>
           <span class="sr-only">Tìm kiếm sản phẩm</span>
-          <svg class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" stroke-linecap="round" />
           </svg>
-          <input id="searchInput" name="q" type="search" value="<?= htmlspecialchars($searchQuery) ?>"
-            placeholder="Tìm kiếm áo polo, đầm taffeta, sơ mi lụa..."
-            class="w-full rounded-full border border-stone-200 bg-white py-2 pl-11 pr-4 text-sm text-charcoal placeholder:text-muted transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20" />
+          <input id="searchInput" name="q" type="text" value="<?= htmlspecialchars($searchQuery) ?>"
+            placeholder="Tìm kiếm sản phẩm..."
+            autocomplete="off"
+            class="w-full rounded-full border border-stone-200 bg-white py-2 pl-10 pr-9 text-sm text-charcoal placeholder:text-muted transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20" />
+          <button type="button" id="clearSearchBtn" aria-label="Xóa từ khóa tìm kiếm"
+            class="<?= !empty($searchQuery) ? '' : 'hidden' ?> absolute right-2.5 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full bg-stone-200 text-xs font-semibold text-stone-600 hover:bg-stone-300 hover:text-charcoal transition">
+            &times;
+          </button>
         </form>
       </div>
 
@@ -269,12 +274,20 @@ $cartTotalCount = array_sum(array_column($cartItems, 'so_luong_mua'));
     </div>
 
     <div class="border-t border-stone-200 px-6 pb-3 pt-3 lg:hidden">
-      <form action="index.php" method="GET" class="relative block">
+      <form action="index.php" method="GET" class="relative block" id="searchHeaderMobileForm">
         <input type="hidden" name="page" value="home" />
         <span class="sr-only">Tìm kiếm sản phẩm</span>
-        <input id="searchInputMobile" name="q" type="search" value="<?= htmlspecialchars($searchQuery) ?>"
-          placeholder="Tìm kiếm áo polo, đầm taffeta..."
-          class="w-full rounded-full border border-stone-200 bg-white py-2 pl-4 pr-4 text-sm text-charcoal placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20" />
+        <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" stroke-linecap="round" />
+        </svg>
+        <input id="searchInputMobile" name="q" type="text" value="<?= htmlspecialchars($searchQuery) ?>"
+          placeholder="Tìm kiếm sản phẩm..."
+          autocomplete="off"
+          class="w-full rounded-full border border-stone-200 bg-white py-2 pl-10 pr-9 text-sm text-charcoal placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20" />
+        <button type="button" id="clearSearchMobileBtn" aria-label="Xóa từ khóa tìm kiếm"
+          class="<?= !empty($searchQuery) ? '' : 'hidden' ?> absolute right-2.5 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full bg-stone-200 text-xs font-semibold text-stone-600 hover:bg-stone-300 hover:text-charcoal transition">
+          &times;
+        </button>
       </form>
     </div>
   </header>

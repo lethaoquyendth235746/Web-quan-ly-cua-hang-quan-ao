@@ -16,6 +16,15 @@ $tierService = new TierAdminService();
 // Phải chạy trước khi nạp header HTML để tránh lỗi "headers already sent"
 // =============================================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_tier') {
+    // Phân quyền: Chỉ Super-Admin (ma_vt = 1) mới được thay đổi cấu hình hạng thành viên
+    if (!isSuperAdminRole()) {
+        $_SESSION['admin_flash'] = [
+            'type'    => 'error',
+            'message' => 'Chỉ Quản trị viên cấp cao (Admin) mới có quyền thay đổi cấu hình Hạng thành viên và Chiến dịch Khuyến mãi!'
+        ];
+        header('Location: tiers.php');
+        exit;
+    }
     try {
         $maHang = (int)($_POST['ma_hang'] ?? 0);
         $res = $tierService->updateTierConfig($maHang, $_POST);
@@ -53,6 +62,13 @@ require __DIR__ . '/includes/header.php';
     Hệ thống phân cấp thành viên (4 bậc hạng) và <?= count($memberCards) ?> thẻ thành viên đã cấp.
   </p>
 </header>
+
+<?php if (!isSuperAdminRole()): ?>
+<div class="mt-4 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-5 py-3 text-sm text-amber-800">
+  <svg class="h-5 w-5 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 3a9 9 0 110 18A9 9 0 0112 3z"/></svg>
+  <span>Bạn đang xem với quyền <strong>Nhân viên (Chỉ xem)</strong> — Chỉ Quản trị viên cấp cao mới có thể chỉnh sửa cấu hình hạng thành viên.</span>
+</div>
+<?php endif; ?>
 
 <!-- Bảng Cấu hình 4 Bậc Hạng Thành Viên -->
 <section aria-label="Danh sách hạng" class="fade-up mt-8 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
@@ -111,7 +127,8 @@ require __DIR__ . '/includes/header.php';
                 data-prev-points="<?= (int)($prevTier['diem_toi_thieu'] ?? 0) ?>"
                 data-next-name="<?= htmlspecialchars($nextTier['ten_hang'] ?? '') ?>"
                 data-next-points="<?= (int)($nextTier['diem_toi_thieu'] ?? 0) ?>"
-                onclick="openEditTierModal(this)">
+                onclick="openEditTierModal(this)"
+                <?= !isSuperAdminRole() ? 'disabled title="Chỉ Admin mới có quyền chỉnh sửa"' : '' ?>>
                 Chỉnh sửa
               </button>
             </td>

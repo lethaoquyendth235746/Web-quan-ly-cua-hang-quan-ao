@@ -16,8 +16,45 @@ class ProductAdminService
     }
 
     /**
-     * Chuyển đổi chuỗi tiếng Việt có dấu thành slug không dấu nối bằng dấu gạch ngang (-)
+     * Chuẩn hóa URL hiển thị ảnh trong phân hệ Admin
+     * Hỗ trợ URL tuyệt đối, đường dẫn tương đối, tên file ảnh trong assets/images/
      */
+    public static function resolveAdminImageUrl(?string $path): string
+    {
+        if (!$path) {
+            return 'https://images.pexels.com/photos/9968526/pexels-photo-9968526.jpeg?auto=compress&cs=tinysrgb&h=650&w=940';
+        }
+
+        // 1. URL tuyệt đối qua HTTP/HTTPS
+        if (preg_match('/^https?:\/\//i', $path)) {
+            return $path;
+        }
+
+        // 2. Đã có tiền tố ../
+        if (strpos($path, '../') === 0) {
+            return $path;
+        }
+
+        // 3. Có chứa dấu / (ví dụ: assets/images/sp_xxx.jpg)
+        if (strpos($path, '/') !== false) {
+            return '../' . ltrim($path, '/');
+        }
+
+        // 4. Tên file thuần (ví dụ: sp_1794736672_fa818cd7.jpg hoặc sp01_polo_den.jpg)
+        // Kiểm tra file vật lý trong assets/images
+        $localPhysical = dirname(__DIR__, 2) . '/assets/images/' . $path;
+        if (file_exists($localPhysical)) {
+            return '../assets/images/' . $path;
+        }
+
+        // Nếu là tên file mẫu trong CSDL, dùng resolveProductImage để lấy URL tương ứng
+        $resolved = resolveProductImage($path);
+        if (strpos($resolved, 'assets/images/') === 0) {
+            return '../' . $resolved;
+        }
+
+        return $resolved;
+    }
     public static function slugifyVietnamese(string $str): string
     {
         $vietnameseMap = [
@@ -282,12 +319,7 @@ class ProductAdminService
         $products = $stmt->fetchAll();
 
         foreach ($products as &$p) {
-            $img = resolveProductImage($p['anh_chinh']);
-            // Nếu là đường dẫn nội bộ assets/images/..., khi hiển thị ở trang admin/products.php cần ../ để trỏ về thư mục gốc
-            if (strpos($img, 'assets/images/') === 0) {
-                $img = '../' . $img;
-            }
-            $p['anh_chinh_url'] = $img;
+            $p['anh_chinh_url'] = self::resolveAdminImageUrl($p['anh_chinh']);
             $p['ma_sp_code'] = sprintf('SP-%03d', $p['ma_sp']);
         }
         unset($p);
@@ -313,11 +345,7 @@ class ProductAdminService
             return null;
         }
 
-        $img = resolveProductImage($p['anh_chinh']);
-        if (strpos($img, 'assets/images/') === 0) {
-            $img = '../' . $img;
-        }
-        $p['anh_chinh_url'] = $img;
+        $p['anh_chinh_url'] = self::resolveAdminImageUrl($p['anh_chinh']);
         $p['ma_sp_code'] = sprintf('SP-%03d', $p['ma_sp']);
         return $p;
     }
@@ -599,6 +627,183 @@ class ProductAdminService
         ");
         $stmt->execute([$maSp]);
         return $stmt->fetchAll();
+    }
+
+    // =========================================================================
+    // NHÓM PHƯƠNG THỨC QUẢN LÝ BỘ SƯU TẬP ẢNH PHỤ THEO MÀU (ha_hinh_anh_sp)
+    // =========================================================================
+
+    /**
+     * Lấy toàn bộ hình ảnh trong bảng ha_hinh_anh_sp theo mã sản phẩm
+     */
+    public function getProductImages(int $maSp): array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT ma_ha, ma_sp, duong_dan_anh, mau_sac_lien_ket, thu_tu, la_anh_chinh
+            FROM ha_hinh_anh_sp
+            WHERE ma_sp = ?
+            ORDER BY la_anh_chinh DESC, thu_tu ASC, ma_ha ASC
+        ");
+        $stmt->execute([$maSp]);
+        $rows = $stmt->fetchAll();
+        foreach ($rows as &$r) {
+            $r['resolved_url'] = self::resolveAdminImageUrl($r['duong_dan_anh']);
+        }
+        unset($r);
+        return $rows;
+    }
+
+    /**
+     * Lấy tất cả ảnh phụ nhóm theo ma_sp [ma_sp => [danh sách ảnh]]
+     */
+    public function getAllImagesGroupedByProduct(): array
+    {
+        $stmt = $this->pdo->query("
+            SELECT ma_ha, ma_sp, duong_dan_anh, mau_sac_lien_ket, thu_tu, la_anh_chinh
+            FROM ha_hinh_anh_sp
+            ORDER BY ma_sp ASC, la_anh_chinh DESC, thu_tu ASC, ma_ha ASC
+        ");
+        $rows = $stmt->fetchAll();
+        $grouped = [];
+        foreach ($rows as $r) {
+            $r['resolved_url'] = self::resolveAdminImageUrl($r['duong_dan_anh']);
+            $grouped[$r['ma_sp']][] = $r;
+        }
+        return $grouped;
+    }
+
+    /**
+     * Thêm ảnh mới vào bộ sưu tập ảnh sản phẩm (ha_hinh_anh_sp)
+     * Hỗ trợ file upload hoặc link URL trực tiếp
+     */
+    public function addProductImage(int $maSp, array $data, ?array $file = null): int
+    {
+        if ($maSp <= 0) {
+            throw new InvalidArgumentException('Mã sản phẩm không hợp lệ.');
+        }
+
+        $imagePath = null;
+        if ($file && isset($file['name']) && !empty($file['name'])) {
+            $imagePath = $this->handleImageUpload($file);
+        }
+
+        if (!$imagePath && !empty($data['url_anh'])) {
+            $imagePath = trim($data['url_anh']);
+        }
+
+        if (!$imagePath) {
+            throw new Exception('Vui lòng chọn file ảnh để tải lên hoặc nhập URL ảnh hợp lệ.');
+        }
+
+        $mauSac = !empty($data['mau_sac_lien_ket']) ? trim($data['mau_sac_lien_ket']) : null;
+        $laAnhChinh = !empty($data['la_anh_chinh']) ? 1 : 0;
+        $thuTu = isset($data['thu_tu']) ? (int)$data['thu_tu'] : 1;
+
+        $this->pdo->beginTransaction();
+        try {
+            if ($laAnhChinh === 1) {
+                // Reset tất cả ảnh khác về la_anh_chinh = 0
+                $stmtReset = $this->pdo->prepare("UPDATE ha_hinh_anh_sp SET la_anh_chinh = 0 WHERE ma_sp = ?");
+                $stmtReset->execute([$maSp]);
+
+                // Đồng bộ cập nhật sp_san_pham.anh_chinh
+                $stmtUpSp = $this->pdo->prepare("UPDATE sp_san_pham SET anh_chinh = ? WHERE ma_sp = ?");
+                $stmtUpSp->execute([$imagePath, $maSp]);
+            }
+
+            $stmt = $this->pdo->prepare("
+                INSERT INTO ha_hinh_anh_sp (ma_sp, duong_dan_anh, mau_sac_lien_ket, thu_tu, la_anh_chinh)
+                VALUES (?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([$maSp, $imagePath, $mauSac, $thuTu, $laAnhChinh]);
+            $newMaHa = (int)$this->pdo->lastInsertId();
+
+            $this->pdo->commit();
+            return $newMaHa;
+        } catch (Exception $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * Đặt 1 ảnh phụ làm ảnh chính của sản phẩm (la_anh_chinh = 1 và cập nhật sp_san_pham.anh_chinh)
+     */
+    public function setMainImage(int $maHa): bool
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM ha_hinh_anh_sp WHERE ma_ha = ?");
+        $stmt->execute([$maHa]);
+        $img = $stmt->fetch();
+        if (!$img) {
+            throw new Exception('Không tìm thấy hình ảnh yêu cầu.');
+        }
+
+        $maSp = (int)$img['ma_sp'];
+        $imagePath = $img['duong_dan_anh'];
+
+        $this->pdo->beginTransaction();
+        try {
+            // Reset tất cả ảnh của sản phẩm này về la_anh_chinh = 0
+            $stmtReset = $this->pdo->prepare("UPDATE ha_hinh_anh_sp SET la_anh_chinh = 0 WHERE ma_sp = ?");
+            $stmtReset->execute([$maSp]);
+
+            // Đặt ảnh này thành 1
+            $stmtSet = $this->pdo->prepare("UPDATE ha_hinh_anh_sp SET la_anh_chinh = 1 WHERE ma_ha = ?");
+            $stmtSet->execute([$maHa]);
+
+            // Đồng bộ sang sp_san_pham.anh_chinh
+            $stmtSp = $this->pdo->prepare("UPDATE sp_san_pham SET anh_chinh = ? WHERE ma_sp = ?");
+            $stmtSp->execute([$imagePath, $maSp]);
+
+            $this->pdo->commit();
+            return true;
+        } catch (Exception $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * Xóa 1 ảnh phụ khỏi CSDL (ha_hinh_anh_sp)
+     */
+    public function deleteProductImage(int $maHa): bool
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM ha_hinh_anh_sp WHERE ma_ha = ?");
+        $stmt->execute([$maHa]);
+        $img = $stmt->fetch();
+        if (!$img) {
+            throw new Exception('Hình ảnh không tồn tại hoặc đã bị xóa.');
+        }
+
+        $maSp = (int)$img['ma_sp'];
+        $wasMain = (int)$img['la_anh_chinh'] === 1;
+
+        $stmtDel = $this->pdo->prepare("DELETE FROM ha_hinh_anh_sp WHERE ma_ha = ?");
+        $res = $stmtDel->execute([$maHa]);
+
+        // Nếu ảnh vừa xóa là ảnh chính, thử gán ảnh còn lại đầu tiên làm ảnh chính
+        if ($wasMain) {
+            $stmtNext = $this->pdo->prepare("SELECT * FROM ha_hinh_anh_sp WHERE ma_sp = ? ORDER BY thu_tu ASC, ma_ha ASC LIMIT 1");
+            $stmtNext->execute([$maSp]);
+            $nextImg = $stmtNext->fetch();
+            if ($nextImg) {
+                $this->setMainImage((int)$nextImg['ma_ha']);
+            }
+        }
+
+        // Dọn dẹp file vật lý nếu có trong assets/images
+        if (!preg_match('/^https?:\/\//i', $img['duong_dan_anh'])) {
+            $localFile = dirname(__DIR__, 2) . '/assets/images/' . $img['duong_dan_anh'];
+            if (file_exists($localFile)) {
+                @unlink($localFile);
+            }
+        }
+
+        return $res;
     }
 
     /**

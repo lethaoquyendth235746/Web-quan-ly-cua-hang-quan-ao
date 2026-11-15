@@ -422,15 +422,26 @@ $orderStatusBadges = [
             if (ptsEl) {
               ptsEl.innerHTML = `${Number(newPoints).toLocaleString('vi-VN')} <span class="text-base font-normal text-muted">điểm</span>`;
             }
+            // Cập nhật điểm trên Header Popover nếu có
+            const tierBtn = document.getElementById('tierBtn');
+            if (tierBtn) {
+              const pointsSpan = tierBtn.querySelector('.tabular-nums');
+              if (pointsSpan) pointsSpan.textContent = Number(newPoints).toLocaleString('vi-VN') + ' điểm';
+            }
           }
 
-          // Đổi nút thành link Xem giỏ hàng/Thanh toán
+          // Chuyển trạng thái nút thành "Đã sở hữu" / link dùng ngay
           const parentDiv = btn.parentElement;
           if (parentDiv) {
             parentDiv.innerHTML = `
-              <a href="index.php?page=checkout" class="tap-feedback block w-full rounded-full bg-olive px-4 py-2.5 text-center text-xs font-semibold text-white hover:opacity-95 shadow-sm">
-                Đã có trong Ví &rarr; Dùng ngay
-              </a>
+              <div class="flex items-center gap-2">
+                <span class="inline-block rounded-full bg-stone-100 px-3 py-2 text-center text-xs font-semibold text-stone-600 flex-1">
+                  ✓ Đã sở hữu
+                </span>
+                <a href="index.php?page=checkout" class="tap-feedback rounded-full bg-olive px-3 py-2 text-center text-xs font-semibold text-white hover:opacity-95 shadow-sm">
+                  Dùng &rarr;
+                </a>
+              </div>
             `;
           }
 

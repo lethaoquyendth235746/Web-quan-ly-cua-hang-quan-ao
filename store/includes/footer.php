@@ -126,6 +126,35 @@
       window.addEventListener('scroll', () => {
         $('siteHeader')?.classList.toggle('shadow-sm', window.scrollY > 8);
       }, { passive: true });
+
+      // Nút xóa nhanh từ khóa tìm kiếm trên Header
+      function setupSearchClear(inputId, clearBtnId) {
+        const input = $(inputId);
+        const btn = $(clearBtnId);
+        if (!input || !btn) return;
+
+        function updateBtn() {
+          if (input.value.trim().length > 0) {
+            btn.classList.remove('hidden');
+          } else {
+            btn.classList.add('hidden');
+          }
+        }
+
+        input.addEventListener('input', updateBtn);
+        btn.addEventListener('click', () => {
+          input.value = '';
+          btn.classList.add('hidden');
+          input.focus();
+          // Nếu đang ở trang chủ thì cập nhật luôn bộ lọc trực tiếp
+          if (window.dispatchEvent) {
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        });
+      }
+
+      setupSearchClear('searchInput', 'clearSearchBtn');
+      setupSearchClear('searchInputMobile', 'clearSearchMobileBtn');
     })();
   </script>
 </body>

@@ -478,16 +478,28 @@ $expectedCartPoints = (int) floor(($cartSubtotalAmount / POINTS_PER_VND) * $tier
           if (action === 'plus') {
             const res = await window.cartAPI.update(maBt, currentQty + 1);
             if (!res.success) {
-              window.showStoreToast?.(res.message || 'Không thể tăng số lượng');
+              if (res.require_login && window.openAuthModal) {
+                window.openAuthModal('login');
+              } else {
+                window.showStoreToast?.(res.message || 'Không thể tăng số lượng');
+              }
             }
           } else if (action === 'minus') {
             const res = await window.cartAPI.update(maBt, currentQty - 1);
             if (!res.success) {
-              window.showStoreToast?.(res.message || 'Không thể giảm số lượng');
+              if (res.require_login && window.openAuthModal) {
+                window.openAuthModal('login');
+              } else {
+                window.showStoreToast?.(res.message || 'Không thể giảm số lượng');
+              }
             }
           } else if (action === 'remove') {
             const res = await window.cartAPI.remove(maBt);
-            window.showStoreToast?.(res.message || 'Đã xóa sản phẩm khỏi giỏ');
+            if (!res.success && res.require_login && window.openAuthModal) {
+              window.openAuthModal('login');
+            } else {
+              window.showStoreToast?.(res.message || 'Đã xóa sản phẩm khỏi giỏ');
+            }
           }
         } catch (err) {
           console.error('Cart interaction error:', err);

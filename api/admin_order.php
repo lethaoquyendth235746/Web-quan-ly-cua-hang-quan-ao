@@ -8,6 +8,7 @@ header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../services/admin/OrderAdminService.php';
+require_once __DIR__ . '/../services/admin/LoyaltyEngineService.php';
 
 try {
     // 1. Kiểm tra xác thực & quyền hạn Admin/Nhân viên
@@ -39,11 +40,11 @@ try {
         throw new Exception("Mã đơn hàng không hợp lệ.");
     }
 
-    $orderService = new OrderAdminService();
+    $loyaltyEngine = new LoyaltyEngineService();
 
     switch ($action) {
         case 'approve':
-            $result = $orderService->approveOrder($maDh, $newStatus);
+            $result = $loyaltyEngine->approveOrder($maDh, $newStatus);
             echo json_encode($result, JSON_UNESCAPED_UNICODE);
             break;
 

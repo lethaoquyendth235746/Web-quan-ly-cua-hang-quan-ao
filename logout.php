@@ -31,6 +31,7 @@ session_destroy();
 // 4. Khởi tạo phiên mới để gắn cờ thông báo đăng xuất
 session_start();
 $_SESSION['explicit_logout'] = true;
+$_SESSION['current_user_id'] = 0;
 
 // 5. Chuyển hướng an toàn về login.php
 header('Location: login.php?logout=1');

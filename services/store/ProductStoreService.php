@@ -151,14 +151,44 @@ class ProductStoreService
     }
 
     /**
-     * Tăng lượt xem sản phẩm 1 đơn vị (ghi thẳng vào sp_san_pham.luot_xem)
+     * Tự động tăng lượt xem sản phẩm 1 đơn vị (ghi thẳng vào sp_san_pham.luot_xem)
+     */
+    public function incrementViewCount(int $maSp): void
+    {
+        $stmt = $this->pdo->prepare(
+            "UPDATE sp_san_pham SET luot_xem = luot_xem + 1 WHERE ma_sp = :ma_sp"
+        );
+        $stmt->execute(['ma_sp' => $maSp]);
+    }
+
+    /**
+     * Tăng lượt xem sản phẩm (alias tương thích ngược)
      */
     public function incrementProductView(int $maSp): void
     {
-        $stmt = $this->pdo->prepare(
-            "UPDATE sp_san_pham SET luot_xem = luot_xem + 1 WHERE ma_sp = :id"
-        );
-        $stmt->execute(['id' => $maSp]);
+        $this->incrementViewCount($maSp);
+    }
+
+    /**
+     * Kiểm tra xem khách hàng có đơn hàng HOAN_THANH chứa sản phẩm này mà chưa đánh giá (da_cong_diem_dg = 0)
+     */
+    public function canCustomerReviewProduct(int $maNd, int $maSp): bool
+    {
+        if ($maNd <= 0) {
+            return false;
+        }
+        $stmt = $this->pdo->prepare("
+            SELECT COUNT(*) 
+            FROM ctdh_chi_tiet_dh ct
+            INNER JOIN bt_bien_the_sp bt ON ct.ma_bt = bt.ma_bt
+            INNER JOIN dh_don_hang dh ON ct.ma_dh = dh.ma_dh
+            WHERE dh.ma_nd = :ma_nd
+              AND bt.ma_sp = :ma_sp
+              AND dh.trang_thai_dh = 'HOAN_THANH'
+              AND ct.da_cong_diem_dg = 0
+        ");
+        $stmt->execute(['ma_nd' => $maNd, 'ma_sp' => $maSp]);
+        return (int)$stmt->fetchColumn() > 0;
     }
 
     /**

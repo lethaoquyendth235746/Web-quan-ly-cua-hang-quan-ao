@@ -22,6 +22,18 @@ $tierMultiplier = (float) ($loyaltyProfile['he_so_tich_diem'] ?? 1.0);
 $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
 $pointsExpected = (int) floor(((float) ($firstVariant['gia_ban_rieng'] ?? $p['gia_khuyen_mai']) / POINTS_PER_VND) * $tierMultiplier);
 
+// Tự động tăng lượt xem sản phẩm hợp lệ
+if (isset($productService) && isset($p['ma_sp'])) {
+    $productService->incrementViewCount((int)$p['ma_sp']);
+}
+
+// Kiểm tra xem khách đã mua sản phẩm này trong đơn HOAN_THANH và chưa đánh giá (da_cong_diem_dg = 0)
+$canReviewAndEarnPoints = false;
+$currentUserId = getCurrentUserId();
+if ($currentUserId > 0 && isset($productService) && isset($p['ma_sp'])) {
+    $canReviewAndEarnPoints = $productService->canCustomerReviewProduct($currentUserId, (int)$p['ma_sp']);
+}
+
 // Tính trung bình sao đánh giá thực tế
 $reviewCount = count($reviews);
 $avgRating = 0;
@@ -201,6 +213,24 @@ if ($reviewCount > 0) {
 
   <!-- Khu vực Đánh giá sản phẩm thực tế từ bảng ctdh_chi_tiet_dh -->
   <section class="mt-20 border-t border-stone-200 pt-12" aria-labelledby="reviewTitle">
+    <?php if ($canReviewAndEarnPoints): ?>
+      <div class="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-xl border border-amber-200 bg-amber-50/80 p-5 shadow-sm">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl" aria-hidden="true">🎁</span>
+          <div>
+            <p class="text-sm font-semibold text-amber-900">
+              Bạn đã mua sản phẩm này! Hãy vào Trung tâm Thành viên để đánh giá và nhận ngay +10 điểm thưởng.
+            </p>
+            <p class="mt-0.5 text-xs text-amber-700">
+              Mỗi đánh giá hợp lệ sẽ được cộng trực tiếp vào Thẻ tích điểm và hỗ trợ nâng hạng thành viên.
+            </p>
+          </div>
+        </div>
+        <a href="index.php?page=loyalty" class="tap-feedback whitespace-nowrap rounded-full bg-charcoal px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-accent transition">
+          Vào đổi điểm & Đánh giá &rarr;
+        </a>
+      </div>
+    <?php endif; ?>
     <div class="grid gap-10 lg:grid-cols-3">
       <div class="lg:col-span-1">
         <h2 id="reviewTitle" class="text-xl font-semibold">Đánh giá sản phẩm</h2>

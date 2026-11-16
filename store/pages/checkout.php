@@ -167,7 +167,7 @@ $maxPointsToUse = min(50, $diemKhaDung);
                   data-type="<?= htmlspecialchars($vch['loai_giam']) ?>"
                   data-value="<?= (float)$vch['gia_tri_giam'] ?>"
                   data-min="<?= (float)$vch['don_toi_thieu'] ?>">
-                  <?= htmlspecialchars($vch['ma_code']) ?> — <?= htmlspecialchars($vch['ten_pgg']) ?>
+                  <?= htmlspecialchars($vch['ma_code']) ?> — <?= htmlspecialchars($vch['ten_pgg']) ?> (Đơn tối thiểu: <?= formatVND($vch['don_toi_thieu']) ?> | HSD: <?= date('d/m/Y', strtotime($vch['ngay_kt'])) ?>)
                 </option>
               <?php endforeach; ?>
             </select>

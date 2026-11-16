@@ -326,6 +326,14 @@ $pageTitle = 'Hồ sơ cá nhân & Thẻ thành viên | AURA STUDIO';
 require_once __DIR__ . '/includes/header.php';
 ?>
 
+<style>
+  /* ── Galaxy Gradient – Profile Page ── */
+  body {
+    background: linear-gradient(135deg, #e8e6f8 0%, #ede9f6 30%, #eef2fb 65%, #e6ecf8 100%) !important;
+    min-height: 100vh;
+  }
+</style>
+
 <div class="container py-5">
   
   <!-- Thông báo Alert Flash Message -->
@@ -344,8 +352,8 @@ require_once __DIR__ . '/includes/header.php';
   <?php endif; ?>
 
   <!-- THẺ TÍCH ĐIỂM THÀNH VIÊN (LOYALTY CARD BANNER) -->
-  <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden text-white" 
-    style="background: linear-gradient(135deg, #2D2D2D 0%, #1f1f1f 100%); border-top: 4px solid <?= htmlspecialchars($cardInfo['mau_sac_the'] ?? '#CD7F32') ?> !important;">
+  <div class="card border-0 shadow rounded-4 mb-5 overflow-hidden text-white"
+    style="background: linear-gradient(135deg, #0f0c29 0%, #1a1060 35%, #24243e 65%, #0d0221 100%); border-top: 4px solid <?= htmlspecialchars($cardInfo['mau_sac_the'] ?? '#CD7F32') ?> !important; box-shadow: 0 8px 32px rgba(99,60,180,0.35) !important;">
     <div class="card-body p-4 p-md-5">
       <div class="row align-items-center g-4">
         <div class="col-lg-7">
@@ -414,7 +422,7 @@ require_once __DIR__ . '/includes/header.php';
       <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
         <h5 class="fw-bold text-dark fs-6 mb-3 d-flex align-items-center gap-2">
           <i class="bi bi-person-lines-fill text-secondary"></i>
-          Thông tin cá nhân (nd_nguoi_dung)
+          Thông tin cá nhân
         </h5>
         
         <form method="POST" action="profile.php">
@@ -479,14 +487,14 @@ require_once __DIR__ . '/includes/header.php';
       </div>
     </div>
 
-    <!-- CỘT PHẢI: QUẢN LÝ SỔ ĐỊA CHỈ NHẬN HÀNG (dc_dia_chi_kh) -->
+    <!-- CỘT PHẢI: QUẢN LÝ SỔ ĐỊA CHỈ NHẬN HÀNG -->
     <div class="col-lg-7" id="address-section">
       <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4 pb-3 border-bottom">
           <div>
             <h5 class="fw-bold text-dark fs-6 mb-1 d-flex align-items-center gap-2">
               <i class="bi bi-geo-alt-fill text-danger"></i>
-              Sổ địa chỉ nhận hàng (bảng <code>dc_dia_chi_kh</code>)
+              Sổ địa chỉ nhận hàng
             </h5>
             <p class="text-secondary small mb-0">Địa chỉ dùng để giao nhận hàng hóa khi thanh toán đơn hàng</p>
           </div>
@@ -514,7 +522,7 @@ require_once __DIR__ . '/includes/header.php';
                       <span class="fw-bold text-dark small"><?= htmlspecialchars($addr['ten_nguoi_nhan']) ?></span>
                       <?php if ($isDef): ?>
                         <span class="badge bg-success-subtle text-success border border-success-subtle small" style="font-size: 10px;">
-                          Mặc định (mac_dinh = 1)
+                          Mặc định
                         </span>
                       <?php endif; ?>
                     </div>
@@ -523,7 +531,15 @@ require_once __DIR__ . '/includes/header.php';
                     </div>
                     <div class="text-muted small">
                       <i class="bi bi-pin-map me-1"></i>
-                      <?= htmlspecialchars($addr['dia_chi_cu_the']) ?>, <?= htmlspecialchars($addr['phuong_xa']) ?>, <?= htmlspecialchars($addr['quan_huyen']) ?>, <?= htmlspecialchars($addr['tinh_thanh']) ?>
+                      <?php
+                        $parts = array_filter([
+                          trim((string)($addr['dia_chi_cu_the'] ?? '')),
+                          trim((string)($addr['phuong_xa'] ?? '')),
+                          trim((string)($addr['quan_huyen'] ?? '')),
+                          trim((string)($addr['tinh_thanh'] ?? ''))
+                        ], fn($v) => $v !== '');
+                        echo htmlspecialchars(implode(', ', $parts));
+                      ?>
                     </div>
                   </div>
 
@@ -612,7 +628,7 @@ require_once __DIR__ . '/includes/header.php';
           <div class="form-check">
             <input class="form-check-input" type="checkbox" id="modalMacDinh" name="mac_dinh" value="1">
             <label class="form-check-label small fw-medium text-dark" for="modalMacDinh">
-              Đặt làm địa chỉ nhận hàng mặc định (mac_dinh = 1)
+              Đặt làm địa chỉ mặc định
             </label>
           </div>
         </div>

@@ -43,6 +43,13 @@ $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
       <?php foreach ($recommendedProducts as $idx => $p): ?>
         <?php
           $pts = (int) floor(((float)$p['gia_khuyen_mai'] / POINTS_PER_VND) * $tierMultiplier);
+          $availableVariant = null;
+          foreach (($p['variants'] ?? []) as $v) {
+              if ((int)($v['so_luong_ton'] ?? 0) > 0 && (int)($v['trang_thai'] ?? 1) === 1) {
+                  $availableVariant = $v;
+                  break;
+              }
+          }
         ?>
         <article class="fade-up group" style="--stagger: <?= $idx ?>">
           <div class="relative aspect-[3/4] overflow-hidden rounded-xl bg-stone-100 shadow-sm">
@@ -53,11 +60,18 @@ $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
             <span class="tabular-nums absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-medium text-charcoal backdrop-blur">
               <?= number_format((int)$p['luot_xem'], 0, ',', '.') ?> lượt xem
             </span>
-            <button type="button"
-              onclick="addRecommendedToCart(<?= (int)$p['ma_sp'] ?>)"
-              class="tap-feedback absolute bottom-3 right-3 rounded-full bg-white px-4 py-2 text-xs font-medium text-charcoal opacity-100 shadow-sm transition duration-300 hover:bg-charcoal hover:text-white md:translate-y-2 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100">
-              + Thêm vào giỏ
-            </button>
+            <?php if ($availableVariant): ?>
+              <button type="button"
+                data-ma-bt="<?= (int)$availableVariant['ma_bt'] ?>"
+                class="js-home-add-to-cart tap-feedback absolute bottom-3 right-3 rounded-full bg-white px-4 py-2 text-xs font-medium text-charcoal opacity-100 shadow-sm transition duration-300 hover:bg-charcoal hover:text-white md:translate-y-2 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100">
+                + Thêm vào giỏ
+              </button>
+            <?php else: ?>
+              <button type="button" disabled
+                class="absolute bottom-3 right-3 rounded-full bg-stone-200/90 px-4 py-2 text-xs font-medium text-stone-500 opacity-100 shadow-sm cursor-not-allowed md:translate-y-2 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100">
+                Hết hàng
+              </button>
+            <?php endif; ?>
           </div>
           <div class="mt-4 space-y-2">
             <div class="flex items-center gap-2">
@@ -183,6 +197,13 @@ $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
             $pts = (int) floor(((float)$p['gia_khuyen_mai'] / POINTS_PER_VND) * $tierMultiplier);
             $sizesAttr = implode('|', $p['sizes']);
             $colorsAttr = implode('|', $p['colors']);
+            $availableVariant = null;
+            foreach (($p['variants'] ?? []) as $v) {
+                if ((int)($v['so_luong_ton'] ?? 0) > 0 && (int)($v['trang_thai'] ?? 1) === 1) {
+                    $availableVariant = $v;
+                    break;
+                }
+            }
           ?>
           <article class="product-card fade-up group"
             style="--stagger: <?= $idx % 6 ?>"
@@ -202,11 +223,18 @@ $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
               <span class="tabular-nums absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-medium text-charcoal backdrop-blur">
                 Tồn: <?= (int)$p['tong_ton_kho'] ?>
               </span>
-              <button type="button"
-                onclick="addFirstVariantToCart(<?= (int)$p['ma_sp'] ?>)"
-                class="tap-feedback absolute bottom-3 right-3 rounded-full bg-white px-4 py-2 text-xs font-medium text-charcoal opacity-100 shadow-sm transition duration-300 hover:bg-charcoal hover:text-white md:translate-y-2 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100">
-                + Thêm vào giỏ
-              </button>
+              <?php if ($availableVariant): ?>
+                <button type="button"
+                  data-ma-bt="<?= (int)$availableVariant['ma_bt'] ?>"
+                  class="js-home-add-to-cart tap-feedback absolute bottom-3 right-3 rounded-full bg-white px-4 py-2 text-xs font-medium text-charcoal opacity-100 shadow-sm transition duration-300 hover:bg-charcoal hover:text-white md:translate-y-2 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100">
+                  + Thêm vào giỏ
+                </button>
+              <?php else: ?>
+                <button type="button" disabled
+                  class="absolute bottom-3 right-3 rounded-full bg-stone-200/90 px-4 py-2 text-xs font-medium text-stone-500 opacity-100 shadow-sm cursor-not-allowed md:translate-y-2 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100">
+                  Hết hàng
+                </button>
+              <?php endif; ?>
             </div>
             <div class="mt-4 space-y-2">
               <div class="flex items-center justify-between gap-2">
@@ -383,11 +411,61 @@ $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
     applyFilterAndSort();
   })();
 
-  // Hàm thêm sản phẩm nhanh từ trang chủ vào giỏ hàng
-  window.addRecommendedToCart = window.addFirstVariantToCart = async function(maSp) {
-    // Nếu sản phẩm có phân loại, tìm biến thể khả dụng đầu tiên hoặc chuyển đến trang chi tiết
+  // Xử lý sự kiện click nút Thêm nhanh vào giỏ hàng (.js-home-add-to-cart)
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.js-home-add-to-cart');
+    if (!btn) return;
+    e.preventDefault();
+    const maBt = Number(btn.dataset.maBt || 0);
+    if (!maBt) return;
+
+    btn.disabled = true;
+    const originalHtml = btn.innerHTML;
+    btn.innerHTML = 'Đang thêm...';
+
     try {
-      // Gọi fetch lấy biến thể khả dụng hoặc gọi api/cart.php
+      if (window.cartAPI && window.cartAPI.add) {
+        const res = await window.cartAPI.add(maBt, 1);
+        if (res && res.success) {
+          window.showStoreToast?.(res.message || 'Đã thêm sản phẩm vào giỏ hàng!');
+          window.openCartDrawer?.();
+        } else {
+          if (res && res.require_login) {
+            if (window.openAuthModal) window.openAuthModal('login');
+          } else {
+            window.showStoreToast?.(res?.message || 'Không thể thêm sản phẩm');
+          }
+        }
+      } else {
+        // Fallback gọi trực tiếp api/cart.php
+        const res = await fetch('api/cart.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'add', ma_bt: maBt, so_luong_mua: 1 })
+        });
+        const data = await res.json();
+        if (data.success && data.data) {
+          if (window.renderCartDrawer) window.renderCartDrawer(data.data);
+          if (window.showStoreToast) window.showStoreToast(data.message || 'Đã thêm sản phẩm vào giỏ!');
+          if (window.openCartDrawer) window.openCartDrawer();
+        } else if (data.require_login) {
+          if (window.openAuthModal) window.openAuthModal('login');
+        } else {
+          window.showStoreToast?.(data.message || 'Không thể thêm vào giỏ');
+        }
+      }
+    } catch (err) {
+      console.error('Home quick add error:', err);
+      window.showStoreToast?.('Lỗi kết nối khi thêm vào giỏ');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
+  });
+
+  // Hàm thêm sản phẩm nhanh từ trang chủ vào giỏ hàng (backward compatible)
+  window.addRecommendedToCart = window.addFirstVariantToCart = async function(maSp) {
+    try {
       const res = await fetch('api/cart.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -402,7 +480,6 @@ $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
         if (data.require_login) {
           if (window.openAuthModal) window.openAuthModal('login');
         } else {
-          // Nếu cần chọn size/màu chi tiết
           window.location.href = `index.php?page=product&id=${maSp}`;
         }
       }

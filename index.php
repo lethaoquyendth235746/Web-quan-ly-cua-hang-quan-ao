@@ -26,6 +26,14 @@ switch ($page) {
         require __DIR__ . '/login.php';
         exit;
 
+    case 'register':
+        require __DIR__ . '/register.php';
+        exit;
+
+    case 'profile':
+        require __DIR__ . '/profile.php';
+        exit;
+
     case 'logout':
         require __DIR__ . '/logout.php';
         exit;

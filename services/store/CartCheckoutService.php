@@ -273,7 +273,12 @@ class CartCheckoutService
      */
     public function getCustomerAddresses(int $maNd): array
     {
-        return $this->addressService->getAddressesByUserId($maNd);
+        return getUserAddresses($this->pdo, $maNd);
+    }
+
+    public function getCustomerDefaultAddress(int $maNd): ?array
+    {
+        return getDefaultAddress($this->pdo, $maNd);
     }
 
     public function getAddressById(int $maDc, int $maNd): ?array

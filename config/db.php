@@ -5,43 +5,10 @@
  * Kèm các hàm tiện ích định dạng và quản lý phiên người dùng từ CSDL
  */
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/database.php';
 
-date_default_timezone_set('Asia/Ho_Chi_Minh');
-
-define('DB_HOST', '127.0.0.1');
-define('DB_PORT', '3306');
-define('DB_NAME', 'csdl_cua_hang_quan_ao');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('POINTS_PER_VND', 10000); // Quy chuẩn: 10.000đ = 1 điểm cơ bản
-
-/**
- * Khởi tạo và trả về đối tượng kết nối PDO (Singleton)
- */
-function getDBConnection(): PDO
-{
-    static $pdo = null;
-    if ($pdo === null) {
-        $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', DB_HOST, DB_PORT, DB_NAME);
-        $options = [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES   => false,
-        ];
-        try {
-            $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
-        } catch (PDOException $e) {
-            die('<div style="font-family:sans-serif;padding:2rem;max-width:640px;margin:2rem auto;border:1px solid #fca5a5;background:#fef2f2;border-radius:12px;color:#991b1b;">'
-                . '<h2 style="margin-top:0;">Không thể kết nối Cơ sở dữ liệu</h2>'
-                . '<p>Vui lòng kiểm tra MySQL trong XAMPP Control Panel và đảm bảo đã nạp file <code>SQL/file_mau-duLieu.sql</code> vào CSDL <strong>' . htmlspecialchars(DB_NAME) . '</strong>.</p>'
-                . '<p style="font-size:13px;color:#b91c1c;">Chi tiết lỗi: ' . htmlspecialchars($e->getMessage()) . '</p>'
-                . '</div>');
-        }
-    }
-    return $pdo;
+if (!defined('POINTS_PER_VND')) {
+    define('POINTS_PER_VND', 10000); // Quy chuẩn: 10.000đ = 1 điểm cơ bản
 }
 
 /**

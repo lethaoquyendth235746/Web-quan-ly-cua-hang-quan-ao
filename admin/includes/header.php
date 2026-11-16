@@ -4,12 +4,13 @@
  * Kết nối dữ liệu quản trị viên từ CSDL (bảng nd_nguoi_dung & vt_vai_tro)
  */
 require_once __DIR__ . '/../../config/db.php';
-require_once __DIR__ . '/auth_middleware.php';
+require_once __DIR__ . '/auth_check.php';
 require_once __DIR__ . '/../../services/admin/DashboardService.php';
 
 $dashServiceForHeader = new DashboardService();
 $adminUser = $dashServiceForHeader->getCurrentAdminProfile(getCurrentAdminId());
 $activeAdminMenu = $activeAdminMenu ?? 'dashboard';
+$isAdmin = ((int)($adminUser['ma_vt'] ?? 0) === ROLE_ADMIN);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -95,16 +96,23 @@ $activeAdminMenu = $activeAdminMenu ?? 'dashboard';
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 4h12v16l-6-3-6 3V4Z" stroke-linejoin="round" /></svg>
           Quản lý Đơn hàng
         </a>
-        <a href="tiers.php" <?= $activeAdminMenu === 'tiers' ? 'aria-current="page"' : '' ?>
-          class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm <?= $activeAdminMenu === 'tiers' ? 'bg-slate-100 font-medium text-slate-900' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' ?>">
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.6 6.8 19.1l1-5.8-4.3-4.1 5.9-.9L12 3Z" stroke-linejoin="round" /></svg>
-          Cấu hình Hạng thành viên
-        </a>
-        <a href="vouchers.php" <?= $activeAdminMenu === 'vouchers' ? 'aria-current="page"' : '' ?>
-          class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm <?= $activeAdminMenu === 'vouchers' ? 'bg-slate-100 font-medium text-slate-900' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' ?>">
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9a2 2 0 0 0 0 4v2h18v-2a2 2 0 0 0 0-4V7H3v2Z" stroke-linejoin="round" /></svg>
-          Chiến dịch Voucher
-        </a>
+        <?php if ($isAdmin): ?>
+          <div class="px-3 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+            Quản trị Hệ thống
+          </div>
+          <a href="tiers.php" <?= $activeAdminMenu === 'tiers' ? 'aria-current="page"' : '' ?>
+            class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm <?= $activeAdminMenu === 'tiers' ? 'bg-slate-100 font-medium text-slate-900' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' ?>">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.6 6.8 19.1l1-5.8-4.3-4.1 5.9-.9L12 3Z" stroke-linejoin="round" /></svg>
+            Cấu hình Hạng thành viên
+            <span class="ml-auto rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-semibold text-purple-700">Admin</span>
+          </a>
+          <a href="vouchers.php" <?= $activeAdminMenu === 'vouchers' ? 'aria-current="page"' : '' ?>
+            class="nav-item flex shrink-0 items-center gap-3 rounded-lg px-3 py-2.5 text-sm <?= $activeAdminMenu === 'vouchers' ? 'bg-slate-100 font-medium text-slate-900' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900' ?>">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9a2 2 0 0 0 0 4v2h18v-2a2 2 0 0 0 0-4V7H3v2Z" stroke-linejoin="round" /></svg>
+            Chiến dịch Voucher
+            <span class="ml-auto rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-semibold text-purple-700">Admin</span>
+          </a>
+        <?php endif; ?>
       </nav>
 
       <div class="border-t border-slate-200 px-6 py-4 lg:mt-auto space-y-2">

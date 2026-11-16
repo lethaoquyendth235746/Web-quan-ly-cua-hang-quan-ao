@@ -242,16 +242,22 @@ $cartTotalCount = array_sum(array_column($cartItems, 'so_luong_mua'));
             </div>
 
             <div class="mt-2.5 flex items-center justify-between text-xs">
-              <a href="index.php?page=loyalty#so-dia-chi" class="font-medium text-accent hover:underline">
-                Sổ địa chỉ nhận hàng &rarr;
-              </a>
+              <div class="flex items-center gap-2">
+                <a href="profile.php" class="font-medium text-charcoal hover:underline">
+                  Hồ sơ &amp; Thẻ
+                </a>
+                <span class="text-stone-300">&bull;</span>
+                <a href="profile.php#address-section" class="font-medium text-accent hover:underline">
+                  Sổ địa chỉ
+                </a>
+              </div>
               <?php if (hasAdminAccess()): ?>
                 <a href="admin/index.php" class="font-semibold text-purple-700 hover:underline">
                   Vào Quản trị (Admin) &rarr;
                 </a>
               <?php else: ?>
                 <a href="admin/index.php" class="text-stone-500 hover:underline">
-                  Thử vào Quản trị &rarr;
+                  Vào Quản trị &rarr;
                 </a>
               <?php endif; ?>
             </div>

@@ -328,8 +328,9 @@ class CartCheckoutService
             INNER JOIN pgg_phieu_giam_gia pgg ON vkh.ma_pgg = pgg.ma_pgg
             WHERE vkh.ma_nd = :ma_nd
               AND vkh.trang_thai_su_dung = 0
-              AND pgg.ngay_bd <= NOW() AND pgg.ngay_kt > NOW()
-            ORDER BY vkh.ngay_doi DESC
+              AND NOW() BETWEEN pgg.ngay_bd AND pgg.ngay_kt
+              AND pgg.ngay_kt > NOW()
+            ORDER BY pgg.gia_tri_giam DESC, vkh.ngay_doi DESC
         ");
         $stmt->execute(['ma_nd' => $maNd]);
         return $stmt->fetchAll();

@@ -257,16 +257,8 @@ $cartTotalCount = array_sum(array_column($cartItems, 'so_luong_mua'));
                 </a>
               </div>
               <?php if (hasAdminAccess()): ?>
-                <a href="admin/index.php" class="font-semibold text-purple-700 hover:underline">
-<<<<<<< HEAD
+                <a href="../admin/index.php" class="font-semibold text-purple-700 hover:underline">
                   Vào Quản trị (Admin) &rarr;
-                </a>
-              <?php else: ?>
-                <a href="admin/index.php" class="text-stone-500 hover:underline">
-                  Vào Quản trị &rarr;
-=======
-                  Trang Quản trị &rarr;
->>>>>>> origin/main
                 </a>
               <?php endif; ?>
             </div>

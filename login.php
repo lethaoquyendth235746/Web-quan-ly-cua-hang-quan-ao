@@ -108,11 +108,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-<<<<<<< HEAD
 $pageTitle = 'Đăng nhập tài khoản | AURA STUDIO';
 require_once __DIR__ . '/includes/header.php';
-=======
->>>>>>> origin/main
 ?>
 
 <div class="container py-5">
@@ -194,76 +191,19 @@ require_once __DIR__ . '/includes/header.php';
         </div>
       </div>
 
-<<<<<<< HEAD
       <!-- Quick Demo Login Section -->
       <div class="card border-0 shadow-sm rounded-4 p-4 mt-4 bg-white">
         <div class="d-flex justify-content-between align-items-center mb-2">
           <span class="small fw-bold text-dark text-uppercase">Tài khoản kiểm thử nhanh (Demo)</span>
           <span class="badge bg-light text-dark border font-monospace small">Pass: 123456</span>
-=======
-    <div class="grid gap-8 lg:grid-cols-12">
-      <!-- Form Box (Col 12 / Max width centered) -->
-      <div class="lg:col-span-8 lg:col-start-3 bg-white rounded-2xl border border-stone-200 p-6 sm:p-8 shadow-sm">
-        
-        <!-- Tab selector -->
-        <div class="flex border-b border-stone-200 mb-6">
-          <button type="button" id="tabLoginBtn" onclick="switchAuthTab('login')"
-            class="pb-3 text-sm font-semibold transition border-b-2 mr-6 <?= $activeTab === 'login' ? 'border-charcoal text-charcoal' : 'border-transparent text-muted hover:text-charcoal' ?>">
-            Đăng nhập tài khoản
-          </button>
-          <button type="button" id="tabRegisterBtn" onclick="switchAuthTab('register')"
-            class="pb-3 text-sm font-semibold transition border-b-2 <?= $activeTab === 'register' ? 'border-charcoal text-charcoal' : 'border-transparent text-muted hover:text-charcoal' ?>">
-            Đăng ký thành viên mới
-          </button>
->>>>>>> origin/main
         </div>
         <p class="text-secondary small mb-3">Nhấp vào tài khoản để điền thông tin và đăng nhập ngay lập tức:</p>
 
-<<<<<<< HEAD
         <div class="row g-2">
           <div class="col-6">
             <button type="button" onclick="quickFill('admin_duc', '123456')" class="btn btn-sm btn-outline-primary w-100 text-start py-2">
               <div class="fw-semibold small">👑 Admin Đức</div>
               <div class="text-muted" style="font-size: 10px;">Quản trị viên (ma_vt=1)</div>
-=======
-        <!-- TAB 1: FORM ĐĂNG NHẬP -->
-        <div id="loginSection" class="<?= $activeTab === 'login' ? '' : 'hidden' ?>">
-          <form method="POST" action="login.php<?= !empty($redirectUrl) ? '?redirect=' . urlencode($redirectUrl) : '' ?>" class="space-y-4">
-            <input type="hidden" name="action" value="login" />
-
-            <div>
-              <label for="loginIdentifier" class="block text-xs font-semibold uppercase tracking-wider text-charcoal mb-1.5">
-                Tên đăng nhập hoặc Email <span class="text-red-500">*</span>
-              </label>
-              <input type="text" id="loginIdentifier" name="identifier" required
-                placeholder="Nhập tên đăng nhập hoặc email của bạn"
-                value="<?= htmlspecialchars($_POST['identifier'] ?? '') ?>"
-                class="w-full rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-sm text-charcoal placeholder:text-stone-400 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 transition" />
-            </div>
-
-            <div>
-              <div class="flex items-center justify-between mb-1.5">
-                <label for="loginPassword" class="block text-xs font-semibold uppercase tracking-wider text-charcoal">
-                  Mật khẩu <span class="text-red-500">*</span>
-                </label>
-              </div>
-              <input type="password" id="loginPassword" name="password" required
-                placeholder="Nhập mật khẩu của bạn..."
-                class="w-full rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-sm text-charcoal placeholder:text-stone-400 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 transition" />
-            </div>
-
-            <div class="pt-2">
-              <button type="submit" class="tap-feedback w-full rounded-xl bg-charcoal py-3 text-sm font-semibold text-white hover:bg-accent transition shadow-sm">
-                Đăng nhập hệ thống
-              </button>
-            </div>
-          </form>
-
-          <p class="mt-4 text-center text-xs text-muted">
-            Chưa có tài khoản? 
-            <button type="button" onclick="switchAuthTab('register')" class="font-semibold text-accent hover:underline">
-              Đăng ký ngay &amp; nhận Thẻ Hạng Đồng
->>>>>>> origin/main
             </button>
           </div>
           <div class="col-6">
@@ -286,15 +226,11 @@ require_once __DIR__ . '/includes/header.php';
           </div>
         </div>
       </div>
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/main
     </div>
   </div>
 </div>
 
-<<<<<<< HEAD
 <script>
   function quickFill(u, p) {
     document.getElementById('identifier').value = u;
@@ -304,35 +240,3 @@ require_once __DIR__ . '/includes/header.php';
 </script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
-=======
-  <footer class="border-t border-stone-200 bg-white py-6 text-center text-xs text-muted">
-    AURA STUDIO &middot; Hệ thống Quản lý Cửa hàng Quần áo &amp; Khách hàng Thân thiết
-  </footer>
-
-  <script>
-    function switchAuthTab(tab) {
-      const loginSection = document.getElementById('loginSection');
-      const registerSection = document.getElementById('registerSection');
-      const tabLoginBtn = document.getElementById('tabLoginBtn');
-      const tabRegisterBtn = document.getElementById('tabRegisterBtn');
-
-      if (tab === 'register') {
-        loginSection.classList.add('hidden');
-        registerSection.classList.remove('hidden');
-        tabRegisterBtn.classList.add('border-charcoal', 'text-charcoal');
-        tabRegisterBtn.classList.remove('border-transparent', 'text-muted');
-        tabLoginBtn.classList.remove('border-charcoal', 'text-charcoal');
-        tabLoginBtn.classList.add('border-transparent', 'text-muted');
-      } else {
-        registerSection.classList.add('hidden');
-        loginSection.classList.remove('hidden');
-        tabLoginBtn.classList.add('border-charcoal', 'text-charcoal');
-        tabLoginBtn.classList.remove('border-transparent', 'text-muted');
-        tabRegisterBtn.classList.remove('border-charcoal', 'text-charcoal');
-        tabRegisterBtn.classList.add('border-transparent', 'text-muted');
-      }
-    }
-  </script>
-</body>
-</html>
->>>>>>> origin/main

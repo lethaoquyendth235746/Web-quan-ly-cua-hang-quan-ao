@@ -230,7 +230,7 @@ $cartTotalCount = array_sum(array_column($cartItems, 'so_luong_mua'));
             <svg class="h-3.5 w-3.5 text-muted" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
           </button>
 
-          <div id="userSwitchPanel" class="popover-origin popover-hidden absolute right-0 top-full z-50 mt-3 w-80 rounded-xl border border-stone-200 bg-white p-4 shadow-lg">
+          <div id="userSwitchPanel" class="popover-origin popover-hidden absolute right-0 top-full z-50 mt-3 w-80 sm:w-[350px] rounded-xl border border-stone-200 bg-white p-4 shadow-lg">
             <div class="border-b border-stone-100 pb-3">
               <div class="flex items-center justify-between">
                 <p class="text-xs font-semibold uppercase tracking-wider text-muted">
@@ -246,19 +246,18 @@ $cartTotalCount = array_sum(array_column($cartItems, 'so_luong_mua'));
               <p class="text-xs text-muted"><?= htmlspecialchars($loyaltyProfile['email'] ?? '') ?> &middot; <?= htmlspecialchars($loyaltyProfile['sdt'] ?? '') ?></p>
             </div>
 
-            <div class="mt-2.5 flex items-center justify-between text-xs">
-              <div class="flex items-center gap-2">
-                <a href="profile.php" class="font-medium text-charcoal hover:underline">
-                  Hồ sơ &amp; Thẻ
-                </a>
-                <span class="text-stone-300">&bull;</span>
-                <a href="profile.php#address-section" class="font-medium text-accent hover:underline">
-                  Sổ địa chỉ
-                </a>
-              </div>
+            <div class="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-xs">
+              <a href="profile.php" class="font-medium text-charcoal hover:text-accent hover:underline whitespace-nowrap focus:outline-none">
+                Hồ sơ &amp; Thẻ
+              </a>
+              <span class="text-stone-300 select-none">&bull;</span>
+              <a href="profile.php#address-section" class="font-medium text-accent hover:text-charcoal hover:underline whitespace-nowrap focus:outline-none">
+                Sổ địa chỉ
+              </a>
               <?php if (hasAdminAccess()): ?>
-                <a href="../admin/index.php" class="font-semibold text-purple-700 hover:underline">
-                  Vào Quản trị (Admin) &rarr;
+                <span class="text-stone-300 select-none">&bull;</span>
+                <a href="admin/index.php" class="inline-flex items-center gap-1 text-xs font-semibold text-amber-800 hover:text-amber-950 whitespace-nowrap no-underline focus:outline-none">
+                  Vào Quản trị &rarr;
                 </a>
               <?php endif; ?>
             </div>

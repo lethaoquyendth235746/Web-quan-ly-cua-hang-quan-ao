@@ -21,10 +21,10 @@ $txLabels = [
 ];
 
 $orderStatusBadges = [
-    'CHO_XAC_NHAN' => ['label' => 'Chờ xác nhận',  'class' => 'bg-amber-100 text-amber-800'],
-    'DANG_GIAO'    => ['label' => 'Đang giao hàng', 'class' => 'bg-blue-100 text-blue-800'],
+    'CHO_XAC_NHAN' => ['label' => 'Chờ xác nhận', 'class' => 'bg-amber-100 text-amber-800'],
+    'DANG_GIAO'    => ['label' => 'Đang giao',     'class' => 'bg-blue-100 text-blue-800'],
     'HOAN_THANH'   => ['label' => 'Hoàn thành',    'class' => 'bg-emerald-100 text-emerald-800'],
-    'DA_HUY'       => ['label' => 'Đã hủy',        'class' => 'bg-rose-100 text-rose-800'],
+    'DA_HUY'       => ['label' => 'Đã hủy',        'class' => 'bg-rose-100 text-rose-700'],
 ];
 ?>
 <div id="loyaltyView" class="fade-up space-y-16">
@@ -324,76 +324,107 @@ $orderStatusBadges = [
   </section>
 
   <!-- Danh sách Đơn đặt hàng của khách hàng từ bảng dh_don_hang -->
-  <section aria-labelledby="myOrdersTitle">
-    <h2 id="myOrdersTitle" class="text-xl font-semibold">Đơn hàng của <?= htmlspecialchars($hoTen) ?></h2>
-    <div class="mt-6 overflow-x-auto rounded-xl bg-white shadow-sm">
+  <section aria-labelledby="myOrdersTitle" class="w-full">
+    <div class="flex items-center justify-between">
+      <h2 id="myOrdersTitle" class="text-xl font-semibold text-charcoal">Đơn hàng của <?= htmlspecialchars($hoTen) ?></h2>
+      <span class="text-xs text-muted"><?= count($customerOrders) ?> đơn hàng</span>
+    </div>
+    <div class="mt-6 w-full overflow-x-auto rounded-2xl border border-stone-200 bg-white shadow-sm">
       <?php if (empty($customerOrders)): ?>
         <div class="p-10 text-center text-sm text-muted">Bạn chưa có đơn đặt hàng nào.</div>
       <?php else: ?>
-        <table class="min-w-full text-left text-sm">
-          <thead class="border-b border-stone-200 text-xs uppercase tracking-wider text-muted">
+        <table class="min-w-full text-left text-xs sm:text-sm border-collapse">
+          <thead class="border-b border-stone-200 bg-stone-50/75 text-xs uppercase tracking-wider text-muted">
             <tr>
-              <th scope="col" class="px-5 py-4 font-medium">Mã đơn</th>
-              <th scope="col" class="px-5 py-4 font-medium">Sản phẩm</th>
-              <th scope="col" class="px-5 py-4 font-medium">Ngày đặt</th>
-              <th scope="col" class="px-5 py-4 text-right font-medium">Tiền hàng</th>
-              <th scope="col" class="px-5 py-4 text-right font-medium">Giảm Hạng TV</th>
-              <th scope="col" class="px-5 py-4 text-right font-medium">Giảm Voucher/Điểm</th>
-              <th scope="col" class="px-5 py-4 text-right font-medium">Thực trả</th>
-              <th scope="col" class="px-5 py-4 text-right font-medium">Điểm tích lũy</th>
-              <th scope="col" class="px-5 py-4 font-medium">Trạng thái</th>
+              <th scope="col" class="px-3 py-3 font-semibold text-charcoal whitespace-nowrap">Mã đơn</th>
+              <th scope="col" class="px-3 py-3 font-semibold text-charcoal min-w-[200px]">Sản phẩm</th>
+              <th scope="col" class="px-3 py-3 font-semibold text-charcoal whitespace-nowrap">Ngày đặt</th>
+              <th scope="col" class="px-3 py-3 font-semibold text-charcoal text-right whitespace-nowrap">Thực trả</th>
+              <th scope="col" class="px-3 py-3 font-semibold text-charcoal text-center whitespace-nowrap">Trạng thái</th>
+              <th scope="col" class="px-3 py-3 font-semibold text-charcoal text-center whitespace-nowrap">Thao tác</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-stone-200 tabular-nums">
             <?php foreach ($customerOrders as $od): ?>
-              <?php
-                $firstItem = $od['items'][0] ?? null;
-                $totalItemCount = count($od['items'] ?? []);
-                $otherItemCount = $totalItemCount - 1;
-              ?>
-              <tr class="align-middle hover:bg-stone-50/50 transition-colors">
-                <td class="whitespace-nowrap px-5 py-4 font-mono font-semibold text-charcoal">#DH<?= str_pad((string)$od['ma_dh'], 2, '0', STR_PAD_LEFT) ?></td>
-                <td class="px-5 py-4">
-                  <?php if ($firstItem): ?>
-                    <div class="flex items-center gap-3 min-w-[220px] max-w-[280px]">
-                      <img src="<?= htmlspecialchars($firstItem['anh_chinh_url'] ?? resolveProductImage($firstItem['anh_chinh'] ?? null)) ?>"
-                           alt="<?= htmlspecialchars($firstItem['ten_sp']) ?>"
-                           class="w-12 h-14 rounded-lg object-cover border border-stone-200 bg-stone-50 flex-shrink-0"
-                           loading="lazy" />
-                      <div class="min-w-0 flex-1">
-                        <p class="truncate text-xs font-semibold text-charcoal" title="<?= htmlspecialchars($firstItem['ten_sp']) ?>">
-                          <?= htmlspecialchars($firstItem['ten_sp']) ?>
-                        </p>
-                        <p class="mt-0.5 text-[11px] text-muted truncate">
-                          <?= htmlspecialchars($firstItem['mau_sac']) ?> &middot; Size <?= htmlspecialchars($firstItem['kich_co']) ?> &middot; x<?= (int)$firstItem['so_luong'] ?>
-                        </p>
-                        <?php if ($otherItemCount > 0): ?>
-                          <span class="mt-1 inline-flex items-center rounded bg-stone-100 px-1.5 py-0.5 text-[10px] font-medium text-stone-600">
-                            + <?= $otherItemCount ?> sản phẩm khác
-                          </span>
-                        <?php endif; ?>
-                      </div>
+              <?php $stKey = $od['trang_thai_dh'] ?? 'CHO_XAC_NHAN'; ?>
+              <tr id="order-row-<?= (int)$od['ma_dh'] ?>" class="align-top hover:bg-stone-50/50 transition-colors">
+                <td class="whitespace-nowrap px-3 py-3 font-mono font-semibold text-charcoal">
+                  #<?= htmlspecialchars($od['ma_dh_code'] ?? ('DH' . str_pad((string)$od['ma_dh'], 2, '0', STR_PAD_LEFT))) ?>
+                </td>
+                <td class="px-3 py-3">
+                  <?php if (!empty($od['items'])): ?>
+                    <div class="space-y-2 min-w-0 max-w-sm">
+                      <?php foreach ($od['items'] as $item): ?>
+                        <div class="flex items-center justify-between gap-2.5 p-2 rounded-lg bg-stone-50/80 border border-stone-200/70">
+                          <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                            <img src="<?= htmlspecialchars($item['anh_chinh_url'] ?? resolveProductImage($item['anh_chinh'] ?? null)) ?>"
+                                 alt="<?= htmlspecialchars($item['ten_sp']) ?>"
+                                 class="w-10 h-12 rounded object-cover border border-stone-200 bg-white flex-shrink-0"
+                                 loading="lazy" />
+                            <div class="min-w-0 flex-1">
+                              <p class="truncate text-xs font-semibold text-charcoal" title="<?= htmlspecialchars($item['ten_sp']) ?>">
+                                <?= htmlspecialchars($item['ten_sp']) ?>
+                              </p>
+                              <p class="text-[11px] text-muted truncate">
+                                <?= htmlspecialchars($item['mau_sac']) ?> &middot; Size <?= htmlspecialchars($item['kich_co']) ?> &middot; x<?= (int)$item['so_luong'] ?>
+                              </p>
+                            </div>
+                          </div>
+
+                          <div class="flex-shrink-0">
+                            <?php if ($od['trang_thai_dh'] === 'HOAN_THANH'): ?>
+                              <?php if ((int)$item['da_cong_diem_dg'] === 0): ?>
+                                <button type="button"
+                                  class="btn-open-review-modal tap-feedback inline-flex items-center gap-1 rounded-full bg-amber-500 hover:bg-amber-600 px-2 py-0.5 text-[11px] font-semibold text-white shadow-sm transition"
+                                  data-ctdh="<?= (int)$item['ma_ctdh'] ?>"
+                                  data-product-name="<?= htmlspecialchars($item['ten_sp']) ?>"
+                                  data-variant="<?= htmlspecialchars($item['mau_sac'] . ' &middot; Size ' . $item['kich_co']) ?>">
+                                  ⭐ Đánh giá (+10đ)
+                                </button>
+                              <?php else: ?>
+                                <span class="inline-flex items-center gap-0.5 rounded-full bg-amber-50 border border-amber-200 px-1.5 py-0.5 text-[10px] font-medium text-amber-800" title="<?= htmlspecialchars($item['noi_dung_danh_gia'] ?? '') ?>">
+                                  <?= str_repeat('★', (int)($item['so_sao_danh_gia'] ?: 5)) ?> <span class="text-[9px] text-amber-600">(+10đ)</span>
+                                </span>
+                              <?php endif; ?>
+                            <?php endif; ?>
+                          </div>
+                        </div>
+                      <?php endforeach; ?>
                     </div>
                   <?php else: ?>
                     <span class="text-xs text-muted italic">Không có chi tiết</span>
                   <?php endif; ?>
                 </td>
-                <td class="whitespace-nowrap px-5 py-4 text-xs text-muted"><?= formatDateVN($od['ngay_dat'], true) ?></td>
-                <td class="whitespace-nowrap px-5 py-4 text-right"><?= formatVND($od['tong_tien_hang']) ?></td>
-                <td class="whitespace-nowrap px-5 py-4 text-right text-olive">-<?= formatVND($od['tien_giam_hang_tv']) ?></td>
-                <td class="whitespace-nowrap px-5 py-4 text-right text-accent">
-                  -<?= formatVND((float)$od['tien_giam_voucher'] + ((int)$od['diem_su_dung'] * 1000)) ?>
+                <td class="whitespace-nowrap px-3 py-3 text-xs text-muted">
+                  <?= formatDateVN($od['ngay_dat'], true) ?>
                 </td>
-                <td class="whitespace-nowrap px-5 py-4 text-right font-semibold text-charcoal"><?= formatVND($od['thanh_tien']) ?></td>
-                <td class="whitespace-nowrap px-5 py-4 text-right font-medium text-emerald-700">+<?= (int)$od['diem_cong_du_kien'] ?> điểm</td>
-                <td class="whitespace-nowrap px-5 py-4">
+                <td class="whitespace-nowrap px-3 py-3 text-right">
+                  <div class="font-semibold text-charcoal"><?= formatVND($od['thanh_tien']) ?></div>
+                  <?php if ((float)$od['tong_tien_hang'] > (float)$od['thanh_tien']): ?>
+                    <div class="text-[11px] text-muted line-through"><?= formatVND($od['tong_tien_hang']) ?></div>
+                  <?php endif; ?>
+                  <?php if ((int)($od['diem_cong_du_kien'] ?? 0) > 0 && $od['trang_thai_dh'] !== 'DA_HUY'): ?>
+                    <div id="order-points-<?= (int)$od['ma_dh'] ?>" class="text-[11px] text-emerald-700 font-medium">+<?= (int)$od['diem_cong_du_kien'] ?> điểm</div>
+                  <?php endif; ?>
+                </td>
+                <td class="whitespace-nowrap px-3 py-3 text-center">
                   <?php
-                    $stKey = $od['trang_thai_dh'] ?? 'CHO_XAC_NHAN';
                     $stBadge = $orderStatusBadges[$stKey] ?? ['label' => $stKey, 'class' => 'bg-stone-100 text-charcoal'];
                   ?>
-                  <span class="rounded-full px-3 py-1 text-xs font-semibold <?= $stBadge['class'] ?>">
+                  <span class="inline-block rounded-full px-2.5 py-1 text-xs font-semibold <?= $stBadge['class'] ?>" id="order-badge-<?= (int)$od['ma_dh'] ?>">
                     <?= htmlspecialchars($stBadge['label']) ?>
                   </span>
+                </td>
+                <td class="whitespace-nowrap px-3 py-3 text-center">
+                  <button type="button"
+                    class="btn-open-order-detail tap-feedback inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-300 bg-white text-xs font-medium text-stone-700 hover:bg-stone-100 transition shadow-sm"
+                    data-order-id="<?= (int)$od['ma_dh'] ?>">
+                    <svg class="w-3.5 h-3.5 text-stone-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Chi tiết
+                  </button>
                 </td>
               </tr>
             <?php endforeach; ?>
@@ -404,9 +435,182 @@ $orderStatusBadges = [
   </section>
 </div>
 
+<!-- Dữ liệu JSON các đơn hàng gắn sẵn cho Modal Chi tiết đơn hàng -->
+<script id="customerOrdersJson" type="application/json">
+<?= json_encode($customerOrders, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) ?>
+</script>
+
+<!-- Modal Chi tiết đơn hàng của khách hàng (Yêu cầu 3) -->
+<div id="customerOrderDetailModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-stone-900/60 backdrop-blur-sm p-4 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modalDetailOrderTitle">
+  <div class="relative w-full max-w-2xl my-8 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-2xl flex flex-col max-h-[90vh]">
+    <!-- Modal Header -->
+    <div class="flex items-start justify-between border-b border-stone-100 px-6 py-4 bg-stone-50/70">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <h3 id="modalDetailOrderTitle" class="text-lg font-bold text-charcoal">#DH00</h3>
+          <span id="modalDetailStatusBadge" class="rounded-full px-2.5 py-0.5 text-xs font-semibold bg-stone-100 text-charcoal">
+            Chờ xác nhận
+          </span>
+        </div>
+        <p class="mt-1 text-xs text-muted">
+          Đặt lúc: <span id="modalDetailOrderDate" class="font-medium text-stone-600">--</span>
+        </p>
+      </div>
+      <button type="button" id="closeOrderDetailModalBtn" aria-label="Đóng" class="rounded-lg p-1.5 text-stone-400 hover:bg-stone-200/60 hover:text-charcoal transition">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
+      </button>
+    </div>
+
+    <!-- Modal Body (Scrollable) -->
+    <div class="p-6 overflow-y-auto space-y-6 flex-1 text-sm">
+      <!-- Thông tin nhận hàng -->
+      <div class="rounded-xl border border-stone-200 bg-stone-50/50 p-4 space-y-2.5">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-charcoal flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-stone-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+          </svg>
+          Thông tin nhận hàng
+        </h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1 border-t border-stone-200/60">
+          <div>
+            <span class="text-muted">Người nhận:</span>
+            <span id="modalDetailReceiverName" class="font-semibold text-charcoal ml-1">--</span>
+          </div>
+          <div>
+            <span class="text-muted">Số điện thoại:</span>
+            <span id="modalDetailReceiverPhone" class="font-semibold text-charcoal ml-1">--</span>
+          </div>
+          <div class="sm:col-span-2">
+            <span class="text-muted">Địa chỉ giao:</span>
+            <span id="modalDetailReceiverAddress" class="text-stone-700 ml-1 leading-relaxed">--</span>
+          </div>
+          <div class="sm:col-span-2">
+            <span class="text-muted">Phương thức thanh toán:</span>
+            <span id="modalDetailPaymentMethod" class="inline-flex items-center gap-1 font-medium text-stone-800 ml-1">
+              --
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Danh sách sản phẩm đã đặt -->
+      <div>
+        <h4 class="text-xs font-bold uppercase tracking-wider text-charcoal mb-3 flex items-center justify-between">
+          <span>Sản phẩm đã đặt</span>
+          <span id="modalDetailItemCount" class="text-xs font-normal text-muted">(0 món)</span>
+        </h4>
+        <div id="modalDetailItemsList" class="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Tổng kết thanh toán -->
+      <div class="rounded-xl border border-stone-200 bg-stone-50/50 p-4 space-y-2 text-xs">
+        <h4 class="text-xs font-bold uppercase tracking-wider text-charcoal mb-2">Chi tiết thanh toán</h4>
+        <div class="flex justify-between text-muted">
+          <span>Tạm tính tiền hàng:</span>
+          <span id="modalDetailSubtotal" class="font-medium text-charcoal">0₫</span>
+        </div>
+        <div class="flex justify-between text-muted">
+          <span>Giảm giá Hạng thành viên:</span>
+          <span id="modalDetailTierDiscount" class="font-medium text-olive">-0₫</span>
+        </div>
+        <div class="flex justify-between text-muted">
+          <span>Giảm giá Voucher &amp; Tiêu điểm:</span>
+          <span id="modalDetailVoucherDiscount" class="font-medium text-accent">-0₫</span>
+        </div>
+        <div class="flex justify-between text-muted">
+          <span>Phí vận chuyển:</span>
+          <span id="modalDetailShippingFee" class="font-medium text-charcoal">Miễn phí</span>
+        </div>
+        <div class="flex justify-between items-baseline pt-2.5 border-t border-stone-200 text-sm font-semibold text-charcoal">
+          <span>Tổng thanh toán thực trả:</span>
+          <span id="modalDetailTotal" class="text-base font-bold text-charcoal">0₫</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="flex items-center justify-between border-t border-stone-100 px-6 py-4 bg-stone-50/70">
+      <div>
+        <button type="button" id="modalDetailCancelBtn"
+          class="hidden tap-feedback items-center gap-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+          </svg>
+          Hủy đơn hàng
+        </button>
+      </div>
+      <button type="button" id="modalDetailCloseFooterBtn"
+        class="tap-feedback rounded-lg border border-stone-300 bg-white hover:bg-stone-100 px-5 py-2 text-xs font-semibold text-stone-700 shadow-sm transition">
+        Đóng
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Đánh giá sản phẩm nhận thưởng nóng +10 điểm (Mục 1.4) -->
+<div id="loyaltyReviewModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-stone-900/60 backdrop-blur-sm px-4 py-8" role="dialog" aria-modal="true" aria-labelledby="loyaltyReviewModalTitle">
+  <div class="max-h-full w-full max-w-lg overflow-y-auto rounded-2xl border border-stone-200 bg-white shadow-2xl">
+    <div class="flex items-start justify-between gap-4 border-b border-stone-100 px-6 py-5">
+      <div>
+        <span class="inline-block rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
+          ⭐ Thưởng nóng +10 Điểm
+        </span>
+        <h3 id="loyaltyReviewModalTitle" class="mt-1 text-lg font-semibold text-charcoal">Đánh giá sản phẩm</h3>
+      </div>
+      <button type="button" id="closeLoyaltyReviewModalBtn" aria-label="Đóng" class="rounded-lg p-2 text-stone-400 hover:bg-stone-100 hover:text-charcoal transition">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
+      </button>
+    </div>
+
+    <form id="loyaltyReviewForm" class="space-y-5 p-6">
+      <input type="hidden" id="modalReviewCtdh" name="ma_ctdh" value="" />
+      <input type="hidden" id="modalReviewStars" name="so_sao" value="5" />
+
+      <!-- Thông tin sản phẩm -->
+      <div class="rounded-xl bg-stone-50 p-4 border border-stone-200">
+        <p id="modalReviewProductName" class="text-sm font-semibold text-charcoal"></p>
+        <p id="modalReviewVariant" class="mt-0.5 text-xs text-muted"></p>
+      </div>
+
+      <!-- Chọn số sao (1-5 sao) -->
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-wider text-charcoal mb-2">Đánh giá chất lượng sản phẩm</label>
+        <div id="modalStarRatingPicker" class="flex items-center gap-1.5 text-3xl cursor-pointer select-none">
+          <span class="star-rating-item text-amber-400 hover:scale-110 transition-transform" data-star="1">★</span>
+          <span class="star-rating-item text-amber-400 hover:scale-110 transition-transform" data-star="2">★</span>
+          <span class="star-rating-item text-amber-400 hover:scale-110 transition-transform" data-star="3">★</span>
+          <span class="star-rating-item text-amber-400 hover:scale-110 transition-transform" data-star="4">★</span>
+          <span class="star-rating-item text-amber-400 hover:scale-110 transition-transform" data-star="5">★</span>
+          <span id="starRatingLabel" class="ml-2 text-xs font-medium text-stone-600">5 sao (Rất hài lòng)</span>
+        </div>
+      </div>
+
+      <!-- Nội dung nhận xét -->
+      <div>
+        <label for="modalReviewContent" class="block text-xs font-semibold uppercase tracking-wider text-charcoal mb-1">
+          Nội dung nhận xét <span class="text-rose-600">*</span>
+        </label>
+        <textarea id="modalReviewContent" name="noi_dung_danh_gia" rows="3" required
+          placeholder="Hãy chia sẻ cảm nhận về chất liệu, form dáng và chất lượng sản phẩm..."
+          class="w-full rounded-xl border border-stone-300 p-3 text-sm text-charcoal placeholder:text-stone-400 focus:border-charcoal focus:outline-none focus:ring-1 focus:ring-charcoal"></textarea>
+      </div>
+
+      <div class="flex items-center justify-end gap-3 border-t border-stone-100 pt-4">
+        <button type="button" id="cancelLoyaltyReviewModalBtn" class="rounded-full border border-stone-300 px-5 py-2.5 text-xs font-semibold text-stone-600 hover:bg-stone-50">Hủy</button>
+        <button type="submit" id="btnSubmitLoyaltyReview" class="tap-feedback inline-flex items-center gap-2 rounded-full bg-charcoal px-6 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-accent transition">
+          Gửi đánh giá &amp; Nhận +10 điểm
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
   (() => {
-    // Xử lý đổi điểm lấy Voucher thật qua API redeem_voucher.php
+    // 1. Xử lý đổi điểm lấy Voucher thật qua API redeem_voucher.php
     document.addEventListener('click', async (e) => {
       const btn = e.target.closest('[data-redeem-btn]');
       if (!btn) return;
@@ -502,6 +706,485 @@ $orderStatusBadges = [
         btn.innerHTML = originalHtml;
       }
     });
+
+    // 2. Xử lý Modal Đánh giá sản phẩm nhận +10 điểm thưởng nóng (Mục 1.4)
+    const reviewModal = document.getElementById('loyaltyReviewModal');
+    const reviewForm = document.getElementById('loyaltyReviewForm');
+    const inputCtdh = document.getElementById('modalReviewCtdh');
+    const inputStars = document.getElementById('modalReviewStars');
+    const starLabel = document.getElementById('starRatingLabel');
+    const starItems = Array.from(document.querySelectorAll('.star-rating-item'));
+    const btnSubmitReview = document.getElementById('btnSubmitLoyaltyReview');
+
+    const starDescriptions = {
+      1: '1 sao (Tệ)',
+      2: '2 sao (Chưa ưng ý)',
+      3: '3 sao (Bình thường)',
+      4: '4 sao (Hài lòng)',
+      5: '5 sao (Rất hài lòng)'
+    };
+
+    function setStarRating(rating) {
+      if (inputStars) inputStars.value = rating;
+      if (starLabel) starLabel.textContent = starDescriptions[rating] || (rating + ' sao');
+      starItems.forEach(item => {
+        const val = Number(item.dataset.star);
+        if (val <= rating) {
+          item.classList.add('text-amber-400');
+          item.classList.remove('text-stone-300');
+        } else {
+          item.classList.remove('text-amber-400');
+          item.classList.add('text-stone-300');
+        }
+      });
+    }
+
+    starItems.forEach(item => {
+      item.addEventListener('click', () => {
+        setStarRating(Number(item.dataset.star));
+      });
+    });
+
+    function openReviewModal(ctdh, spName, variant) {
+      if (inputCtdh) inputCtdh.value = ctdh;
+      const nameEl = document.getElementById('modalReviewProductName');
+      const varEl = document.getElementById('modalReviewVariant');
+      const contentEl = document.getElementById('modalReviewContent');
+      if (nameEl) nameEl.textContent = spName;
+      if (varEl) varEl.innerHTML = variant;
+      if (contentEl) contentEl.value = '';
+      setStarRating(5);
+
+      if (reviewModal) {
+        reviewModal.classList.remove('hidden');
+        reviewModal.classList.add('flex');
+      }
+    }
+
+    function closeReviewModal() {
+      if (reviewModal) {
+        reviewModal.classList.add('hidden');
+        reviewModal.classList.remove('flex');
+      }
+    }
+
+    document.getElementById('closeLoyaltyReviewModalBtn')?.addEventListener('click', closeReviewModal);
+    document.getElementById('cancelLoyaltyReviewModalBtn')?.addEventListener('click', closeReviewModal);
+
+    reviewModal?.addEventListener('click', (e) => {
+      if (e.target === reviewModal) closeReviewModal();
+    });
+
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn-open-review-modal');
+      if (btn) {
+        openReviewModal(
+          btn.dataset.ctdh,
+          btn.dataset.productName || 'Sản phẩm',
+          btn.dataset.variant || ''
+        );
+      }
+    });
+
+    reviewForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const ctdh = Number(inputCtdh?.value || 0);
+      const stars = Number(inputStars?.value || 5);
+      const content = (document.getElementById('modalReviewContent')?.value || '').trim();
+
+      if (!content) {
+        alert('Vui lòng nhập nội dung đánh giá của bạn.');
+        return;
+      }
+
+      if (btnSubmitReview) {
+        btnSubmitReview.disabled = true;
+        const originalHtml = btnSubmitReview.innerHTML;
+        btnSubmitReview.innerHTML = `
+          <svg class="h-3.5 w-3.5 animate-spin text-white inline-block mr-1" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+          Đang gửi đánh giá...
+        `;
+
+        try {
+          const res = await fetch('api/review_product.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ma_ctdh: ctdh,
+              so_sao: stars,
+              noi_dung_danh_gia: content
+            })
+          });
+          const data = await res.json();
+
+          if (data.success) {
+            closeReviewModal();
+            if (window.showStoreToast) {
+              window.showStoreToast('🎉 ' + data.message);
+            } else {
+              alert(data.message);
+            }
+
+            // Cập nhật số điểm khả dụng trên giao diện
+            const newPoints = data.diem_kha_dung;
+            if (newPoints !== undefined) {
+              const ptsEl = document.getElementById('loyaltyAvailablePoints');
+              if (ptsEl) {
+                ptsEl.innerHTML = `${Number(newPoints).toLocaleString('vi-VN')} <span class="text-base font-normal text-muted">điểm</span>`;
+              }
+              const tierBtn = document.getElementById('tierBtn');
+              if (tierBtn) {
+                const pointsSpan = tierBtn.querySelector('.tabular-nums');
+                if (pointsSpan) pointsSpan.textContent = Number(newPoints).toLocaleString('vi-VN') + ' điểm';
+              }
+            }
+
+            // Tải lại sau 1.2s để cập nhật đồng bộ bảng đơn và lịch sử giao dịch điểm
+            setTimeout(() => {
+              window.location.reload();
+            }, 1200);
+
+          } else {
+            alert(data.message || 'Gửi đánh giá không thành công.');
+            btnSubmitReview.disabled = false;
+            btnSubmitReview.innerHTML = originalHtml;
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Lỗi kết nối khi gửi yêu cầu đánh giá.');
+          btnSubmitReview.disabled = false;
+          btnSubmitReview.innerHTML = originalHtml;
+        }
+      }
+    });
+
+    // 3. Xử lý Modal Chi tiết đơn hàng & Khách hàng tự hủy đơn hàng (Yêu cầu 2 & 3)
+
+    // Bảng nhãn trạng thái đơn hàng (mirror từ PHP $orderStatusBadges)
+    const orderStatusBadges = {
+      'CHO_XAC_NHAN': { label: 'Chờ xác nhận', class: 'bg-amber-100 text-amber-800' },
+      'DANG_GIAO':    { label: 'Đang giao',     class: 'bg-blue-100 text-blue-800' },
+      'HOAN_THANH':   { label: 'Hoàn thành',    class: 'bg-emerald-100 text-emerald-800' },
+      'DA_HUY':       { label: 'Đã hủy',         class: 'bg-rose-100 text-rose-700' },
+    };
+
+    function formatVND(amount) {
+      return Number(amount || 0).toLocaleString('vi-VN') + '₫';
+    }
+
+    function formatDateVN(dateStr) {
+      if (!dateStr) return '--';
+      const d = new Date(dateStr.replace(' ', 'T'));
+      if (isNaN(d.getTime())) return dateStr;
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Đọc dữ liệu đơn hàng gắn sẵn
+    const rawOrdersJson = document.getElementById('customerOrdersJson')?.textContent;
+    let customerOrdersList = [];
+    try {
+      customerOrdersList = rawOrdersJson ? JSON.parse(rawOrdersJson) : [];
+    } catch (e) {
+      console.error('Không thể đọc dữ liệu JSON đơn hàng:', e);
+    }
+    const customerOrdersMap = {};
+    customerOrdersList.forEach(od => {
+      customerOrdersMap[od.ma_dh] = od;
+    });
+
+    const orderDetailModal = document.getElementById('customerOrderDetailModal');
+    const closeOrderDetailModalBtn = document.getElementById('closeOrderDetailModalBtn');
+    const modalDetailCloseFooterBtn = document.getElementById('modalDetailCloseFooterBtn');
+    const modalCancelBtn = document.getElementById('modalDetailCancelBtn');
+    let currentDetailOrderId = null;
+
+    function closeCustomerOrderDetailModal() {
+      if (orderDetailModal) {
+        orderDetailModal.classList.add('hidden');
+        orderDetailModal.classList.remove('flex');
+      }
+      currentDetailOrderId = null;
+    }
+
+    if (closeOrderDetailModalBtn) closeOrderDetailModalBtn.addEventListener('click', closeCustomerOrderDetailModal);
+    if (modalDetailCloseFooterBtn) modalDetailCloseFooterBtn.addEventListener('click', closeCustomerOrderDetailModal);
+    if (orderDetailModal) {
+      orderDetailModal.addEventListener('click', (e) => {
+        if (e.target === orderDetailModal) {
+          closeCustomerOrderDetailModal();
+        }
+      });
+    }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && orderDetailModal && !orderDetailModal.classList.contains('hidden')) {
+        closeCustomerOrderDetailModal();
+      }
+    });
+
+    window.openCustomerOrderDetail = function(orderId) {
+      const order = customerOrdersMap[orderId];
+      if (!order) {
+        alert('Không tìm thấy dữ liệu chi tiết của đơn hàng này.');
+        return;
+      }
+
+      currentDetailOrderId = Number(orderId);
+      const dhCode = order.ma_dh_code || ('DH' + String(orderId).padStart(2, '0'));
+
+      // 1. Header Modal: Mã đơn hàng, Ngày đặt, Badge trạng thái
+      const titleEl = document.getElementById('modalDetailOrderTitle');
+      const dateEl = document.getElementById('modalDetailOrderDate');
+      const badgeEl = document.getElementById('modalDetailStatusBadge');
+
+      if (titleEl) titleEl.textContent = '#' + dhCode;
+      if (dateEl) dateEl.textContent = formatDateVN(order.ngay_dat);
+
+      const stKey = order.trang_thai_dh || 'CHO_XAC_NHAN';
+      const stBadge = orderStatusBadges[stKey] || { label: stKey, class: 'bg-stone-100 text-charcoal' };
+      if (badgeEl) {
+        badgeEl.className = 'rounded-full px-2.5 py-0.5 text-xs font-semibold ' + stBadge.class;
+        badgeEl.textContent = stBadge.label;
+      }
+
+      // 2. Thông tin nhận hàng
+      const receiverNameEl = document.getElementById('modalDetailReceiverName');
+      const receiverPhoneEl = document.getElementById('modalDetailReceiverPhone');
+      const receiverAddressEl = document.getElementById('modalDetailReceiverAddress');
+      const paymentMethodEl = document.getElementById('modalDetailPaymentMethod');
+
+      if (receiverNameEl) receiverNameEl.textContent = order.ten_nguoi_nhan || order.ten_khach_hang || '--';
+      if (receiverPhoneEl) receiverPhoneEl.textContent = order.sdt_nhan || order.sdt_khach_hang || '--';
+      if (receiverAddressEl) receiverAddressEl.textContent = order.dia_chi_giao_hang || 'Theo địa chỉ đăng ký tài khoản';
+
+      let ptText = 'Thanh toán khi nhận hàng (COD)';
+      if (order.pt_thanh_toan === 'CHUYEN_KHOAN') {
+        ptText = 'Chuyển khoản ngân hàng';
+      }
+      if (paymentMethodEl) paymentMethodEl.textContent = ptText;
+
+      // 3. Danh sách sản phẩm đã đặt
+      const itemsListEl = document.getElementById('modalDetailItemsList');
+      const itemCountEl = document.getElementById('modalDetailItemCount');
+      const items = Array.isArray(order.items) ? order.items : [];
+      if (itemCountEl) itemCountEl.textContent = `(${items.length} món)`;
+
+      if (itemsListEl) {
+        if (items.length === 0) {
+          itemsListEl.innerHTML = '<p class="text-xs text-muted italic p-3 text-center">Không có sản phẩm nào trong đơn hàng.</p>';
+        } else {
+          itemsListEl.innerHTML = items.map(item => {
+            const donGia = Number(item.don_gia_luc_mua || 0);
+            const thanhTien = Number(item.thanh_tien_muc || (donGia * Number(item.so_luong || 1)));
+            const imgUrl = item.anh_chinh_url || 'images/default_product.png';
+
+            let reviewHtml = '';
+            if (stKey === 'HOAN_THANH') {
+              if (Number(item.da_cong_diem_dg) === 0) {
+                reviewHtml = `
+                  <button type="button"
+                    class="btn-open-review-modal tap-feedback inline-flex items-center gap-1 rounded-full bg-amber-500 hover:bg-amber-600 px-2.5 py-1 text-[11px] font-semibold text-white shadow-sm transition mt-1"
+                    data-ctdh="${item.ma_ctdh}"
+                    data-product-name="${escapeHtml(item.ten_sp || '')}"
+                    data-variant="${escapeHtml((item.mau_sac || '') + ' · Size ' + (item.kich_co || ''))}">
+                    ⭐ Đánh giá (+10đ)
+                  </button>
+                `;
+              } else {
+                const stars = Number(item.so_sao_danh_gia || 5);
+                reviewHtml = `
+                  <span class="inline-flex items-center gap-0.5 rounded-full bg-amber-50 border border-amber-200 px-1.5 py-0.5 text-[10px] font-medium text-amber-800 mt-1" title="${escapeHtml(item.noi_dung_danh_gia || '')}">
+                    ${'★'.repeat(stars)} <span class="text-[9px] text-amber-600">(+10đ)</span>
+                  </span>
+                `;
+              }
+            }
+
+            return `
+              <div class="flex items-center justify-between gap-3 p-2.5 rounded-xl bg-stone-50/80 border border-stone-200/70">
+                <div class="flex items-center gap-3 min-w-0 flex-1">
+                  <img src="${imgUrl}" alt="${escapeHtml(item.ten_sp || '')}" class="w-12 h-14 rounded-lg object-cover border border-stone-200 bg-white flex-shrink-0" />
+                  <div class="min-w-0 flex-1">
+                    <p class="font-semibold text-charcoal text-xs truncate" title="${escapeHtml(item.ten_sp || '')}">${escapeHtml(item.ten_sp || '')}</p>
+                    <p class="text-[11px] text-muted mt-0.5">${escapeHtml(item.mau_sac || '')} &middot; Size ${escapeHtml(item.kich_co || '')} &middot; x${item.so_luong}</p>
+                    <p class="text-[11px] text-stone-500 mt-0.5">Đơn giá: ${formatVND(donGia)}</p>
+                    ${reviewHtml}
+                  </div>
+                </div>
+                <div class="text-right flex-shrink-0">
+                  <p class="font-semibold text-xs text-charcoal">${formatVND(thanhTien)}</p>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+      }
+
+      // 4. Tổng kết thanh toán
+      const tongTienHang = Number(order.tong_tien_hang || 0);
+      const giamHangTv = Number(order.tien_giam_hang_tv || 0);
+      const giamVoucherDiem = Number(order.tien_giam_voucher || 0) + (Number(order.diem_su_dung || 0) * 1000);
+      const phiShip = Number(order.phi_van_chuyen || 0);
+      const thanhTien = Number(order.thanh_tien || 0);
+
+      document.getElementById('modalDetailSubtotal').textContent = formatVND(tongTienHang);
+      document.getElementById('modalDetailTierDiscount').textContent = `-${formatVND(giamHangTv)}`;
+      document.getElementById('modalDetailVoucherDiscount').textContent = `-${formatVND(giamVoucherDiem)}`;
+      document.getElementById('modalDetailShippingFee').textContent = phiShip > 0 ? formatVND(phiShip) : 'Miễn phí';
+
+      // Tổng thanh toán + điểm tích lũy dự kiến / đã nhận
+      const diemCongDuKien = Number(order.diem_cong_du_kien || 0);
+      const totalEl = document.getElementById('modalDetailTotal');
+      if (totalEl) {
+        if (diemCongDuKien > 0 && stKey !== 'DA_HUY') {
+          totalEl.innerHTML = `${formatVND(thanhTien)} <span class="ml-1 text-xs font-medium text-emerald-700">+${diemCongDuKien.toLocaleString('vi-VN')} điểm</span>`;
+        } else {
+          totalEl.textContent = formatVND(thanhTien);
+        }
+      }
+
+      // 5. Nút "Hủy đơn hàng" bên trong Modal
+      if (modalCancelBtn) {
+        if (stKey === 'CHO_XAC_NHAN') {
+          modalCancelBtn.classList.remove('hidden');
+          modalCancelBtn.classList.add('inline-flex');
+        } else {
+          modalCancelBtn.classList.add('hidden');
+          modalCancelBtn.classList.remove('inline-flex');
+        }
+      }
+
+      // Mở modal
+      if (orderDetailModal) {
+        orderDetailModal.classList.remove('hidden');
+        orderDetailModal.classList.add('flex');
+      }
+    };
+
+    // Bắt sự kiện bấm nút "Chi tiết" ở bảng đơn hàng
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.btn-open-order-detail');
+      if (btn) {
+        const orderId = btn.dataset.orderId;
+        if (orderId) {
+          window.openCustomerOrderDetail(orderId);
+        }
+      }
+    });
+
+    // Bắt sự kiện bấm nút "Hủy đơn hàng" bên trong Modal
+    if (modalCancelBtn) {
+      modalCancelBtn.addEventListener('click', async () => {
+        if (!currentDetailOrderId) return;
+        const order = customerOrdersMap[currentDetailOrderId];
+        if (!order) return;
+        const dhCode = order.ma_dh_code || ('DH' + String(currentDetailOrderId).padStart(2, '0'));
+
+        if (!confirm(`Bạn có chắc chắn muốn hủy đơn hàng #${dhCode} không?\nTồn kho và Voucher (nếu có) sẽ được hoàn lại.`)) {
+          return;
+        }
+
+        modalCancelBtn.disabled = true;
+        const originalHtml = modalCancelBtn.innerHTML;
+        modalCancelBtn.innerHTML = `
+          <svg class="h-3.5 w-3.5 animate-spin text-white inline-block mr-1" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+          Đang hủy...
+        `;
+
+        try {
+          const res = await fetch('api/cancel_order.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ma_dh: Number(currentDetailOrderId) })
+          });
+          const data = await res.json();
+
+          if (data.require_login) {
+            if (window.openAuthModal) {
+              window.openAuthModal('login');
+            } else {
+              window.location.href = 'login.php';
+            }
+            modalCancelBtn.disabled = false;
+            modalCancelBtn.innerHTML = originalHtml;
+            return;
+          }
+
+          if (data.success) {
+            if (window.showStoreToast) {
+              window.showStoreToast('✓ ' + data.message);
+            } else {
+              alert(data.message);
+            }
+
+            // 1. Cập nhật dữ liệu trong bộ nhớ
+            order.trang_thai_dh = 'DA_HUY';
+
+            // 2. Cập nhật Badge trên Modal
+            const modalBadge = document.getElementById('modalDetailStatusBadge');
+            if (modalBadge) {
+              modalBadge.className = 'rounded-full px-2.5 py-0.5 text-xs font-semibold bg-rose-100 text-rose-700';
+              modalBadge.textContent = 'Đã hủy';
+            }
+
+            // 3. Ẩn nút Hủy đơn trên Modal
+            modalCancelBtn.classList.add('hidden');
+            modalCancelBtn.classList.remove('inline-flex');
+            modalCancelBtn.disabled = false;
+            modalCancelBtn.innerHTML = originalHtml;
+
+            // 4. Cập nhật Badge trên bảng danh sách bên ngoài
+            const tableBadge = document.getElementById(`order-badge-${currentDetailOrderId}`);
+            if (tableBadge) {
+              tableBadge.className = 'inline-block rounded-full px-2.5 py-1 text-xs font-semibold bg-rose-100 text-rose-700';
+              tableBadge.textContent = 'Đã hủy';
+            }
+            const pointsEl = document.getElementById(`order-points-${currentDetailOrderId}`);
+            if (pointsEl) {
+              pointsEl.remove();
+            }
+
+            // 5. Reload sau 1.2s để đồng bộ lại điểm và ví voucher trên toàn giao diện
+            setTimeout(() => {
+              window.location.reload();
+            }, 1200);
+
+          } else {
+            alert(data.message || 'Không thể hủy đơn hàng.');
+            modalCancelBtn.disabled = false;
+            modalCancelBtn.innerHTML = originalHtml;
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Lỗi kết nối khi gửi yêu cầu hủy đơn hàng.');
+          modalCancelBtn.disabled = false;
+          modalCancelBtn.innerHTML = originalHtml;
+        }
+      });
+    }
+
+    // Helper tương thích cho các lệnh gọi cũ
+    window.cancelCustomerOrder = async function(maDh, dhCode) {
+      if (customerOrdersMap[maDh]) {
+        window.openCustomerOrderDetail(maDh);
+      }
+    };
   })();
 </script>
 

@@ -97,20 +97,46 @@ $statusBadges = [
               </span>
             </td>
             <td class="whitespace-nowrap px-6 py-4 text-right">
-              <div class="inline-flex items-center gap-2">
+              <div class="inline-flex items-center gap-1.5 flex-wrap justify-end">
                 <button type="button" data-open-order="<?= (int)$od['ma_dh'] ?>"
-                  class="tap-feedback rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:border-slate-500 hover:text-slate-900">
-                  Xem chi tiết (<?= count($od['items']) ?>)
+                  class="tap-feedback rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:border-slate-500 hover:text-slate-900 transition">
+                  Chi tiết (<?= count($od['items']) ?>)
                 </button>
-                <?php if ($od['trang_thai_dh'] !== 'HOAN_THANH' && $od['trang_thai_dh'] !== 'DA_HUY'): ?>
+                <?php if ($od['trang_thai_dh'] === 'CHO_XAC_NHAN'): ?>
                   <button type="button"
-                    data-approve-order="<?= (int)$od['ma_dh'] ?>"
+                    data-update-status="DANG_GIAO"
+                    data-order-id="<?= (int)$od['ma_dh'] ?>"
                     data-order-code="<?= htmlspecialchars($od['ma_dh_code']) ?>"
-                    class="tap-feedback inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 transition">
+                    class="tap-feedback inline-flex items-center gap-1 rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 transition">
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                    </svg>
+                    Xác nhận &amp; Giao hàng
+                  </button>
+                  <button type="button"
+                    data-update-status="DA_HUY"
+                    data-order-id="<?= (int)$od['ma_dh'] ?>"
+                    data-order-code="<?= htmlspecialchars($od['ma_dh_code']) ?>"
+                    class="tap-feedback inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 transition">
+                    Hủy đơn
+                  </button>
+                <?php elseif ($od['trang_thai_dh'] === 'DANG_GIAO'): ?>
+                  <button type="button"
+                    data-update-status="HOAN_THANH"
+                    data-order-id="<?= (int)$od['ma_dh'] ?>"
+                    data-order-code="<?= htmlspecialchars($od['ma_dh_code']) ?>"
+                    class="tap-feedback inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-2.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 transition">
                     <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
-                    Duyệt đơn
+                    Hoàn thành &amp; Cộng điểm
+                  </button>
+                  <button type="button"
+                    data-update-status="DA_HUY"
+                    data-order-id="<?= (int)$od['ma_dh'] ?>"
+                    data-order-code="<?= htmlspecialchars($od['ma_dh_code']) ?>"
+                    class="tap-feedback inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 transition">
+                    Hủy đơn
                   </button>
                 <?php endif; ?>
               </div>
@@ -126,7 +152,7 @@ $statusBadges = [
 </section>
 
 <!-- Modal Xem Chi tiết Đơn hàng & Tiến trình lên hạng từ CSDL -->
-<div id="orderModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 px-4 py-8" role="dialog" aria-modal="true" aria-labelledby="orderModalTitle">
+<div id="orderDetailModal" data-alias="orderModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 px-4 py-8" role="dialog" aria-modal="true" aria-labelledby="orderModalTitle">
   <div class="max-h-full w-full max-w-2xl overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-xl">
     <div class="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-5">
       <div>
@@ -196,13 +222,7 @@ $statusBadges = [
 
       <div class="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
         <button type="button" id="closeOrderModalFooterBtn" class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:border-slate-500">Đóng</button>
-        <button type="button" id="modalApproveBtn"
-          class="tap-feedback inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 transition">
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-          </svg>
-          Duyệt hoàn thành
-        </button>
+        <div id="modalActionButtonsContainer" class="flex items-center gap-2"></div>
       </div>
     </div>
   </div>
@@ -215,7 +235,7 @@ $statusBadges = [
     const statusFilter = document.getElementById('statusFilter');
     const rows = Array.from(document.querySelectorAll('.order-row'));
     const summary = document.getElementById('orderSummary');
-    const modal = document.getElementById('orderModal');
+    const modal = document.getElementById('orderDetailModal') || document.getElementById('orderModal');
 
     function filterOrders() {
       const q = (searchInput?.value || '').trim().toLowerCase();
@@ -274,10 +294,51 @@ $statusBadges = [
         document.getElementById('orderPointsBar').style.width = '100%';
       }
 
-      const approveBtn = document.getElementById('modalApproveBtn');
-      approveBtn.classList.toggle('hidden', order.trang_thai_dh === 'HOAN_THANH' || order.trang_thai_dh === 'DA_HUY');
-      approveBtn.dataset.approveOrder = order.ma_dh;
-      approveBtn.dataset.orderCode = order.ma_dh_code;
+      // Render các nút hành động tương ứng trạng thái đơn trong Modal
+      const actionContainer = document.getElementById('modalActionButtonsContainer');
+      actionContainer.innerHTML = '';
+
+      if (order.trang_thai_dh === 'CHO_XAC_NHAN') {
+        actionContainer.innerHTML = `
+          <button type="button"
+            data-update-status="DANG_GIAO"
+            data-order-id="${order.ma_dh}"
+            data-order-code="${order.ma_dh_code}"
+            class="tap-feedback inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+            </svg>
+            Xác nhận &amp; Giao hàng
+          </button>
+          <button type="button"
+            data-update-status="DA_HUY"
+            data-order-id="${order.ma_dh}"
+            data-order-code="${order.ma_dh_code}"
+            class="tap-feedback inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-700 hover:bg-rose-100 transition">
+            Hủy đơn
+          </button>
+        `;
+      } else if (order.trang_thai_dh === 'DANG_GIAO') {
+        actionContainer.innerHTML = `
+          <button type="button"
+            data-update-status="HOAN_THANH"
+            data-order-id="${order.ma_dh}"
+            data-order-code="${order.ma_dh_code}"
+            class="tap-feedback inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 transition">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Hoàn thành &amp; Cộng điểm
+          </button>
+          <button type="button"
+            data-update-status="DA_HUY"
+            data-order-id="${order.ma_dh}"
+            data-order-code="${order.ma_dh_code}"
+            class="tap-feedback inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-700 hover:bg-rose-100 transition">
+            Hủy đơn
+          </button>
+        `;
+      }
 
       modal.classList.remove('hidden');
       modal.classList.add('flex');
@@ -288,15 +349,24 @@ $statusBadges = [
       modal.classList.remove('flex');
     }
 
-    async function handleApproveOrder(maDh, orderCode, triggerBtn) {
-      if (!confirm(`Xác nhận duyệt HOÀN THÀNH đơn hàng #${orderCode} và kích hoạt cộng điểm tích lũy cho khách hàng?`)) {
-        return;
+    async function handleUpdateOrderStatus(maDh, orderCode, newStatus, triggerBtn) {
+      let confirmMsg = '';
+      if (newStatus === 'DANG_GIAO') {
+        confirmMsg = `Xác nhận chuyển đơn hàng #${orderCode} sang trạng thái "Đang giao hàng"?`;
+      } else if (newStatus === 'HOAN_THANH') {
+        confirmMsg = `Xác nhận duyệt HOÀN THÀNH đơn hàng #${orderCode} và kích hoạt Loyalty Engine cộng điểm cho khách hàng?`;
+      } else if (newStatus === 'DA_HUY') {
+        confirmMsg = `CẢNH BÁO: Bạn có chắc chắn muốn HỦY đơn hàng #${orderCode}?\nHệ thống sẽ hoàn trả số lượng tồn kho sản phẩm và mở lại Voucher (nếu có).`;
+      } else {
+        confirmMsg = `Xác nhận đổi trạng thái đơn #${orderCode} sang ${newStatus}?`;
       }
+
+      if (!confirm(confirmMsg)) return;
 
       triggerBtn.disabled = true;
       const originalHtml = triggerBtn.innerHTML;
       triggerBtn.innerHTML = `
-        <svg class="h-4 w-4 animate-spin text-white inline-block mr-1" viewBox="0 0 24 24" fill="none">
+        <svg class="h-3.5 w-3.5 animate-spin text-current inline-block mr-1" viewBox="0 0 24 24" fill="none">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
         </svg>
@@ -307,23 +377,27 @@ $statusBadges = [
         const res = await fetch('../api/admin_order.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'approve', ma_dh: Number(maDh), trang_thai_dh: 'HOAN_THANH' })
+          body: JSON.stringify({ action: 'update_status', ma_dh: Number(maDh), trang_thai_dh: newStatus })
         });
         const data = await res.json();
 
         if (data.success) {
-          window.showAdminToast(data.message);
+          if (window.showAdminToast) {
+            window.showAdminToast(data.message);
+          } else {
+            alert(data.message);
+          }
           setTimeout(() => {
             window.location.reload();
           }, 1000);
         } else {
-          alert(data.message || 'Có lỗi xảy ra khi duyệt đơn.');
+          alert(data.message || 'Có lỗi xảy ra khi cập nhật đơn.');
           triggerBtn.disabled = false;
           triggerBtn.innerHTML = originalHtml;
         }
       } catch (err) {
         console.error(err);
-        alert('Lỗi kết nối khi gửi yêu cầu duyệt đơn.');
+        alert('Lỗi kết nối khi gửi yêu cầu cập nhật đơn.');
         triggerBtn.disabled = false;
         triggerBtn.innerHTML = originalHtml;
       }
@@ -332,13 +406,18 @@ $statusBadges = [
     document.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-open-order]');
       if (btn) openOrderModal(btn.dataset.openOrder);
+
       if (e.target === modal || e.target.closest('#closeOrderModalBtn') || e.target.closest('#closeOrderModalFooterBtn')) {
         closeOrderModal();
       }
 
-      const approveBtn = e.target.closest('[data-approve-order]');
-      if (approveBtn) {
-        handleApproveOrder(approveBtn.dataset.approveOrder, approveBtn.dataset.orderCode || approveBtn.dataset.approveOrder, approveBtn);
+      // Xử lý các nút cập nhật trạng thái đơn (cả trong bảng và trong modal)
+      const actionBtn = e.target.closest('[data-update-status]');
+      if (actionBtn) {
+        const maDh = actionBtn.dataset.orderId;
+        const code = actionBtn.dataset.orderCode || ('DH' + maDh);
+        const status = actionBtn.dataset.updateStatus;
+        handleUpdateOrderStatus(maDh, code, status, actionBtn);
       }
     });
   })();

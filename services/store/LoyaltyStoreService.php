@@ -149,10 +149,20 @@ class LoyaltyStoreService
             $ownedMap[$w['ma_pgg']] = $w;
         }
 
+        // Lấy ngưỡng điểm tối thiểu của hạng khách để so sánh đúng spec
+        $tiers = $this->getAllTiers();
+        $customerMinPoints = 0;
+        foreach ($tiers as $t) {
+            if ((int)$t['ma_hang'] === $customerTierId) {
+                $customerMinPoints = (int)$t['diem_toi_thieu'];
+                break;
+            }
+        }
+
         foreach ($vouchers as &$v) {
             $vid = $v['ma_pgg'];
             $v['owned_info'] = $ownedMap[$vid] ?? null;
-            $v['is_tier_eligible'] = $customerTierId >= (int) $v['ma_hang_yeu_cau'];
+            $v['is_tier_eligible'] = $customerMinPoints >= (int) $v['moc_diem_hang'];
             $v['is_points_eligible'] = $availablePoints >= (int) $v['diem_can_doi'];
             $v['is_in_stock'] = (int) $v['so_luong'] > 0;
             $v['can_redeem'] = $v['is_tier_eligible'] && $v['is_points_eligible'] && $v['is_in_stock'] && empty($v['owned_info']);
@@ -194,9 +204,26 @@ class LoyaltyStoreService
             SELECT 
                 dh.*,
                 pgg.ma_code AS voucher_code,
+                pgg.ten_pgg AS voucher_name,
+                nd.ho_ten AS ten_khach_hang,
+                nd.sdt AS sdt_khach_hang,
+                nd.email AS email_khach_hang,
+                COALESCE(dc.ten_nguoi_nhan, nd.ho_ten) AS ten_nguoi_nhan,
+                COALESCE(dc.sdt_nhan, nd.sdt) AS sdt_nhan,
+                dc.dia_chi_cu_the,
+                dc.phuong_xa,
+                dc.quan_huyen,
+                dc.tinh_thanh,
                 (SELECT COUNT(*) FROM ctdh_chi_tiet_dh ct WHERE ct.ma_dh = dh.ma_dh) AS so_mat_hang
             FROM dh_don_hang dh
+            INNER JOIN nd_nguoi_dung nd ON dh.ma_nd = nd.ma_nd
             LEFT JOIN pgg_phieu_giam_gia pgg ON dh.ma_pgg = pgg.ma_pgg
+            LEFT JOIN dc_dia_chi_kh dc ON dc.ma_dc = (
+                SELECT ma_dc FROM dc_dia_chi_kh 
+                WHERE ma_nd = dh.ma_nd 
+                ORDER BY mac_dinh DESC, ma_dc ASC 
+                LIMIT 1
+            )
             WHERE dh.ma_nd = :ma_nd
             ORDER BY dh.ngay_dat DESC
         ");
@@ -218,9 +245,13 @@ class LoyaltyStoreService
                 ct.so_luong,
                 ct.don_gia_luc_mua,
                 ct.thanh_tien_muc,
+                ct.so_sao_danh_gia,
+                ct.noi_dung_danh_gia,
+                ct.da_cong_diem_dg,
                 bt.ma_sku,
                 bt.kich_co,
                 bt.mau_sac,
+                sp.ma_sp,
                 sp.ten_sp,
                 sp.anh_chinh
             FROM ctdh_chi_tiet_dh ct
@@ -239,11 +270,171 @@ class LoyaltyStoreService
         }
 
         foreach ($orders as &$order) {
+            $order['ma_dh_code'] = 'DH' . str_pad((string)$order['ma_dh'], 2, '0', STR_PAD_LEFT);
             $order['items'] = $itemsByOrder[$order['ma_dh']] ?? [];
+
+            $addrParts = array_filter([
+                $order['dia_chi_cu_the'] ?? '',
+                $order['phuong_xa'] ?? '',
+                $order['quan_huyen'] ?? '',
+                $order['tinh_thanh'] ?? ''
+            ]);
+            $order['dia_chi_giao_hang'] = !empty($addrParts) 
+                ? implode(', ', $addrParts) 
+                : 'Địa chỉ theo thông tin đăng ký tài khoản';
+            $order['phi_van_chuyen'] = 0; // Hệ thống áp dụng miễn phí giao hàng
+            $order['tien_giam_voucher_diem'] = (float)$order['tien_giam_voucher'] + ((int)$order['diem_su_dung'] * 1000);
         }
         unset($order);
 
         return $orders;
+    }
+
+    /**
+     * Alias getUserOrders theo đặc tả Mục 1.4
+     */
+    public function getUserOrders(int $maNd): array
+    {
+        return $this->getCustomerOrders($maNd);
+    }
+
+    /**
+     * Khách hàng tự hủy đơn hàng đang ở trạng thái CHO_XAC_NHAN (Yêu cầu 2)
+     * Thực thi trong 1 PDO Transaction (SELECT ... FOR UPDATE):
+     * 1. Khóa dòng đơn hàng dh_don_hang theo ma_dh và ma_nd
+     * 2. Chỉ cho phép hủy khi trang_thai_dh === 'CHO_XAC_NHAN'
+     * 3. Cập nhật dh_don_hang.trang_thai_dh = 'DA_HUY'
+     * 4. Hoàn trả tồn kho bt_bien_the_sp.so_luong_ton từ ctdh_chi_tiet_dh
+     * 5. Hoàn trả voucher ví vkh_vi_voucher_kh (nếu có dùng)
+     * 6. Hoàn trả điểm khả dụng ttd_the_tich_diem và ghi nhận sổ cái lsd_lich_su_diem (nếu có dùng điểm)
+     *
+     * @param int $maDh Mã đơn hàng cần hủy
+     * @param int $maNd Mã khách hàng thực hiện hủy
+     * @return array Kết quả xử lý
+     * @throws Exception
+     */
+    public function cancelCustomerOrder(int $maDh, int $maNd): array
+    {
+        if ($maDh <= 0 || $maNd <= 0) {
+            throw new Exception("Thông tin đơn hàng hoặc người dùng không hợp lệ.");
+        }
+
+        $this->pdo->beginTransaction();
+
+        try {
+            // 1. Khóa dòng đơn hàng của chính khách hàng này (FOR UPDATE)
+            $stmt = $this->pdo->prepare("
+                SELECT * FROM dh_don_hang 
+                WHERE ma_dh = :ma_dh AND ma_nd = :ma_nd 
+                FOR UPDATE
+            ");
+            $stmt->execute([
+                'ma_dh' => $maDh,
+                'ma_nd' => $maNd,
+            ]);
+            $order = $stmt->fetch();
+
+            if (!$order) {
+                throw new Exception("Đơn hàng không tồn tại hoặc bạn không có quyền hủy đơn hàng này.");
+            }
+
+            $currentStatus = $order['trang_thai_dh'];
+            $dhCode = 'DH' . str_pad((string)$maDh, 2, '0', STR_PAD_LEFT);
+
+            // 2. Chỉ cho phép khách hàng tự hủy khi trang_thai_dh === 'CHO_XAC_NHAN'
+            if ($currentStatus !== 'CHO_XAC_NHAN') {
+                throw new Exception("Đơn hàng đã được xử lý hoặc đang giao, không thể tự hủy.");
+            }
+
+            // 3. Cập nhật dh_don_hang.trang_thai_dh = 'DA_HUY'
+            $this->pdo->prepare("UPDATE dh_don_hang SET trang_thai_dh = 'DA_HUY' WHERE ma_dh = :ma_dh")
+                      ->execute(['ma_dh' => $maDh]);
+
+            // 4. Hoàn trả tồn kho: cộng trả lại so_luong vào bt_bien_the_sp.so_luong_ton
+            $stmtItems = $this->pdo->prepare("
+                SELECT ma_bt, so_luong FROM ctdh_chi_tiet_dh WHERE ma_dh = :ma_dh
+            ");
+            $stmtItems->execute(['ma_dh' => $maDh]);
+            $items = $stmtItems->fetchAll();
+
+            $stmtReturnStock = $this->pdo->prepare("
+                UPDATE bt_bien_the_sp 
+                SET so_luong_ton = so_luong_ton + :qty 
+                WHERE ma_bt = :ma_bt
+            ");
+            foreach ($items as $item) {
+                $stmtReturnStock->execute([
+                    'qty'   => (int)$item['so_luong'],
+                    'ma_bt' => (int)$item['ma_bt'],
+                ]);
+            }
+
+            // 5. Hoàn trả Voucher (nếu có sử dụng voucher)
+            if (!empty($order['ma_pgg'])) {
+                $this->pdo->prepare("
+                    UPDATE vkh_vi_voucher_kh
+                    SET trang_thai_su_dung = 0, ngay_su_dung = NULL
+                    WHERE ma_nd = :ma_nd AND ma_pgg = :ma_pgg AND trang_thai_su_dung = 1
+                    ORDER BY ngay_su_dung DESC
+                    LIMIT 1
+                ")->execute([
+                    'ma_nd'  => $maNd,
+                    'ma_pgg' => (int)$order['ma_pgg'],
+                ]);
+            }
+
+            // 6. Hoàn trả điểm tiêu dùng (nếu đơn có dùng điểm)
+            $diemSuDung = (int)($order['diem_su_dung'] ?? 0);
+            if ($diemSuDung > 0) {
+                $stmtCard = $this->pdo->prepare("
+                    SELECT ma_the, diem_kha_dung FROM ttd_the_tich_diem WHERE ma_nd = :ma_nd FOR UPDATE
+                ");
+                $stmtCard->execute(['ma_nd' => $maNd]);
+                $card = $stmtCard->fetch();
+
+                if ($card) {
+                    $newBalance = (int)$card['diem_kha_dung'] + $diemSuDung;
+                    $this->pdo->prepare("
+                        UPDATE ttd_the_tich_diem 
+                        SET diem_kha_dung = diem_kha_dung + :pts 
+                        WHERE ma_the = :ma_the
+                    ")->execute([
+                        'pts'    => $diemSuDung,
+                        'ma_the' => $card['ma_the'],
+                    ]);
+
+                    $this->pdo->prepare("
+                        INSERT INTO lsd_lich_su_diem (
+                            ma_the, ma_dh, loai_giao_dich, so_diem_thay_doi,
+                            so_du_sau_gd, noi_dung, thoi_gian
+                        ) VALUES (
+                            :ma_the, :ma_dh, 'CONG_MUA_HANG', :pts,
+                            :balance, :note, NOW()
+                        )
+                    ")->execute([
+                        'ma_the'  => $card['ma_the'],
+                        'ma_dh'   => $maDh,
+                        'pts'     => $diemSuDung,
+                        'balance' => $newBalance,
+                        'note'    => "Hoàn lại {$diemSuDung} điểm khi hủy đơn #{$dhCode}",
+                    ]);
+                }
+            }
+
+            $this->pdo->commit();
+
+            return [
+                'success'       => true,
+                'message'       => "Đã hủy đơn hàng #{$dhCode} thành công.",
+                'ma_dh'         => $maDh,
+                'trang_thai_dh' => 'DA_HUY',
+            ];
+        } catch (Exception $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
+        }
     }
 }
 

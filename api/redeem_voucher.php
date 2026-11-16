@@ -44,8 +44,14 @@ try {
     // 3. Khởi tạo PDO Transaction
     $pdo->beginTransaction();
 
-    // 3.1. Khóa và kiểm tra thẻ tích điểm của khách hàng
-    $stmtCard = $pdo->prepare("SELECT * FROM ttd_the_tich_diem WHERE ma_nd = ? FOR UPDATE");
+    // 3.1. Khóa và kiểm tra thẻ tích điểm của khách hàng kèm thông tin hạng thành viên
+    $stmtCard = $pdo->prepare("
+        SELECT ttd.*, htv.diem_toi_thieu AS card_diem_toi_thieu, htv.ten_hang AS card_ten_hang
+        FROM ttd_the_tich_diem ttd
+        LEFT JOIN htv_hang_thanh_vien htv ON ttd.ma_hang = htv.ma_hang
+        WHERE ttd.ma_nd = ? 
+        FOR UPDATE
+    ");
     $stmtCard->execute([$currentUserId]);
     $card = $stmtCard->fetch();
 
@@ -55,7 +61,7 @@ try {
 
     // 3.2. Khóa và kiểm tra thông tin Voucher
     $stmtVch = $pdo->prepare("
-        SELECT pgg.*, htv.ten_hang AS ten_hang_yeu_cau 
+        SELECT pgg.*, htv.ten_hang AS ten_hang_yeu_cau, htv.diem_toi_thieu AS req_diem_toi_thieu
         FROM pgg_phieu_giam_gia pgg
         INNER JOIN htv_hang_thanh_vien htv ON pgg.ma_hang_yeu_cau = htv.ma_hang
         WHERE pgg.ma_pgg = ? 
@@ -68,9 +74,9 @@ try {
         throw new Exception("Phiếu giảm giá không tồn tại trong hệ thống.");
     }
 
-    // 3.3. Kiểm tra thời hạn áp dụng
+    // 3.3. Kiểm tra thời hạn áp dụng (NOW() BETWEEN ngay_bd AND ngay_kt)
     $now = date('Y-m-d H:i:s');
-    if ($now < $voucher['ngay_bd'] || $now >= $voucher['ngay_kt']) {
+    if ($now < $voucher['ngay_bd'] || $now > $voucher['ngay_kt']) {
         throw new Exception("Voucher \"{$voucher['ma_code']}\" hiện chưa đến đợt hoặc đã hết hạn đổi.");
     }
 
@@ -79,8 +85,10 @@ try {
         throw new Exception("Voucher \"{$voucher['ma_code']}\" đã hết lượt đổi hoặc đang tạm dừng tiếp nhận đổi mới.");
     }
 
-    // 3.5. Kiểm tra hạng thành viên yêu cầu
-    if ((int) $card['ma_hang'] < (int) $voucher['ma_hang_yeu_cau']) {
+    // 3.5. Kiểm tra hạng thành viên yêu cầu (so sánh diem_toi_thieu của hạng thẻ khách với hạng yêu cầu)
+    $cardMinPoints = (int) ($card['card_diem_toi_thieu'] ?? 0);
+    $reqMinPoints  = (int) ($voucher['req_diem_toi_thieu'] ?? 0);
+    if ($cardMinPoints < $reqMinPoints) {
         throw new Exception("Voucher này chỉ dành cho thành viên từ {$voucher['ten_hang_yeu_cau']} trở lên.");
     }
 

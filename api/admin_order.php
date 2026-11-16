@@ -44,7 +44,14 @@ try {
 
     switch ($action) {
         case 'approve':
-            $result = $loyaltyEngine->approveOrder($maDh, $newStatus);
+        case 'update_status':
+        case 'change_status':
+            $result = $loyaltyEngine->updateOrderStatus($maDh, $newStatus);
+            echo json_encode($result, JSON_UNESCAPED_UNICODE);
+            break;
+
+        case 'cancel':
+            $result = $loyaltyEngine->updateOrderStatus($maDh, 'DA_HUY');
             echo json_encode($result, JSON_UNESCAPED_UNICODE);
             break;
 

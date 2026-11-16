@@ -34,12 +34,13 @@ try {
     }
     $data = array_merge($_POST, $body);
 
-    $maSp = (int)($data['ma_sp'] ?? 0);
-    $soSao = (int)($data['so_sao'] ?? 5);
-    $noiDung = trim($data['noi_dung'] ?? '');
+    $maCtdh  = (int)($data['ma_ctdh'] ?? 0);
+    $maSp    = (int)($data['ma_sp'] ?? 0);
+    $soSao   = (int)($data['so_sao'] ?? $data['so_sao_danh_gia'] ?? 5);
+    $noiDung = trim($data['noi_dung_danh_gia'] ?? $data['noi_dung'] ?? '');
 
-    if ($maSp <= 0) {
-        throw new Exception('Sản phẩm yêu cầu đánh giá không hợp lệ.');
+    if ($maCtdh <= 0 && $maSp <= 0) {
+        throw new Exception('Vui lòng chỉ định sản phẩm hoặc chi tiết đơn hàng cần đánh giá.');
     }
 
     if ($soSao < 1 || $soSao > 5) {
@@ -52,57 +53,70 @@ try {
 
     $pdo = getDBConnection();
 
-    // 3. Kiểm tra điều kiện nghiệp vụ:
-    // Tìm dòng chi tiết đơn hàng ctdh_chi_tiet_dh hợp lệ của khách $currentUserId cho sản phẩm $maSp
-    // Thỏa mãn: dh.ma_nd = :ma_nd, bt.ma_sp = :ma_sp, dh.trang_thai_dh = 'HOAN_THANH', và ctdh.da_cong_diem_dg = 0
-    $stmtCheckPurchased = $pdo->prepare("
-        SELECT ct.ma_ctdh, ct.ma_dh, ct.so_sao_danh_gia, ct.da_cong_diem_dg, bt.mau_sac, bt.kich_co, sp.ten_sp
-        FROM ctdh_chi_tiet_dh ct
-        INNER JOIN bt_bien_the_sp bt ON ct.ma_bt = bt.ma_bt
-        INNER JOIN sp_san_pham sp ON bt.ma_sp = sp.ma_sp
-        INNER JOIN dh_don_hang dh ON ct.ma_dh = dh.ma_dh
-        WHERE dh.ma_nd = :ma_nd 
-          AND bt.ma_sp = :ma_sp 
-          AND dh.trang_thai_dh = 'HOAN_THANH'
-        ORDER BY ct.ma_ctdh DESC
-    ");
-    $stmtCheckPurchased->execute([
-        'ma_nd' => $currentUserId,
-        'ma_sp' => $maSp
-    ]);
-    $purchasedItems = $stmtCheckPurchased->fetchAll();
+    // Bắt đầu Transaction để thực hiện Pessimistic Locking đồng bộ
+    $pdo->beginTransaction();
 
-    if (empty($purchasedItems)) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Bạn chỉ có thể đánh giá sau khi đã mua sản phẩm này và đơn hàng đã hoàn thành.'
-        ], JSON_UNESCAPED_UNICODE);
-        exit;
-    }
+    // 3. Khóa dòng chi tiết đơn hàng ctdh_chi_tiet_dh nối với dh_don_hang FOR UPDATE
+    if ($maCtdh > 0) {
+        $stmtCheck = $pdo->prepare("
+            SELECT ct.ma_ctdh, ct.ma_dh, ct.so_sao_danh_gia, ct.da_cong_diem_dg, 
+                   bt.mau_sac, bt.kich_co, sp.ten_sp, dh.ma_nd, dh.trang_thai_dh
+            FROM ctdh_chi_tiet_dh ct
+            INNER JOIN bt_bien_the_sp bt ON ct.ma_bt = bt.ma_bt
+            INNER JOIN sp_san_pham sp ON bt.ma_sp = sp.ma_sp
+            INNER JOIN dh_don_hang dh ON ct.ma_dh = dh.ma_dh
+            WHERE ct.ma_ctdh = :ma_ctdh
+            FOR UPDATE
+        ");
+        $stmtCheck->execute(['ma_ctdh' => $maCtdh]);
+        $targetItem = $stmtCheck->fetch();
 
-    // Tìm dòng chi tiết đơn hàng chưa đánh giá (da_cong_diem_dg = 0)
-    $targetItem = null;
-    foreach ($purchasedItems as $item) {
-        if ((int)$item['da_cong_diem_dg'] === 0) {
-            $targetItem = $item;
-            break;
+        if (!$targetItem) {
+            throw new Exception('Chi tiết đơn hàng không tồn tại trong hệ thống.');
+        }
+
+        if ((int)$targetItem['ma_nd'] !== $currentUserId) {
+            throw new Exception('Bạn không có quyền đánh giá đơn hàng của khách hàng khác.');
+        }
+
+        if ($targetItem['trang_thai_dh'] !== 'HOAN_THANH') {
+            throw new Exception('Bạn chỉ có thể đánh giá sản phẩm sau khi đơn hàng đã chuyển sang trạng thái Hoàn thành.');
+        }
+
+        if ((int)$targetItem['da_cong_diem_dg'] === 1) {
+            throw new Exception('Mục sản phẩm này trong đơn hàng đã được đánh giá và cộng điểm thưởng rồi.');
+        }
+    } else {
+        // Fallback: Tìm dòng chi tiết đơn hàng chưa đánh giá theo ma_sp của khách
+        $stmtCheckPurchased = $pdo->prepare("
+            SELECT ct.ma_ctdh, ct.ma_dh, ct.so_sao_danh_gia, ct.da_cong_diem_dg, 
+                   bt.mau_sac, bt.kich_co, sp.ten_sp, dh.ma_nd, dh.trang_thai_dh
+            FROM ctdh_chi_tiet_dh ct
+            INNER JOIN bt_bien_the_sp bt ON ct.ma_bt = bt.ma_bt
+            INNER JOIN sp_san_pham sp ON bt.ma_sp = sp.ma_sp
+            INNER JOIN dh_don_hang dh ON ct.ma_dh = dh.ma_dh
+            WHERE dh.ma_nd = :ma_nd 
+              AND bt.ma_sp = :ma_sp 
+              AND dh.trang_thai_dh = 'HOAN_THANH'
+              AND ct.da_cong_diem_dg = 0
+            ORDER BY ct.ma_ctdh DESC
+            LIMIT 1
+            FOR UPDATE
+        ");
+        $stmtCheckPurchased->execute([
+            'ma_nd' => $currentUserId,
+            'ma_sp' => $maSp
+        ]);
+        $targetItem = $stmtCheckPurchased->fetch();
+
+        if (!$targetItem) {
+            throw new Exception('Bạn chỉ có thể đánh giá sau khi đã mua sản phẩm này và đơn hàng đã hoàn thành (hoặc bạn đã đánh giá rồi).');
         }
     }
 
-    if (!$targetItem) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Bạn đã đánh giá sản phẩm này cho các đơn hàng đã mua rồi.'
-        ], JSON_UNESCAPED_UNICODE);
-        exit;
-    }
-
     $maCtdh = (int)$targetItem['ma_ctdh'];
-    $maDh = (int)$targetItem['ma_dh'];
-    $tenSp = $targetItem['ten_sp'];
-
-    // 4. Bắt đầu 1 PDO Transaction cập nhật đánh giá, cộng điểm và nâng hạng
-    $pdo->beginTransaction();
+    $maDh   = (int)$targetItem['ma_dh'];
+    $tenSp  = $targetItem['ten_sp'];
 
     // 4.1 Khóa thẻ tích điểm của khách hàng (Pessimistic Locking)
     $stmtCard = $pdo->prepare("SELECT * FROM ttd_the_tich_diem WHERE ma_nd = :ma_nd FOR UPDATE");

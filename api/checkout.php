@@ -166,7 +166,7 @@ try {
         }
 
         $now = date('Y-m-d H:i:s');
-        if ($now < $voucher['ngay_bd'] || $now > $voucher['ngay_kt']) {
+        if ($now < $voucher['ngay_bd'] || $now >= $voucher['ngay_kt']) {
             throw new Exception("Voucher \"{$voucher['ma_code']}\" hiện đã hết hạn sử dụng.");
         }
 

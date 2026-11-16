@@ -130,13 +130,18 @@ $orderStatusBadges = [
           $discountLabel = $v['loai_giam'] === 'PHAN_TRAM'
               ? 'Giảm ' . number_format((float)$v['gia_tri_giam'], 0) . '%'
               : 'Giảm ' . formatVND($v['gia_tri_giam']);
+          $isOutOfStock = (int)$v['so_luong'] <= 0;
         ?>
-        <article class="fade-up relative flex flex-col justify-between rounded-xl border border-dashed border-stone-300 bg-white p-6 shadow-sm <?= !$v['is_tier_eligible'] ? 'opacity-75' : '' ?>"
+        <article class="fade-up relative flex flex-col justify-between rounded-xl border border-dashed border-stone-300 bg-white p-6 shadow-sm <?= (!$v['is_tier_eligible'] || ($isOutOfStock && !$owned)) ? 'opacity-75' : '' ?>"
           style="--stagger: <?= $idx ?>">
           <div>
             <div class="flex items-center justify-between gap-2">
               <span class="text-xs font-medium uppercase tracking-wider text-accent"><?= htmlspecialchars($v['ten_hang_yeu_cau']) ?></span>
-              <span class="tabular-nums text-xs text-muted">Còn <?= (int)$v['so_luong'] ?> mã</span>
+              <?php if ($isOutOfStock): ?>
+                <span class="tabular-nums text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">Hết lượt đổi</span>
+              <?php else: ?>
+                <span class="tabular-nums text-xs text-muted">Còn <?= (int)$v['so_luong'] ?> mã</span>
+              <?php endif; ?>
             </div>
             <p class="mt-2 font-mono text-xl font-semibold tracking-wide text-charcoal"><?= htmlspecialchars($v['ma_code']) ?></p>
             <p class="mt-2 text-sm font-medium text-charcoal"><?= htmlspecialchars($v['ten_pgg']) ?></p>
@@ -159,6 +164,10 @@ $orderStatusBadges = [
                   Đã có trong Ví &rarr; Dùng ngay
                 </a>
               <?php endif; ?>
+            <?php elseif ($isOutOfStock): ?>
+              <button type="button" disabled class="w-full rounded-full bg-stone-100 border border-stone-200 px-4 py-2.5 text-xs font-medium text-stone-500 cursor-not-allowed" title="Voucher này đã hết lượt hoặc đang tạm dừng đổi mới">
+                Đã khóa / Hết lượt đổi
+              </button>
             <?php elseif (!$v['is_tier_eligible']): ?>
               <button type="button" disabled class="w-full rounded-full bg-stone-200 px-4 py-2.5 text-xs font-medium text-muted cursor-not-allowed">
                 Yêu cầu từ <?= htmlspecialchars($v['ten_hang_yeu_cau']) ?>
@@ -324,29 +333,60 @@ $orderStatusBadges = [
         <table class="min-w-full text-left text-sm">
           <thead class="border-b border-stone-200 text-xs uppercase tracking-wider text-muted">
             <tr>
-              <th class="px-6 py-4 font-medium">Mã đơn</th>
-              <th class="px-6 py-4 font-medium">Ngày đặt</th>
-              <th class="px-6 py-4 text-right font-medium">Tiền hàng</th>
-              <th class="px-6 py-4 text-right font-medium">Giảm Hạng TV</th>
-              <th class="px-6 py-4 text-right font-medium">Giảm Voucher/Điểm</th>
-              <th class="px-6 py-4 text-right font-medium">Thực trả</th>
-              <th class="px-6 py-4 text-right font-medium">Điểm tích lũy</th>
-              <th class="px-6 py-4 font-medium">Trạng thái</th>
+              <th scope="col" class="px-5 py-4 font-medium">Mã đơn</th>
+              <th scope="col" class="px-5 py-4 font-medium">Sản phẩm</th>
+              <th scope="col" class="px-5 py-4 font-medium">Ngày đặt</th>
+              <th scope="col" class="px-5 py-4 text-right font-medium">Tiền hàng</th>
+              <th scope="col" class="px-5 py-4 text-right font-medium">Giảm Hạng TV</th>
+              <th scope="col" class="px-5 py-4 text-right font-medium">Giảm Voucher/Điểm</th>
+              <th scope="col" class="px-5 py-4 text-right font-medium">Thực trả</th>
+              <th scope="col" class="px-5 py-4 text-right font-medium">Điểm tích lũy</th>
+              <th scope="col" class="px-5 py-4 font-medium">Trạng thái</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-stone-200 tabular-nums">
             <?php foreach ($customerOrders as $od): ?>
-              <tr>
-                <td class="whitespace-nowrap px-6 py-4 font-mono font-semibold text-charcoal">#DH<?= str_pad((string)$od['ma_dh'], 2, '0', STR_PAD_LEFT) ?></td>
-                <td class="whitespace-nowrap px-6 py-4 text-muted"><?= formatDateVN($od['ngay_dat'], true) ?></td>
-                <td class="whitespace-nowrap px-6 py-4 text-right"><?= formatVND($od['tong_tien_hang']) ?></td>
-                <td class="whitespace-nowrap px-6 py-4 text-right text-olive">-<?= formatVND($od['tien_giam_hang_tv']) ?></td>
-                <td class="whitespace-nowrap px-6 py-4 text-right text-accent">
+              <?php
+                $firstItem = $od['items'][0] ?? null;
+                $totalItemCount = count($od['items'] ?? []);
+                $otherItemCount = $totalItemCount - 1;
+              ?>
+              <tr class="align-middle hover:bg-stone-50/50 transition-colors">
+                <td class="whitespace-nowrap px-5 py-4 font-mono font-semibold text-charcoal">#DH<?= str_pad((string)$od['ma_dh'], 2, '0', STR_PAD_LEFT) ?></td>
+                <td class="px-5 py-4">
+                  <?php if ($firstItem): ?>
+                    <div class="flex items-center gap-3 min-w-[220px] max-w-[280px]">
+                      <img src="<?= htmlspecialchars($firstItem['anh_chinh_url'] ?? resolveProductImage($firstItem['anh_chinh'] ?? null)) ?>"
+                           alt="<?= htmlspecialchars($firstItem['ten_sp']) ?>"
+                           class="w-12 h-14 rounded-lg object-cover border border-stone-200 bg-stone-50 flex-shrink-0"
+                           loading="lazy" />
+                      <div class="min-w-0 flex-1">
+                        <p class="truncate text-xs font-semibold text-charcoal" title="<?= htmlspecialchars($firstItem['ten_sp']) ?>">
+                          <?= htmlspecialchars($firstItem['ten_sp']) ?>
+                        </p>
+                        <p class="mt-0.5 text-[11px] text-muted truncate">
+                          <?= htmlspecialchars($firstItem['mau_sac']) ?> &middot; Size <?= htmlspecialchars($firstItem['kich_co']) ?> &middot; x<?= (int)$firstItem['so_luong'] ?>
+                        </p>
+                        <?php if ($otherItemCount > 0): ?>
+                          <span class="mt-1 inline-flex items-center rounded bg-stone-100 px-1.5 py-0.5 text-[10px] font-medium text-stone-600">
+                            + <?= $otherItemCount ?> sản phẩm khác
+                          </span>
+                        <?php endif; ?>
+                      </div>
+                    </div>
+                  <?php else: ?>
+                    <span class="text-xs text-muted italic">Không có chi tiết</span>
+                  <?php endif; ?>
+                </td>
+                <td class="whitespace-nowrap px-5 py-4 text-xs text-muted"><?= formatDateVN($od['ngay_dat'], true) ?></td>
+                <td class="whitespace-nowrap px-5 py-4 text-right"><?= formatVND($od['tong_tien_hang']) ?></td>
+                <td class="whitespace-nowrap px-5 py-4 text-right text-olive">-<?= formatVND($od['tien_giam_hang_tv']) ?></td>
+                <td class="whitespace-nowrap px-5 py-4 text-right text-accent">
                   -<?= formatVND((float)$od['tien_giam_voucher'] + ((int)$od['diem_su_dung'] * 1000)) ?>
                 </td>
-                <td class="whitespace-nowrap px-6 py-4 text-right font-semibold text-charcoal"><?= formatVND($od['thanh_tien']) ?></td>
-                <td class="whitespace-nowrap px-6 py-4 text-right font-medium text-emerald-700">+<?= (int)$od['diem_cong_du_kien'] ?> điểm</td>
-                <td class="whitespace-nowrap px-6 py-4">
+                <td class="whitespace-nowrap px-5 py-4 text-right font-semibold text-charcoal"><?= formatVND($od['thanh_tien']) ?></td>
+                <td class="whitespace-nowrap px-5 py-4 text-right font-medium text-emerald-700">+<?= (int)$od['diem_cong_du_kien'] ?> điểm</td>
+                <td class="whitespace-nowrap px-5 py-4">
                   <?php
                     $stKey = $od['trang_thai_dh'] ?? 'CHO_XAC_NHAN';
                     $stBadge = $orderStatusBadges[$stKey] ?? ['label' => $stKey, 'class' => 'bg-stone-100 text-charcoal'];

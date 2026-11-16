@@ -70,13 +70,13 @@ try {
 
     // 3.3. Kiểm tra thời hạn áp dụng
     $now = date('Y-m-d H:i:s');
-    if ($now < $voucher['ngay_bd'] || $now > $voucher['ngay_kt']) {
+    if ($now < $voucher['ngay_bd'] || $now >= $voucher['ngay_kt']) {
         throw new Exception("Voucher \"{$voucher['ma_code']}\" hiện chưa đến đợt hoặc đã hết hạn đổi.");
     }
 
     // 3.4. Kiểm tra số lượng voucher còn lại
     if ((int) $voucher['so_luong'] <= 0) {
-        throw new Exception("Voucher \"{$voucher['ma_code']}\" đã hết lượt đổi.");
+        throw new Exception("Voucher \"{$voucher['ma_code']}\" đã hết lượt đổi hoặc đang tạm dừng tiếp nhận đổi mới.");
     }
 
     // 3.5. Kiểm tra hạng thành viên yêu cầu

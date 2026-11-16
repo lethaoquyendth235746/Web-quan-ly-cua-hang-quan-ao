@@ -121,6 +121,7 @@ class LoyaltyStoreService
 
     /**
      * Lấy danh sách chiến dịch Phiếu giảm giá (Kho đổi điểm Voucher) kèm trạng thái đổi của khách
+     * Ẩn hoàn toàn các voucher đã hết hạn hoặc kết thúc sớm (ngay_kt < NOW())
      */
     public function getVoucherCatalogForCustomer(int $maNd, int $customerTierId, int $availablePoints): array
     {
@@ -131,6 +132,7 @@ class LoyaltyStoreService
                 htv.diem_toi_thieu AS moc_diem_hang
             FROM pgg_phieu_giam_gia pgg
             INNER JOIN htv_hang_thanh_vien htv ON pgg.ma_hang_yeu_cau = htv.ma_hang
+            WHERE pgg.ngay_kt > NOW()
             ORDER BY pgg.diem_can_doi ASC
         ");
         $vouchers = $stmt->fetchAll();
@@ -184,7 +186,7 @@ class LoyaltyStoreService
     }
 
     /**
-     * Lấy danh sách đơn hàng của khách hàng kèm điểm dự kiến / trạng thái
+     * Lấy danh sách đơn hàng của khách hàng kèm danh sách sản phẩm thuộc từng đơn (ctdh JOIN bt JOIN sp)
      */
     public function getCustomerOrders(int $maNd): array
     {
@@ -199,7 +201,49 @@ class LoyaltyStoreService
             ORDER BY dh.ngay_dat DESC
         ");
         $stmt->execute(['ma_nd' => $maNd]);
-        return $stmt->fetchAll();
+        $orders = $stmt->fetchAll();
+
+        if (empty($orders)) {
+            return [];
+        }
+
+        $orderIds = array_column($orders, 'ma_dh');
+        $inPlaceholders = implode(',', array_fill(0, count($orderIds), '?'));
+
+        $itemsStmt = $this->pdo->prepare("
+            SELECT 
+                ct.ma_ctdh,
+                ct.ma_dh,
+                ct.ma_bt,
+                ct.so_luong,
+                ct.don_gia_luc_mua,
+                ct.thanh_tien_muc,
+                bt.ma_sku,
+                bt.kich_co,
+                bt.mau_sac,
+                sp.ten_sp,
+                sp.anh_chinh
+            FROM ctdh_chi_tiet_dh ct
+            INNER JOIN bt_bien_the_sp bt ON ct.ma_bt = bt.ma_bt
+            INNER JOIN sp_san_pham sp ON bt.ma_sp = sp.ma_sp
+            WHERE ct.ma_dh IN ($inPlaceholders)
+            ORDER BY ct.ma_ctdh ASC
+        ");
+        $itemsStmt->execute($orderIds);
+        $items = $itemsStmt->fetchAll();
+
+        $itemsByOrder = [];
+        foreach ($items as $item) {
+            $item['anh_chinh_url'] = resolveProductImage($item['anh_chinh']);
+            $itemsByOrder[$item['ma_dh']][] = $item;
+        }
+
+        foreach ($orders as &$order) {
+            $order['items'] = $itemsByOrder[$order['ma_dh']] ?? [];
+        }
+        unset($order);
+
+        return $orders;
     }
 }
 

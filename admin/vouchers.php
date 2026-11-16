@@ -44,12 +44,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ];
                 break;
 
+            case 'lock_voucher':
+                $maPgg = (int)($_POST['ma_pgg'] ?? 0);
+                $voucherService->lockVoucherCampaign($maPgg);
+                $_SESSION['admin_flash'] = [
+                    'type'    => 'success',
+                    'message' => "Đã khóa / tạm dừng đổi mới cho chiến dịch Voucher #{$maPgg} (so_luong = 0). Khách hàng đã đổi trước đó vẫn được sử dụng bình thường đến hết thời hạn!"
+                ];
+                break;
+
             case 'end_voucher_early':
                 $maPgg = (int)($_POST['ma_pgg'] ?? 0);
                 $voucherService->endVoucherEarly($maPgg);
                 $_SESSION['admin_flash'] = [
                     'type'    => 'success',
-                    'message' => "Đã đóng và kết thúc sớm chiến dịch Voucher #{$maPgg}!"
+                    'message' => "Đã kết thúc sớm chiến dịch Voucher #{$maPgg} (ngay_kt = NOW()). Voucher đã bị ẩn ngay lập tức khỏi mọi nơi và chặn sử dụng!"
                 ];
                 break;
 
@@ -141,7 +150,7 @@ require __DIR__ . '/includes/header.php';
                 $badgeText = 'Đã kết thúc';
             } elseif ($isOutOfStock) {
                 $badgeClass = 'bg-amber-50 text-amber-700';
-                $badgeText = 'Hết lượt đổi';
+                $badgeText = 'Đã khóa / Hết lượt';
             } elseif ($isUpcoming) {
                 $badgeClass = 'bg-blue-50 text-blue-700';
                 $badgeText = 'Sắp diễn ra';
@@ -180,22 +189,35 @@ require __DIR__ . '/includes/header.php';
                   <?= !isSuperAdminRole() ? 'disabled title="Chỉ Admin mới có quyền cấu hình"' : '' ?>>
                   Cấu hình
                 </button>
-                <?php if (!$isExpired && !$isOutOfStock): ?>
+                <?php if (!$isExpired): ?>
                   <?php if (isSuperAdminRole()): ?>
-                  <form method="POST" action="vouchers.php" class="inline-block"
-                    onsubmit="return confirm('Bạn có chắc chắn muốn kết thúc sớm chiến dịch <?= htmlspecialchars(addslashes($v['ma_code'])) ?>? Số lượng phát hành còn lại sẽ đặt về 0 và thời hạn kết thúc sẽ chuyển về thời điểm hiện tại.');">
-                    <input type="hidden" name="action" value="end_voucher_early" />
-                    <input type="hidden" name="ma_pgg" value="<?= (int)$v['ma_pgg'] ?>" />
-                    <button type="submit"
-                      class="tap-feedback rounded-lg border border-rose-200 px-2.5 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50 hover:border-rose-300 transition-colors">
-                      Đóng sớm
-                    </button>
-                  </form>
+                    <?php if (!$isOutOfStock): ?>
+                    <form method="POST" action="vouchers.php" class="inline-block"
+                      onsubmit="return confirm('Khóa chiến dịch / Tạm dừng đổi mã <?= htmlspecialchars(addslashes($v['ma_code'])) ?>?\n\n- Số lượng phát hành còn lại sẽ cập nhật về 0.\n- Người dùng mới sẽ KHÔNG thể đổi thêm.\n- Khách hàng ĐÃ ĐỔI TRƯỚC ĐÓ VẪN DÙNG ĐƯỢC đến hết ngày <?= date('d/m/Y H:i', strtotime($v['ngay_kt'])) ?>.');">
+                      <input type="hidden" name="action" value="lock_voucher" />
+                      <input type="hidden" name="ma_pgg" value="<?= (int)$v['ma_pgg'] ?>" />
+                      <button type="submit"
+                        class="tap-feedback rounded-lg border border-amber-300 px-2.5 py-1.5 text-xs font-medium text-amber-700 hover:bg-amber-50 hover:border-amber-400 transition-colors"
+                        title="Khóa đổi mới (so_luong = 0)">
+                        Khóa đổi
+                      </button>
+                    </form>
+                    <?php endif; ?>
+                    <form method="POST" action="vouchers.php" class="inline-block"
+                      onsubmit="return confirm('Kết thúc sớm chiến dịch <?= htmlspecialchars(addslashes($v['ma_code'])) ?>?\n\n- Thời hạn kết thúc sẽ chuyển về thời điểm hiện tại (ngay_kt = NOW()).\n- Voucher sẽ ẨN HOÀN TOÀN khỏi Kho đổi điểm và Dropdown thanh toán, chặn sử dụng ngay lập tức.');">
+                      <input type="hidden" name="action" value="end_voucher_early" />
+                      <input type="hidden" name="ma_pgg" value="<?= (int)$v['ma_pgg'] ?>" />
+                      <button type="submit"
+                        class="tap-feedback rounded-lg border border-rose-200 px-2.5 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50 hover:border-rose-300 transition-colors"
+                        title="Kết thúc sớm (ngay_kt = NOW())">
+                        Kết thúc sớm
+                      </button>
+                    </form>
                   <?php else: ?>
-                  <button type="button" disabled title="Chỉ Admin mới có quyền đóng sớm"
-                    class="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-400 cursor-not-allowed">
-                    Đóng sớm
-                  </button>
+                    <button type="button" disabled title="Chỉ Admin mới có quyền thao tác"
+                      class="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-400 cursor-not-allowed">
+                      Đã khóa quyền
+                    </button>
                   <?php endif; ?>
                 <?php endif; ?>
               </div>

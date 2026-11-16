@@ -7,17 +7,14 @@
 
 require_once __DIR__ . '/database.php';
 
-<<<<<<< HEAD
-if (!defined('POINTS_PER_VND')) {
-    define('POINTS_PER_VND', 10000); // Quy chuẩn: 10.000đ = 1 điểm cơ bản
-=======
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 
-define('DB_HOST', '127.0.0.1');
-define('DB_PORT', '3306');
-define('DB_NAME', 'csdl_cua_hang_quan_ao');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+// Database constants are now defined in config/database.php and are conditionally loaded there.
+// define('DB_HOST', '127.0.0.1');
+// define('DB_PORT', '3307');
+// define('DB_NAME', 'csdl_cua_hang_quan_ao');
+// define('DB_USER', 'root');
+// define('DB_PASS', '');
 define('POINTS_PER_VND', 10000); // Quy chuẩn: 10.000đ = 1 điểm cơ bản
 
 // Cấu hình tài khoản ngân hàng & VietQR
@@ -26,7 +23,7 @@ require_once __DIR__ . '/vietqr.php';
 /**
  * Khởi tạo và trả về đối tượng kết nối PDO (Singleton)
  */
-function getDBConnection(): PDO
+function getDBConnectionFromLegacy(): PDO
 {
     static $pdo = null;
     if ($pdo === null) {
@@ -57,7 +54,6 @@ function getDBConnection(): PDO
         }
     }
     return $pdo;
->>>>>>> origin/main
 }
 
 // Cơ chế switch_user trực tiếp qua URL đã bị vô hiệu hóa vì lý do bảo mật.

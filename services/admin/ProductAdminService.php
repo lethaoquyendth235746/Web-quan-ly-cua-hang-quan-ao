@@ -634,6 +634,166 @@ class ProductAdminService
     // =========================================================================
 
     /**
+     * Lấy toàn bộ hình ảnh phụ (không phải ảnh chính) cho một sản phẩm, sắp xếp theo yêu cầu:
+     *   - ảnh chính trước (la_anh_chinh DESC)
+     *   - màu sắc liên kết tăng dần (mau_sac_lien_ket ASC)
+     *   - mã ảnh giảm dần (ma_ha DESC)
+     */
+    public function getProductGalleryImages(int $maSp): array
+    {
+        if ($maSp <= 0) {
+            throw new InvalidArgumentException('Mã sản phẩm không hợp lệ.');
+        }
+        $stmt = $this->pdo->prepare(
+            "SELECT ma_ha, ma_sp, duong_dan_anh, mau_sac_lien_ket, thu_tu, la_anh_chinh
+                 FROM ha_hinh_anh_sp
+                 WHERE ma_sp = ?
+                 ORDER BY la_anh_chinh DESC, mau_sac_lien_ket ASC, ma_ha DESC"
+        );
+        $stmt->execute([$maSp]);
+        $rows = $stmt->fetchAll();
+        foreach ($rows as &$r) {
+            $r['resolved_url'] = self::resolveAdminImageUrl($r['duong_dan_anh']);
+        }
+        unset($r);
+        return $rows;
+    }
+
+    /**
+     * Thêm một hoặc nhiều ảnh phụ cho sản phẩm, gắn màu sắc liên kết.
+     *
+     * @param int   $maSp           Mã sản phẩm
+     * @param array $files          Mảng $_FILES['gallery_images'] (có thể chứa nhiều file)
+     * @param string $mauSacLienKet Tên màu sắc (không được rỗng)
+     * @return int Số ảnh đã lưu thành công
+     */
+    public function addProductGalleryImages(int $maSp, array $files, string $mauSacLienKet): int
+    {
+        if ($maSp <= 0) {
+            throw new InvalidArgumentException('Mã sản phẩm không hợp lệ.');
+        }
+        $mauSacLienKet = trim($mauSacLienKet);
+        if ($mauSacLienKet === '') {
+            throw new InvalidArgumentException('Tên màu sắc liên kết không được để trống.');
+        }
+
+        // Chuẩn hoá mảng files để dễ vòng lặp
+        $uploadedFiles = [];
+        if (isset($files['name']) && is_array($files['name'])) {
+            $fileCount = count($files['name']);
+            for ($i = 0; $i < $fileCount; $i++) {
+                $uploadedFiles[] = [
+                    'name'     => $files['name'][$i],
+                    'type'     => $files['type'][$i],
+                    'tmp_name' => $files['tmp_name'][$i],
+                    'error'    => $files['error'][$i],
+                    'size'     => $files['size'][$i],
+                ];
+            }
+        } else {
+            // single file case (unlikely with multiple input but handle gracefully)
+            $uploadedFiles[] = $files;
+        }
+
+        $savedCount = 0;
+        $this->pdo->beginTransaction();
+        try {
+            foreach ($uploadedFiles as $file) {
+                // Kiểm tra trạng thái upload
+                if ($file['error'] !== UPLOAD_ERR_OK) {
+                    // bỏ qua file lỗi, có thể ghi log nếu muốn
+                    continue;
+                }
+                // Kiểm tra kích thước (≤5MB)
+                if ($file['size'] > 5 * 1024 * 1024) {
+                    continue;
+                }
+                // Kiểm tra phần mở rộng và MIME thực tế
+                $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+                $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+                if (!in_array($ext, $allowed, true)) {
+                    continue;
+                }
+                $finfo = new finfo(FILEINFO_MIME_TYPE);
+                $mime = $finfo->file($file['tmp_name']);
+                $validMimes = ['image/jpeg', 'image/png', 'image/webp'];
+                if (!in_array($mime, $validMimes, true)) {
+                    continue;
+                }
+
+                // Di chuyển file và lấy tên lưu
+                $fileName = $this->handleImageUpload($file);
+                if ($fileName === null) {
+                    continue;
+                }
+
+                // Insert record, la_anh_chinh luôn = 0
+                $stmt = $this->pdo->prepare(
+                    "INSERT INTO ha_hinh_anh_sp (ma_sp, duong_dan_anh, mau_sac_lien_ket, thu_tu, la_anh_chinh)
+                     VALUES (?, ?, ?, 1, 0)"
+                );
+                $stmt->execute([$maSp, $fileName, $mauSacLienKet]);
+                $savedCount++;
+            }
+            $this->pdo->commit();
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            // Xóa các file đã lưu nếu có lỗi
+            if (isset($fileName) && $fileName !== null) {
+                $localPath = dirname(__DIR__, 2) . '/assets/images/' . $fileName;
+                if (file_exists($localPath)) {
+                    @unlink($localPath);
+                }
+            }
+            throw $e;
+        }
+        return $savedCount;
+    }
+
+    /**
+     * Xóa một ảnh phụ (không phải ảnh chính) của sản phẩm.
+     */
+    public function deleteGalleryImage(int $maAnh, int $maSp): void
+    {
+        if ($maAnh <= 0 || $maSp <= 0) {
+            throw new InvalidArgumentException('Mã ảnh hoặc mã sản phẩm không hợp lệ.');
+        }
+        // Kiểm tra tồn tại và loại ảnh
+        $stmt = $this->pdo->prepare(
+            "SELECT duong_dan_anh, la_anh_chinh FROM ha_hinh_anh_sp WHERE ma_ha = ? AND ma_sp = ?"
+        );
+        $stmt->execute([$maAnh, $maSp]);
+        $row = $stmt->fetch();
+        if (!$row) {
+            throw new Exception('Ảnh không tồn tại hoặc không thuộc sản phẩm này.');
+        }
+        if ((int)$row['la_anh_chinh'] === 1) {
+            throw new Exception('Không thể xóa ảnh chính của sản phẩm.');
+        }
+
+        $this->pdo->beginTransaction();
+        try {
+            // Xóa bản ghi DB
+            $del = $this->pdo->prepare("DELETE FROM ha_hinh_anh_sp WHERE ma_ha = ? AND ma_sp = ?");
+            $del->execute([$maAnh, $maSp]);
+            // Xóa file vật lý nếu là file cục bộ
+            $path = $row['duong_dan_anh'];
+            if ($path && !preg_match('/^https?:\/\//i', $path) && $path !== 'no_image.jpg') {
+                $filePath = dirname(__DIR__, 2) . '/assets/images/' . $path;
+                if (file_exists($filePath)) {
+                    @unlink($filePath);
+                }
+            }
+            $this->pdo->commit();
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
+    }
+
+    // Existing methods continue below...
+
+    /**
      * Lấy toàn bộ hình ảnh trong bảng ha_hinh_anh_sp theo mã sản phẩm
      */
     public function getProductImages(int $maSp): array

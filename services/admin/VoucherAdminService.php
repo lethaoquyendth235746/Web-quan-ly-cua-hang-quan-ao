@@ -272,14 +272,28 @@ class VoucherAdminService
     }
 
     /**
-     * Kết thúc sớm chiến dịch Voucher ngay lập tức: đóng số lượng còn lại về 0 và thời gian kết thúc về NOW()
+     * Khóa chiến dịch / Tạm dừng đổi mới: cập nhật số lượng phát hành còn lại về 0
+     * (Chỉ chặn người dùng mới đổi, khách hàng đã đổi vào ví trước đó vẫn được sử dụng bình thường đến hết ngay_kt)
+     */
+    public function lockVoucherCampaign(int $maPgg): bool
+    {
+        $stmt = $this->pdo->prepare("
+            UPDATE pgg_phieu_giam_gia
+            SET so_luong = 0
+            WHERE ma_pgg = :ma_pgg
+        ");
+        return $stmt->execute([':ma_pgg' => $maPgg]);
+    }
+
+    /**
+     * Kết thúc sớm chiến dịch Voucher ngay lập tức: cập nhật thời hạn kết thúc về NOW()
+     * (Voucher hết hạn ngay lập tức: ẩn hoàn toàn khỏi Kho đổi điểm và Dropdown thanh toán, chặn thanh toán ở Backend)
      */
     public function endVoucherEarly(int $maPgg): bool
     {
         $stmt = $this->pdo->prepare("
             UPDATE pgg_phieu_giam_gia
-            SET ngay_kt = NOW(),
-                so_luong = 0
+            SET ngay_kt = NOW()
             WHERE ma_pgg = :ma_pgg
         ");
         return $stmt->execute([':ma_pgg' => $maPgg]);

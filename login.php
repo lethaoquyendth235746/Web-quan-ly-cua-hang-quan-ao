@@ -105,7 +105,7 @@ require_once __DIR__ . '/includes/header.php';
       <!-- Card Đăng nhập -->
       <div class="card border-0 shadow-sm rounded-4 p-4 p-sm-5 bg-white">
         <div class="text-center mb-4">
-          <span class="badge bg-light text-secondary border px-3 py-1.5 rounded-pill small mb-2">Xác thực người dùng</span>
+          <span class="badge bg-light text-secondary border px-3 py-1.5 rounded-pill small mb-2"></span>
           <h2 class="h3 fw-bold text-dark">Đăng nhập</h2>
           <p class="text-secondary small mb-0">Hệ thống Quản lý Cửa hàng Quần áo &amp; Khách hàng Thân thiết</p>
         </div>
@@ -140,7 +140,7 @@ require_once __DIR__ . '/includes/header.php';
           <div class="mb-3">
             <div class="d-flex justify-content-between align-items-center mb-1">
               <label for="password" class="form-label small fw-semibold text-dark mb-0">Mật khẩu <span class="text-danger">*</span></label>
-              <span class="text-muted small" style="font-size: 11px;">Mẫu: <code>123456</code></span>
+              <span class="text-muted small" style="font-size: 11px;"></code></span>
             </div>
             <div class="input-group">
               <span class="input-group-text bg-light text-secondary border-end-0"><i class="bi bi-lock"></i></span>
@@ -155,6 +155,22 @@ require_once __DIR__ . '/includes/header.php';
           Chưa có tài khoản thành viên? <a href="register.php" class="text-dark fw-bold text-decoration-none">Đăng ký &amp; Mở thẻ Hạng Đồng →</a>
         </div>
       </div>
+
     </div>
   </div>
 </div>
+
+
+
+      
+
+<script>
+  function quickFill(u, p) {
+    document.getElementById('identifier').value = u;
+    document.getElementById('password').value = p;
+    document.getElementById('identifier').form.submit();
+  }
+</script>
+
+<?php require_once __DIR__ . '/includes/footer.php'; ?>
+>>>>>>> origin/main

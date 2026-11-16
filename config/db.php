@@ -7,55 +7,61 @@
 
 require_once __DIR__ . '/database.php';
 
+<<<<<<< HEAD
 if (!defined('POINTS_PER_VND')) {
     define('POINTS_PER_VND', 10000); // Quy chuẩn: 10.000đ = 1 điểm cơ bản
-}
+=======
+date_default_timezone_set('Asia/Ho_Chi_Minh');
+
+define('DB_HOST', '127.0.0.1');
+define('DB_PORT', '3306');
+define('DB_NAME', 'csdl_cua_hang_quan_ao');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+define('POINTS_PER_VND', 10000); // Quy chuẩn: 10.000đ = 1 điểm cơ bản
+
+// Cấu hình tài khoản ngân hàng & VietQR
+require_once __DIR__ . '/vietqr.php';
 
 /**
- * Chuyển đổi nhanh tài khoản khách hàng từ CSDL để kiểm thử các bậc Hạng thẻ
- * Đồng bộ hóa với phiên đăng nhập thực tế của hệ thống
+ * Khởi tạo và trả về đối tượng kết nối PDO (Singleton)
  */
-if (isset($_GET['switch_user'])) {
-    $uid = (int) $_GET['switch_user'];
-    if ($uid > 0) {
-        $stmt = getDBConnection()->prepare("
-            SELECT nd.*, vt.ten_vt, vt.mo_ta_quyen
-            FROM nd_nguoi_dung nd
-            INNER JOIN vt_vai_tro vt ON nd.ma_vt = vt.ma_vt
-            WHERE nd.ma_nd = :id AND nd.trang_thai = 1
-            LIMIT 1
-        ");
-        $stmt->execute(['id' => $uid]);
-        $u = $stmt->fetch();
-        if ($u) {
-            unset($_SESSION['explicit_logout']);
-            $_SESSION['user'] = [
-                'ma_nd'         => (int)$u['ma_nd'],
-                'ma_vt'         => (int)$u['ma_vt'],
-                'ten_vt'        => $u['ten_vt'],
-                'ho_ten'        => $u['ho_ten'],
-                'ten_dang_nhap' => $u['ten_dang_nhap'],
-                'email'         => $u['email'],
-                'sdt'           => $u['sdt'],
-                'anh_dai_dien'  => $u['anh_dai_dien'],
+function getDBConnection(): PDO
+{
+    static $pdo = null;
+    if ($pdo === null) {
+        $portsToTry = array_unique([DB_PORT, '3308', '3306']);
+        $lastException = null;
+
+        foreach ($portsToTry as $port) {
+            $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', DB_HOST, $port, DB_NAME);
+            $options = [
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES   => false,
             ];
-            $_SESSION['current_user_id'] = (int)$u['ma_nd'];
-            if (in_array((int)$u['ma_vt'], [1, 2], true)) {
-                $_SESSION['current_admin_id'] = (int)$u['ma_nd'];
-            } else {
-                unset($_SESSION['current_admin_id']);
+            try {
+                $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+                break;
+            } catch (PDOException $e) {
+                $lastException = $e;
             }
         }
+
+        if ($pdo === null && $lastException !== null) {
+            die('<div style="font-family:sans-serif;padding:2rem;max-width:640px;margin:2rem auto;border:1px solid #fca5a5;background:#fef2f2;border-radius:12px;color:#991b1b;">'
+                . '<h2 style="margin-top:0;">Không thể kết nối Cơ sở dữ liệu</h2>'
+                . '<p>Vui lòng kiểm tra MySQL trong XAMPP Control Panel và đảm bảo đã nạp file <code>SQL/file_mau-duLieu.sql</code> vào CSDL <strong>' . htmlspecialchars(DB_NAME) . '</strong>.</p>'
+                . '<p style="font-size:13px;color:#b91c1c;">Chi tiết lỗi: ' . htmlspecialchars($lastException->getMessage()) . '</p>'
+                . '</div>');
+        }
     }
-    $redirect = strtok($_SERVER['REQUEST_URI'], '?');
-    $queryParams = $_GET;
-    unset($queryParams['switch_user']);
-    if (!empty($queryParams)) {
-        $redirect .= '?' . http_build_query($queryParams);
-    }
-    header('Location: ' . $redirect);
-    exit;
+    return $pdo;
+>>>>>>> origin/main
 }
+
+// Cơ chế switch_user trực tiếp qua URL đã bị vô hiệu hóa vì lý do bảo mật.
+
 
 /**
  * Kiểm tra người dùng hiện tại đã đăng nhập hay chưa
@@ -103,20 +109,14 @@ function getCurrentUser(): ?array
 }
 
 /**
- * Lấy mã người dùng hiện tại (nếu chưa đăng nhập và chưa từng logout, mặc định demo ID = 4)
+ * Lấy mã người dùng hiện tại từ Session (trả về 0 nếu chưa đăng nhập)
  */
 function getCurrentUserId(): int
 {
-    if (!empty($_SESSION['explicit_logout'])) {
-        return 0; // Đã đăng xuất chủ động
-    }
-    if (isset($_SESSION['current_user_id'])) {
+    if (isset($_SESSION['current_user_id']) && empty($_SESSION['explicit_logout'])) {
         return (int) $_SESSION['current_user_id'];
     }
-    // Khởi tạo phiên demo mặc định (Neàng Ra - Hạng Đồng) cho lần đầu truy cập
-    $_SESSION['current_user_id'] = 4;
-    $user = getCurrentUser();
-    return 4;
+    return 0;
 }
 
 /**

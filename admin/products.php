@@ -121,6 +121,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $redirectUrl = 'products.php?open_variants=' . $maSp;
                 break;
 
+            // --- NHÓM ẢNH PHỤ SẢN PHẨM (ha_hinh_anh_sp) ---
+            case 'add_product_image':
+                $maSp = (int)($_POST['ma_sp'] ?? 0);
+                $newMaHa = $productAdminService->addProductImage($maSp, $_POST, $_FILES['file_anh'] ?? null);
+                $_SESSION['admin_flash'] = [
+                    'type'    => 'success',
+                    'message' => "Đã thêm ảnh mới vào bộ sưu tập sản phẩm #SP-" . sprintf('%03d', $maSp) . "!"
+                ];
+                $redirectUrl = 'products.php?open_images=' . $maSp;
+                break;
+
+            case 'set_main_image':
+                $maHa = (int)($_POST['ma_ha'] ?? 0);
+                $maSp = (int)($_POST['ma_sp'] ?? 0);
+                $productAdminService->setMainImage($maHa);
+                $_SESSION['admin_flash'] = [
+                    'type'    => 'success',
+                    'message' => "Đã thiết lập ảnh chính cho sản phẩm #SP-" . sprintf('%03d', $maSp) . "!"
+                ];
+                $redirectUrl = 'products.php?open_images=' . $maSp;
+                break;
+
+            case 'delete_product_image':
+                $maHa = (int)($_POST['ma_ha'] ?? 0);
+                $maSp = (int)($_POST['ma_sp'] ?? 0);
+                $productAdminService->deleteProductImage($maHa);
+                $_SESSION['admin_flash'] = [
+                    'type'    => 'success',
+                    'message' => "Đã xóa ảnh phụ khỏi sản phẩm!"
+                ];
+                $redirectUrl = 'products.php?open_images=' . $maSp;
+                break;
+
             default:
                 throw new Exception('Thao tác yêu cầu không hợp lệ.');
         }
@@ -134,6 +167,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($maSp > 0) {
                 $redirectUrl = 'products.php?open_variants=' . $maSp;
             }
+        } elseif (in_array($action, ['add_product_image', 'set_main_image', 'delete_product_image'], true)) {
+            $maSp = (int)($_POST['ma_sp'] ?? 0);
+            if ($maSp > 0) {
+                $redirectUrl = 'products.php?open_images=' . $maSp;
+            }
         }
     }
 
@@ -145,12 +183,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $categories      = $productAdminService->getAllCategories();
 $products        = $productAdminService->getAllProducts();
 $groupedVariants = $productAdminService->getAllVariantsGroupedByProduct();
+$groupedImages   = $productAdminService->getAllImagesGroupedByProduct();
 
 $adminPageTitle  = 'Danh mục & Sản phẩm | Fashion Loyalty';
 $activeAdminMenu = 'products';
 
-// Kiểm tra mở sẵn modal biến thể nếu vừa thao tác biến thể
+// Kiểm tra mở sẵn modal biến thể hoặc ảnh nếu vừa thao tác
 $openVariantsId = isset($_GET['open_variants']) ? (int)$_GET['open_variants'] : 0;
+$openImagesId   = isset($_GET['open_images']) ? (int)$_GET['open_images'] : 0;
 
 require __DIR__ . '/includes/header.php';
 ?>
@@ -165,7 +205,7 @@ require __DIR__ . '/includes/header.php';
     <div>
       <h1 class="text-2xl font-semibold leading-tight text-slate-900">Quản lý Danh mục &amp; Sản phẩm thời trang</h1>
       <p class="mt-1 text-sm text-slate-500">
-        Dữ liệu thực tế từ bảng <code>sp_san_pham</code> (<?= count($products) ?> sản phẩm) và <code>dm_danh_muc_sp</code> (<?= count($categories) ?> danh mục).
+        Danh sách <?= count($products) ?> sản phẩm và <?= count($categories) ?> danh mục đang lưu hành.
       </p>
     </div>
     <button type="button" id="btnOpenAddProduct"
@@ -187,7 +227,7 @@ require __DIR__ . '/includes/header.php';
   <div>
     <label for="categoryFilter" class="sr-only">Lọc theo danh mục</label>
     <select id="categoryFilter" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-100 sm:w-64">
-      <option value="">Tất cả danh mục trong CSDL</option>
+      <option value="">Tất cả danh mục</option>
       <?php foreach ($categories as $cat): ?>
         <option value="<?= (int)$cat['ma_dm'] ?>">
           <?= $cat['ma_dm_cha'] ? '&mdash; ' : '' ?><?= htmlspecialchars($cat['ten_dm']) ?> (<?= (int)$cat['so_san_pham'] ?>)
@@ -225,7 +265,7 @@ require __DIR__ . '/includes/header.php';
         <?php if (empty($products)): ?>
           <tr>
             <td colspan="8" class="px-6 py-12 text-center text-slate-400">
-              Chưa có sản phẩm nào trong CSDL. Hãy bấm nút "Thêm sản phẩm mới" để bắt đầu!
+              Chưa có sản phẩm nào. Hãy bấm nút "Thêm sản phẩm mới" để bắt đầu!
             </td>
           </tr>
         <?php endif; ?>
@@ -236,7 +276,7 @@ require __DIR__ . '/includes/header.php';
             data-status="<?= (int)$p['trang_thai'] ?>">
             <td class="px-6 py-4">
               <img src="<?= htmlspecialchars($p['anh_chinh_url']) ?>" alt="<?= htmlspecialchars($p['ten_sp']) ?>"
-                class="h-12 w-12 rounded-lg object-cover border border-slate-200 bg-slate-100"
+                class="w-16 h-20 rounded-lg object-cover border border-slate-200 bg-slate-100 shadow-sm"
                 onerror="this.src='https://images.pexels.com/photos/9968526/pexels-photo-9968526.jpeg?auto=compress&cs=tinysrgb&h=650&w=940';" />
             </td>
             <td class="px-6 py-4">
@@ -290,6 +330,11 @@ require __DIR__ . '/includes/header.php';
                   Biến thể (<?= (int)$p['so_bien_the'] ?>)
                 </button>
                 <button type="button"
+                  onclick="openImageModal(<?= (int)$p['ma_sp'] ?>)"
+                  class="tap-feedback rounded-lg border border-teal-200 bg-teal-50/50 px-2.5 py-1.5 text-xs font-medium text-teal-700 hover:bg-teal-100 transition-colors">
+                  Ảnh phụ (<?= count($groupedImages[$p['ma_sp']] ?? []) ?>)
+                </button>
+                <button type="button"
                   onclick="openEditProductModal(<?= htmlspecialchars(json_encode($p), ENT_QUOTES, 'UTF-8') ?>)"
                   class="tap-feedback rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50 transition-colors">
                   Sửa
@@ -310,7 +355,7 @@ require __DIR__ . '/includes/header.php';
     </table>
   </div>
   <div class="border-t border-slate-200 px-6 py-4 flex items-center justify-between text-sm text-slate-500">
-    <p id="resultSummary">Hiển thị <?= count($products) ?> sản phẩm trong CSDL</p>
+    <p id="resultSummary">Hiển thị <?= count($products) ?> sản phẩm</p>
   </div>
 </section>
 
@@ -318,7 +363,7 @@ require __DIR__ . '/includes/header.php';
 <section aria-labelledby="catTableTitle" class="fade-up mt-8 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
   <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-6 py-5">
     <div>
-      <h2 id="catTableTitle" class="text-base font-semibold text-slate-900">Cây Danh mục sản phẩm đa cấp (Bảng <code>dm_danh_muc_sp</code>)</h2>
+      <h2 id="catTableTitle" class="text-base font-semibold text-slate-900">Cây Danh mục sản phẩm đa cấp</h2>
       <p class="mt-1 text-sm text-slate-500">Quản lý trọn vẹn danh mục cha - con và thứ tự hiển thị ngoài website.</p>
     </div>
     <button type="button" id="btnOpenAddCategory"
@@ -396,7 +441,7 @@ require __DIR__ . '/includes/header.php';
       <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
         <div>
           <h3 id="productModalTitle" class="text-lg font-semibold text-slate-900">Thêm sản phẩm mới</h3>
-          <p class="text-xs text-slate-500 mt-0.5">Lưu trực tiếp vào bảng <code>sp_san_pham</code> &amp; thư mục <code>assets/images/</code></p>
+          <p class="text-xs text-slate-500 mt-0.5">Thêm thông tin sản phẩm và hình ảnh đại diện</p>
         </div>
         <button type="button" onclick="closeProductModal()" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
           <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
@@ -459,7 +504,7 @@ require __DIR__ . '/includes/header.php';
             <div class="flex-1">
               <input type="file" name="anh_chinh" id="prodAnhChinh" accept=".jpg,.jpeg,.png,.webp"
                 class="block w-full text-xs text-slate-500 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-xs file:font-medium file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
-              <p class="mt-1 text-xs text-slate-500">Chấp nhận JPG, JPEG, PNG, WEBP (tối đa 5MB). File sẽ được lưu vật lý vào <code>assets/images/</code>.</p>
+              <p class="mt-1 text-xs text-slate-500">Chấp nhận JPG, JPEG, PNG, WEBP (tối đa 5MB).</p>
               <p id="currentImageHint" class="mt-1 text-xs text-blue-600 hidden">Đang giữ ảnh hiện tại nếu không chọn file mới.</p>
             </div>
           </div>
@@ -508,7 +553,7 @@ require __DIR__ . '/includes/header.php';
             <h3 id="variantModalTitle" class="text-lg font-semibold text-slate-900">Quản lý Biến thể SKU</h3>
             <span id="variantProductCode" class="font-mono rounded bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-700">SP-001</span>
           </div>
-          <p id="variantProductSubtitle" class="text-xs text-slate-500 mt-0.5">Sản phẩm: Áo Khoác Gió &middot; Bảng <code>bt_bien_the_sp</code></p>
+          <p id="variantProductSubtitle" class="text-xs text-slate-500 mt-0.5">Sản phẩm: Áo Khoác Gió</p>
         </div>
         <button type="button" onclick="closeVariantModal()" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
           <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
@@ -649,7 +694,7 @@ require __DIR__ . '/includes/header.php';
       <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
         <div>
           <h3 id="categoryModalTitle" class="text-lg font-semibold text-slate-900">Thêm danh mục mới</h3>
-          <p class="text-xs text-slate-500 mt-0.5">Bảng <code>dm_danh_muc_sp</code></p>
+          <p class="text-xs text-slate-500 mt-0.5">Phân loại danh mục sản phẩm</p>
         </div>
         <button type="button" onclick="closeCategoryModal()" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
           <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
@@ -724,12 +769,120 @@ require __DIR__ . '/includes/header.php';
 </div>
 
 <!-- ========================================================================= -->
+<!-- MODAL 4: QUẢN LÝ BỘ SƯU TẬP ẢNH PHỤ THEO MÀU SẮC (#imageModal)            -->
+<!-- ========================================================================= -->
+<div id="imageModal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true">
+  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeImageModal()"></div>
+  <div class="flex min-h-full items-center justify-center p-4">
+    <div class="relative w-full max-w-4xl rounded-2xl bg-white shadow-2xl transition-all">
+      <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="imageProductCode" class="font-mono text-xs font-semibold uppercase tracking-wider text-teal-700">SP-000</span>
+            <span class="text-xs text-slate-300">&bull;</span>
+            <span id="imageCountBadge" class="rounded-full bg-teal-50 px-2.5 py-0.5 text-xs font-semibold text-teal-700">0 ảnh</span>
+          </div>
+          <h3 id="imageModalTitle" class="mt-0.5 text-lg font-semibold text-slate-900">Quản lý Bộ sưu tập Ảnh theo màu</h3>
+          <p id="imageProductSubtitle" class="text-xs text-slate-500 mt-0.5">Danh sách ảnh phụ và màu sắc liên kết cho sản phẩm</p>
+        </div>
+        <button type="button" onclick="closeImageModal()" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
+        <!-- Cột 1 & 2: Danh sách ảnh hiện có -->
+        <div class="lg:col-span-2 p-6 max-h-[600px] overflow-y-auto">
+          <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-700 mb-4">Danh sách ảnh hiện có</h4>
+          <div id="imageGridContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <!-- Render động bằng JS -->
+          </div>
+          <div id="imageEmptyNotice" class="hidden rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-8 text-center text-sm text-slate-500">
+            Sản phẩm chưa có ảnh phụ nào trong bộ sưu tập. Hãy thêm ảnh mới ở khung bên cạnh!
+          </div>
+        </div>
+
+        <!-- Cột 3: Form thêm ảnh mới -->
+        <div class="p-6 bg-slate-50/40">
+          <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-700 mb-4">+ Thêm ảnh mới</h4>
+          <form id="addImageForm" method="POST" action="products.php" enctype="multipart/form-data" class="space-y-4">
+            <input type="hidden" name="action" value="add_product_image" />
+            <input type="hidden" name="ma_sp" id="imageFormMaSp" value="" />
+
+            <div>
+              <label class="block text-xs font-medium text-slate-700">Tải file ảnh từ máy</label>
+              <input type="file" name="file_anh" id="imageFileInput" accept=".jpg,.jpeg,.png,.webp"
+                class="mt-1 block w-full text-xs text-slate-500 file:mr-2 file:rounded-md file:border-0 file:bg-teal-50 file:px-2.5 file:py-1.5 file:text-xs file:font-medium file:text-teal-700 hover:file:bg-teal-100 cursor-pointer" />
+            </div>
+
+            <div>
+              <label for="imageUrlInput" class="block text-xs font-medium text-slate-700">Hoặc nhập URL ảnh trực tiếp</label>
+              <input type="text" name="url_anh" id="imageUrlInput" placeholder="https://images.pexels.com/..."
+                class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-teal-700 focus:outline-none focus:ring-1 focus:ring-teal-700" />
+            </div>
+
+            <div>
+              <label for="imageColorSelect" class="block text-xs font-medium text-slate-700">Màu sắc liên kết</label>
+              <select name="mau_sac_lien_ket" id="imageColorSelect"
+                class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-teal-700 focus:outline-none focus:ring-1 focus:ring-teal-700">
+                <option value="">-- Không gắn màu (Ảnh chung) --</option>
+                <!-- Render từ danh sách màu biến thể của SP -->
+              </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label for="imageOrderInput" class="block text-xs font-medium text-slate-700">Thứ tự</label>
+                <input type="number" name="thu_tu" id="imageOrderInput" value="1" min="1"
+                  class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-teal-700 focus:outline-none focus:ring-1 focus:ring-teal-700" />
+              </div>
+              <div class="flex items-center pt-5">
+                <label class="flex items-center gap-2 cursor-pointer select-none">
+                  <input type="checkbox" name="la_anh_chinh" value="1" class="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500" />
+                  <span class="text-xs font-medium text-slate-700">Ảnh chính</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="pt-2">
+              <button type="submit"
+                class="w-full tap-feedback inline-flex items-center justify-center gap-1.5 rounded-lg bg-teal-700 px-4 py-2 text-xs font-medium text-white hover:bg-teal-800 shadow-sm transition">
+                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                Lưu vào bộ sưu tập
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
 <!-- JAVASCRIPT ĐIỀU KHIỂN GIAO DIỆN & MODAL                                   -->
 <!-- ========================================================================= -->
 <script>
+  // Hàm chuẩn hóa URL hiển thị ảnh trong phân hệ Admin
+  function resolveAdminImageUrl(path) {
+    if (!path) {
+      return 'https://images.pexels.com/photos/9968526/pexels-photo-9968526.jpeg?auto=compress&cs=tinysrgb&h=650&w=940';
+    }
+    if (/^https?:\/\//i.test(path)) {
+      return path;
+    }
+    if (path.startsWith('../')) {
+      return path;
+    }
+    if (path.includes('/')) {
+      return '../' + path.replace(/^\/+/, '');
+    }
+    return '../assets/images/' + path;
+  }
+
   // Dữ liệu PHP được truyền an toàn vào JS
   const allProducts = <?= json_encode($products, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) ?>;
   const allGroupedVariants = <?= json_encode($groupedVariants, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) ?>;
+  const allGroupedImages = <?= json_encode($groupedImages, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) ?>;
   const colorHexMap = {
     'Đen': '#2D2D2D',
     'Trắng': '#FFFFFF',
@@ -771,7 +924,7 @@ require __DIR__ . '/includes/header.php';
       });
 
       if (summary) {
-        summary.textContent = `Hiển thị ${visibleCount} trên ${rows.length} sản phẩm trong CSDL`;
+        summary.textContent = `Hiển thị ${visibleCount} trên ${rows.length} sản phẩm`;
       }
     }
 
@@ -996,6 +1149,102 @@ require __DIR__ . '/includes/header.php';
   }
 
   // ---------------------------------------------------------------------------
+  // XỬ LÝ MODAL QUẢN LÝ ẢNH PHỤ THEO MÀU SẮC (ha_hinh_anh_sp)
+  // ---------------------------------------------------------------------------
+  const imageModal = document.getElementById('imageModal');
+  let currentImageProduct = null;
+
+  window.openImageModal = function(maSp) {
+    const p = allProducts.find(item => Number(item.ma_sp) === Number(maSp));
+    if (!p) return;
+
+    currentImageProduct = p;
+    document.getElementById('imageModalTitle').textContent = `Quản lý Bộ sưu tập Ảnh theo màu - ${p.ten_sp}`;
+    document.getElementById('imageProductCode').textContent = p.ma_sp_code;
+    document.getElementById('imageProductSubtitle').textContent = `Danh mục: ${p.ten_dm} · Ảnh chính hiện tại: ${p.anh_chinh}`;
+    document.getElementById('imageFormMaSp').value = p.ma_sp;
+
+    // Đổ danh sách màu sắc từ các biến thể SKU của sản phẩm này vào select
+    const colorSelect = document.getElementById('imageColorSelect');
+    const variants = allGroupedVariants[maSp] || [];
+    const uniqueColors = Array.from(new Set(variants.map(v => v.mau_sac).filter(Boolean)));
+
+    colorSelect.innerHTML = '<option value="">-- Không gắn màu (Ảnh chung) --</option>';
+    uniqueColors.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c;
+      opt.textContent = `Màu: ${c}`;
+      colorSelect.appendChild(opt);
+    });
+
+    renderImageGrid(maSp);
+    imageModal.classList.remove('hidden');
+  };
+
+  window.closeImageModal = function() {
+    imageModal.classList.add('hidden');
+  };
+
+  function renderImageGrid(maSp) {
+    const container = document.getElementById('imageGridContainer');
+    const emptyNotice = document.getElementById('imageEmptyNotice');
+    const badge = document.getElementById('imageCountBadge');
+    const images = allGroupedImages[maSp] || [];
+
+    badge.textContent = `${images.length} ảnh`;
+
+    if (images.length === 0) {
+      container.innerHTML = '';
+      emptyNotice.classList.remove('hidden');
+      return;
+    }
+
+    emptyNotice.classList.add('hidden');
+    container.innerHTML = images.map(img => {
+      const isMain = Number(img.la_anh_chinh) === 1;
+      const colorTag = img.mau_sac_lien_ket
+        ? `<span class="inline-flex items-center gap-1 rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-medium text-slate-700">
+             <span class="h-2 w-2 rounded-full" style="background:${colorHexMap[img.mau_sac_lien_ket] || '#94A3B8'}"></span>
+             ${img.mau_sac_lien_ket}
+           </span>`
+        : `<span class="text-[11px] text-slate-400">Ảnh chung</span>`;
+
+      const imgUrl = resolveAdminImageUrl(img.resolved_url || img.duong_dan_anh);
+
+      return `
+        <div class="relative group rounded-xl border ${isMain ? 'border-teal-500 ring-2 ring-teal-500/20' : 'border-slate-200'} bg-white p-2 shadow-sm flex flex-col justify-between">
+          <div class="aspect-square w-full overflow-hidden rounded-lg bg-slate-100 mb-2">
+            <img src="${imgUrl}" alt="" class="h-full w-full object-cover group-hover:scale-105 transition duration-300"
+              onerror="this.src='https://images.pexels.com/photos/9968526/pexels-photo-9968526.jpeg?auto=compress&cs=tinysrgb&h=650&w=940';" />
+          </div>
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between gap-1">
+              ${colorTag}
+              ${isMain ? '<span class="rounded bg-teal-600 px-1.5 py-0.5 text-[10px] font-bold text-white uppercase">Ảnh chính</span>' : ''}
+            </div>
+            <div class="pt-1 flex items-center justify-between border-t border-slate-100">
+              ${!isMain ? `
+                <form method="POST" action="products.php" class="inline-block">
+                  <input type="hidden" name="action" value="set_main_image" />
+                  <input type="hidden" name="ma_ha" value="${img.ma_ha}" />
+                  <input type="hidden" name="ma_sp" value="${img.ma_sp}" />
+                  <button type="submit" class="text-[11px] font-medium text-teal-700 hover:underline">Đặt ảnh chính</button>
+                </form>
+              ` : '<span class="text-[11px] text-slate-400 italic">Đang là ảnh chính</span>'}
+              <form method="POST" action="products.php" class="inline-block" onsubmit="return confirm('Xác nhận xóa ảnh này khỏi bộ sưu tập?');">
+                <input type="hidden" name="action" value="delete_product_image" />
+                <input type="hidden" name="ma_ha" value="${img.ma_ha}" />
+                <input type="hidden" name="ma_sp" value="${img.ma_sp}" />
+                <button type="submit" class="text-[11px] font-medium text-rose-600 hover:text-rose-800 hover:underline">Xóa</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ---------------------------------------------------------------------------
   // XỬ LÝ MODAL DANH MỤC
   // ---------------------------------------------------------------------------
   const categoryModal = document.getElementById('categoryModal');
@@ -1037,13 +1286,19 @@ require __DIR__ . '/includes/header.php';
       closeProductModal();
       closeVariantModal();
       closeCategoryModal();
+      closeImageModal();
     }
   });
 
-  // Tự động mở modal biến thể nếu URL có param open_variants
+  // Tự động mở modal biến thể hoặc ảnh nếu URL có param
   <?php if ($openVariantsId > 0): ?>
     document.addEventListener('DOMContentLoaded', () => {
       openVariantModal(<?= $openVariantsId ?>);
+    });
+  <?php endif; ?>
+  <?php if ($openImagesId > 0): ?>
+    document.addEventListener('DOMContentLoaded', () => {
+      openImageModal(<?= $openImagesId ?>);
     });
   <?php endif; ?>
 </script>

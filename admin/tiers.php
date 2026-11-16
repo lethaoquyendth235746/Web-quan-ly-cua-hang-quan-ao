@@ -16,6 +16,15 @@ $tierService = new TierAdminService();
 // Phải chạy trước khi nạp header HTML để tránh lỗi "headers already sent"
 // =============================================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_tier') {
+    // Phân quyền: Chỉ Super-Admin (ma_vt = 1) mới được thay đổi cấu hình hạng thành viên
+    if (!isSuperAdminRole()) {
+        $_SESSION['admin_flash'] = [
+            'type'    => 'error',
+            'message' => 'Chỉ Quản trị viên cấp cao (Admin) mới có quyền thay đổi cấu hình Hạng thành viên và Chiến dịch Khuyến mãi!'
+        ];
+        header('Location: tiers.php');
+        exit;
+    }
     try {
         $maHang = (int)($_POST['ma_hang'] ?? 0);
         $res = $tierService->updateTierConfig($maHang, $_POST);
@@ -50,15 +59,22 @@ require __DIR__ . '/includes/header.php';
   </nav>
   <h1 class="mt-2 text-2xl font-semibold leading-tight text-slate-900">Cấu hình Hạng thành viên &amp; Quản lý Thẻ tích điểm</h1>
   <p class="mt-2 max-w-2xl text-sm text-slate-500">
-    Dữ liệu thực tế từ bảng <code>htv_hang_thanh_vien</code> (4 bậc hạng) và <code>ttd_the_tich_diem</code> (<?= count($memberCards) ?> thẻ thành viên).
+    Hệ thống phân cấp thành viên (4 bậc hạng) và <?= count($memberCards) ?> thẻ thành viên đã cấp.
   </p>
 </header>
+
+<?php if (!isSuperAdminRole()): ?>
+<div class="mt-4 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-5 py-3 text-sm text-amber-800">
+  <svg class="h-5 w-5 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 3a9 9 0 110 18A9 9 0 0112 3z"/></svg>
+  <span>Bạn đang xem với quyền <strong>Nhân viên (Chỉ xem)</strong> — Chỉ Quản trị viên cấp cao mới có thể chỉnh sửa cấu hình hạng thành viên.</span>
+</div>
+<?php endif; ?>
 
 <!-- Bảng Cấu hình 4 Bậc Hạng Thành Viên -->
 <section aria-label="Danh sách hạng" class="fade-up mt-8 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
   <div class="border-b border-slate-200 px-6 py-5 flex items-center justify-between">
     <div>
-      <h2 class="text-base font-semibold text-slate-900">4 Bậc Hạng Thành Viên (Bảng <code>htv_hang_thanh_vien</code>)</h2>
+      <h2 class="text-base font-semibold text-slate-900">4 Bậc Hạng Thành Viên</h2>
       <p class="mt-1 text-sm text-slate-500">Quy chuẩn tích điểm cơ bản: 10.000đ = 1 điểm thưởng. Thay đổi ngưỡng điểm sẽ tự động đồng bộ lại thẻ của toàn bộ khách hàng.</p>
     </div>
   </div>
@@ -111,7 +127,8 @@ require __DIR__ . '/includes/header.php';
                 data-prev-points="<?= (int)($prevTier['diem_toi_thieu'] ?? 0) ?>"
                 data-next-name="<?= htmlspecialchars($nextTier['ten_hang'] ?? '') ?>"
                 data-next-points="<?= (int)($nextTier['diem_toi_thieu'] ?? 0) ?>"
-                onclick="openEditTierModal(this)">
+                onclick="openEditTierModal(this)"
+                <?= !isSuperAdminRole() ? 'disabled title="Chỉ Admin mới có quyền chỉnh sửa"' : '' ?>>
                 Chỉnh sửa
               </button>
             </td>
@@ -126,7 +143,7 @@ require __DIR__ . '/includes/header.php';
 <section aria-labelledby="memberCardsTitle" class="fade-up mt-8 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
   <div class="border-b border-slate-200 px-6 py-5">
     <h2 id="memberCardsTitle" class="text-base font-semibold text-slate-900">
-      Danh sách Thẻ Tích Điểm Khách Hàng (Bảng <code>ttd_the_tich_diem</code> &mdash; <?= count($memberCards) ?> thẻ)
+      Danh sách Thẻ Tích Điểm Khách Hàng (<?= count($memberCards) ?> thẻ)
     </h2>
     <p class="mt-1 text-sm text-slate-500">Theo dõi tách biệt giữa Tổng điểm tích lũy (xét hạng) và Điểm khả dụng (tiêu dùng/đổi voucher).</p>
   </div>
@@ -161,9 +178,9 @@ require __DIR__ . '/includes/header.php';
             <td class="whitespace-nowrap px-6 py-4 text-right font-semibold text-emerald-700"><?= number_format((int)$mc['diem_kha_dung'], 0, ',', '.') ?> điểm</td>
             <td class="whitespace-nowrap px-6 py-4 text-slate-600"><?= formatDateVN($mc['ngay_cap']) ?></td>
             <td class="whitespace-nowrap px-6 py-4 text-right">
-              <a href="../index.php?page=loyalty&switch_user=<?= (int)$mc['ma_nd'] ?>"
+              <a href="../index.php?page=loyalty"
                 class="tap-feedback inline-flex items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100 transition-colors">
-                Mở Thẻ trên Store &rarr;
+                Xem trên Cửa hàng &rarr;
               </a>
             </td>
           </tr>
@@ -190,7 +207,7 @@ require __DIR__ . '/includes/header.php';
               <span id="modalBadgeText">Hạng</span>
             </span>
           </div>
-          <p class="text-xs text-slate-500 mt-0.5">Bảng <code>htv_hang_thanh_vien</code> &middot; Tự động đồng bộ thẻ thành viên</p>
+          <p class="text-xs text-slate-500 mt-0.5">Tự động đồng bộ quyền lợi và thẻ thành viên</p>
         </div>
         <button type="button" onclick="closeEditTierModal()" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors">
           <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>

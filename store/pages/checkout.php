@@ -18,8 +18,8 @@ $maxPointsToUse = min(50, $diemKhaDung);
       <section aria-labelledby="addressTitle">
         <div class="flex items-center justify-between">
           <div>
-            <h2 id="addressTitle" class="text-xl font-semibold">Địa chỉ nhận hàng (Bảng <code>dc_dia_chi_kh</code>)</h2>
-            <p class="mt-1 text-xs text-muted">Sổ địa chỉ thực tế của khách hàng <strong><?= htmlspecialchars($hoTen) ?></strong></p>
+            <h2 id="addressTitle" class="text-xl font-semibold">Địa chỉ nhận hàng</h2>
+            <p class="mt-1 text-xs text-muted">Sổ địa chỉ nhận hàng của <strong><?= htmlspecialchars($hoTen) ?></strong></p>
           </div>
           <button type="button" onclick="openAddressModal('create')"
             class="tap-feedback inline-flex items-center gap-1.5 rounded-full bg-charcoal px-4 py-2 text-xs font-medium text-white hover:bg-accent transition shadow-sm">
@@ -31,7 +31,7 @@ $maxPointsToUse = min(50, $diemKhaDung);
         <div class="mt-6 space-y-3" id="checkoutAddressList">
           <?php if (empty($customerAddresses)): ?>
             <div class="rounded-xl border border-dashed border-stone-300 bg-white p-6 text-center text-sm text-muted">
-              <p>Khách hàng hiện chưa có địa chỉ nhận hàng trong CSDL.</p>
+              <p>Bạn chưa có địa chỉ nhận hàng nào. Hãy thêm địa chỉ để tiến hành đặt hàng.</p>
               <button type="button" onclick="openAddressModal('create')" class="mt-3 rounded-full bg-charcoal px-4 py-1.5 text-xs font-medium text-white hover:bg-accent transition">
                 + Thêm địa chỉ đầu tiên ngay
               </button>
@@ -53,7 +53,7 @@ $maxPointsToUse = min(50, $diemKhaDung);
                       </div>
                       <span class="mt-1 block text-xs font-medium text-stone-600">SĐT nhận: <?= htmlspecialchars($addr['sdt_nhan']) ?></span>
                       <span class="mt-1 block text-sm text-muted leading-relaxed">
-                        <?= htmlspecialchars($addr['dia_chi_cu_the']) ?>, <?= htmlspecialchars($addr['phuong_xa']) ?>, <?= htmlspecialchars($addr['quan_huyen']) ?>, <?= htmlspecialchars($addr['tinh_thanh']) ?>
+                        <?= htmlspecialchars($addr['dia_chi_cu_the']) ?>, <?= htmlspecialchars($addr['phuong_xa']) ?>, <?= htmlspecialchars($addr['tinh_thanh']) ?>
                       </span>
                     </div>
                   </label>
@@ -114,7 +114,7 @@ $maxPointsToUse = min(50, $diemKhaDung);
       <div class="space-y-6 rounded-xl bg-white p-6 shadow-sm lg:sticky lg:top-24">
         <div>
           <h2 class="text-xl font-semibold">Tóm tắt đơn hàng</h2>
-          <p class="mt-1 text-xs text-muted">Dữ liệu giỏ hàng từ bảng <code>gh_gio_hang</code></p>
+          <p class="mt-1 text-xs text-muted">Chi tiết sản phẩm trong đơn hàng của bạn</p>
         </div>
 
         <?php if (empty($cartItems)): ?>
@@ -124,23 +124,42 @@ $maxPointsToUse = min(50, $diemKhaDung);
         <?php else: ?>
           <ul id="checkoutItemList" class="divide-y divide-stone-200 text-sm">
             <?php foreach ($cartItems as $item): ?>
-              <li class="flex justify-between gap-4 py-3">
-                <div>
-                  <p class="font-medium text-charcoal"><?= htmlspecialchars($item['ten_sp']) ?></p>
-                  <p class="text-xs text-muted">
-                    Màu: <?= htmlspecialchars($item['mau_sac']) ?>, Size: <?= htmlspecialchars($item['kich_co']) ?> &times; <?= (int)$item['so_luong_mua'] ?>
-                  </p>
-                </div>
+              <li class="flex items-start justify-between gap-3 py-3"
+                  data-ma-gh="<?= (int)$item['ma_gh'] ?>"
+                  data-ma-bt="<?= (int)$item['ma_bt'] ?>"
+                  data-thanh-tien="<?= (float)$item['thanh_tien'] ?>"
+                  data-so-luong="<?= (int)$item['so_luong_mua'] ?>">
+                <label class="flex items-start gap-2 cursor-pointer flex-1">
+                  <input type="checkbox"
+                    class="checkout-item-check mt-0.5 h-4 w-4 rounded border-stone-300 accent-accent cursor-pointer"
+                    data-ma-gh="<?= (int)$item['ma_gh'] ?>"
+                    data-thanh-tien="<?= (float)$item['thanh_tien'] ?>"
+                    data-so-luong="<?= (int)$item['so_luong_mua'] ?>"
+                    checked />
+                  <div>
+                    <p class="font-medium text-charcoal"><?= htmlspecialchars($item['ten_sp']) ?></p>
+                    <p class="text-xs text-muted">
+                      Màu: <?= htmlspecialchars($item['mau_sac']) ?>, Size: <?= htmlspecialchars($item['kich_co']) ?> &times; <?= (int)$item['so_luong_mua'] ?>
+                    </p>
+                  </div>
+                </label>
                 <span class="tabular-nums whitespace-nowrap font-medium text-charcoal"><?= formatVND($item['thanh_tien']) ?></span>
               </li>
             <?php endforeach; ?>
           </ul>
+          <!-- Select All cho checkout -->
+          <div class="flex items-center gap-2 border-t border-stone-100 pt-3 mt-1">
+            <label class="flex items-center gap-2 cursor-pointer select-none text-xs font-medium text-muted">
+              <input type="checkbox" id="checkoutSelectAll" class="h-4 w-4 rounded border-stone-300 accent-accent" checked />
+              Chọn tất cả sản phẩm
+            </label>
+          </div>
         <?php endif; ?>
 
         <!-- Chọn Voucher từ Ví vkh_vi_voucher_kh & Tiêu điểm khả dụng -->
         <div class="space-y-4 rounded-xl bg-gold p-5">
           <label class="block">
-            <span class="text-sm font-medium text-charcoal">Voucher khả dụng trong Ví của bạn (<code>vkh_vi_voucher_kh</code>)</span>
+            <span class="text-sm font-medium text-charcoal">Voucher khả dụng trong Ví của bạn</span>
             <select id="voucherSelect" class="mt-2 w-full rounded-full border border-stone-200 bg-white px-4 py-2.5 text-sm text-charcoal focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20">
               <option value="0" data-type="TIEN" data-value="0" data-min="0">-- Không áp dụng Voucher --</option>
               <?php foreach ($availableVouchers as $vch): ?>
@@ -276,6 +295,10 @@ $maxPointsToUse = min(50, $diemKhaDung);
           class="tap-feedback flex flex-1 items-center justify-center rounded-full bg-charcoal px-6 py-3.5 text-center text-sm font-medium text-white hover:bg-accent">
           Tôi đã chuyển khoản / Xem đơn hàng &rarr;
         </a>
+        <a id="modalQrDirectPageBtn" href="#" target="_blank"
+          class="tap-feedback flex items-center justify-center rounded-full border border-stone-300 px-5 py-3.5 text-center text-xs font-medium text-stone-700 hover:border-charcoal hover:text-charcoal transition">
+          Mở trang QR riêng ↗
+        </a>
       </div>
     </div>
   </div>
@@ -320,17 +343,20 @@ $maxPointsToUse = min(50, $diemKhaDung);
 
 <script>
   (() => {
-    const subtotal = <?= json_encode((float)$checkoutSummary['subtotal']) ?>;
-    const tierDiscount = <?= json_encode((float)$checkoutSummary['tier_discount_amount']) ?>;
+    const subtotalAll = <?= json_encode((float)$checkoutSummary['subtotal']) ?>;
+    const tierDiscountPercent = <?= json_encode((float)($loyaltyProfile['phan_tram_giam'] ?? 0)) ?>;
     const tierMultiplier = <?= json_encode($heSoTichDiem) ?>;
 
     const voucherSelect = document.getElementById('voucherSelect');
     const pointsToggle = document.getElementById('pointsToggle');
+    const ckBase = document.getElementById('ckBase');
+    const ckTier = document.getElementById('ckTier');
     const ckVoucher = document.getElementById('ckVoucher');
     const ckPoints = document.getElementById('ckPoints');
     const ckTotal = document.getElementById('ckTotal');
     const ckExpectedPoints = document.getElementById('ckExpectedPoints');
     const placeOrderBtn = document.getElementById('placeOrderBtn');
+    const checkoutSelectAll = document.getElementById('checkoutSelectAll');
 
     let rawFinalTotal = <?= json_encode((float)$checkoutSummary['final_total']) ?>;
 
@@ -338,16 +364,37 @@ $maxPointsToUse = min(50, $diemKhaDung);
       return Math.round(Number(n) || 0).toLocaleString('vi-VN') + 'đ';
     }
 
+    // Lấy subtotal của các sản phẩm đã chọn
+    function getSelectedSubtotal() {
+      let total = 0;
+      document.querySelectorAll('.checkout-item-check').forEach((cb) => {
+        if (cb.checked) total += Number(cb.dataset.thanhTien || 0);
+      });
+      return total;
+    }
+
+    // Lấy danh sách ma_gh đã chọn
+    function getSelectedMaGh() {
+      const result = [];
+      document.querySelectorAll('.checkout-item-check').forEach((cb) => {
+        if (cb.checked) result.push(Number(cb.dataset.maGh));
+      });
+      return result;
+    }
+
     function recalculateCheckout() {
+      const selectedSubtotal = getSelectedSubtotal();
+      const tierDiscount = Math.round(selectedSubtotal * (tierDiscountPercent / 100));
+
       let voucherDisc = 0;
       if (voucherSelect) {
         const opt = voucherSelect.options[voucherSelect.selectedIndex];
         const minOrder = Number(opt?.dataset.min || 0);
         const val = Number(opt?.dataset.value || 0);
         const type = opt?.dataset.type || 'TIEN';
-        if (val > 0 && subtotal >= minOrder) {
-          voucherDisc = type === 'PHAN_TRAM' ? Math.round(subtotal * (val / 100)) : val;
-        } else if (val > 0 && subtotal < minOrder) {
+        if (val > 0 && selectedSubtotal >= minOrder) {
+          voucherDisc = type === 'PHAN_TRAM' ? Math.round(selectedSubtotal * (val / 100)) : val;
+        } else if (val > 0 && selectedSubtotal < minOrder) {
           window.showStoreToast?.(`Đơn hàng cần tối thiểu ${formatVnd(minOrder)} để áp dụng mã này`);
           voucherSelect.value = '0';
         }
@@ -356,18 +403,102 @@ $maxPointsToUse = min(50, $diemKhaDung);
       const ptsUsed = (pointsToggle && pointsToggle.checked) ? Number(pointsToggle.dataset.points || 0) : 0;
       const pointsDisc = ptsUsed * 1000;
 
-      rawFinalTotal = Math.max(0, subtotal - tierDiscount - voucherDisc - pointsDisc);
+      rawFinalTotal = Math.max(0, selectedSubtotal - tierDiscount - voucherDisc - pointsDisc);
       const expectedPts = Math.floor((rawFinalTotal / 10000) * tierMultiplier);
 
+      if (ckBase) ckBase.textContent = formatVnd(selectedSubtotal);
+      if (ckTier) ckTier.textContent = '-' + formatVnd(tierDiscount);
       if (ckVoucher) ckVoucher.textContent = '-' + formatVnd(voucherDisc);
       if (ckPoints) ckPoints.textContent = '-' + formatVnd(pointsDisc);
       if (ckTotal) ckTotal.textContent = formatVnd(rawFinalTotal);
       if (ckExpectedPoints) ckExpectedPoints.textContent = `+${expectedPts} điểm thưởng`;
+
+      // Disable nút đặt hàng nếu không có gì được chọn
+      if (placeOrderBtn) {
+        const hasSelected = getSelectedMaGh().length > 0;
+        placeOrderBtn.disabled = !hasSelected;
+      }
     }
+
+    // Xử lý checkbox chọn sản phẩm
+    document.addEventListener('change', (e) => {
+      if (e.target.classList.contains('checkout-item-check')) {
+        recalculateCheckout();
+        // Cập nhật trạng thái "Chọn tất cả"
+        const allChecks = document.querySelectorAll('.checkout-item-check');
+        const checkedCount = document.querySelectorAll('.checkout-item-check:checked').length;
+        if (checkoutSelectAll) {
+          checkoutSelectAll.checked = checkedCount === allChecks.length;
+          checkoutSelectAll.indeterminate = checkedCount > 0 && checkedCount < allChecks.length;
+        }
+        try {
+          sessionStorage.setItem('selected_cart_ids', JSON.stringify(getSelectedMaGh()));
+        } catch (err) {}
+      }
+    });
+
+    // Chọn tất cả
+    checkoutSelectAll?.addEventListener('change', (e) => {
+      document.querySelectorAll('.checkout-item-check').forEach((cb) => { cb.checked = e.target.checked; });
+      recalculateCheckout();
+      try {
+        sessionStorage.setItem('selected_cart_ids', JSON.stringify(getSelectedMaGh()));
+      } catch (err) {}
+    });
 
     voucherSelect?.addEventListener('change', recalculateCheckout);
     pointsToggle?.addEventListener('change', recalculateCheckout);
-    recalculateCheckout();
+
+    // Đồng bộ danh sách sản phẩm đã chọn từ URL hoặc sessionStorage
+    function initCheckoutSelection() {
+      let selectedSet = null;
+
+      // 1. Kiểm tra URL params: ?items=1,2,3
+      const urlParams = new URLSearchParams(window.location.search);
+      const itemsParam = urlParams.get('items');
+      if (itemsParam) {
+        const ids = itemsParam.split(',').map(s => Number(s.trim())).filter(n => n > 0);
+        if (ids.length > 0) {
+          selectedSet = new Set(ids);
+        }
+      }
+
+      // 2. Nếu không có trên URL, kiểm tra sessionStorage
+      if (!selectedSet) {
+        try {
+          const stored = sessionStorage.getItem('selected_cart_ids');
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              selectedSet = new Set(parsed.map(Number));
+            }
+          }
+        } catch (e) {}
+      }
+
+      // 3. Tích chọn đúng các sản phẩm
+      const allChecks = document.querySelectorAll('.checkout-item-check');
+      if (selectedSet && selectedSet.size > 0) {
+        allChecks.forEach((cb) => {
+          const maGh = Number(cb.dataset.maGh);
+          cb.checked = selectedSet.has(maGh);
+        });
+      } else {
+        // Mặc định chọn tất cả
+        allChecks.forEach((cb) => { cb.checked = true; });
+      }
+
+      // Cập nhật trạng thái "Chọn tất cả"
+      const checkedCount = document.querySelectorAll('.checkout-item-check:checked').length;
+      if (checkoutSelectAll) {
+        checkoutSelectAll.checked = allChecks.length > 0 && checkedCount === allChecks.length;
+        checkoutSelectAll.indeterminate = checkedCount > 0 && checkedCount < allChecks.length;
+      }
+
+      recalculateCheckout();
+    }
+
+    initCheckoutSelection();
 
     // Xử lý sao chép văn bản
     function copyToClipboard(text, triggerBtn) {
@@ -421,12 +552,18 @@ $maxPointsToUse = min(50, $diemKhaDung);
       window.location.href = 'index.php?page=loyalty#myOrdersTitle';
     });
 
-    // BẮT SỰ KIỆN XÁC NHẬN ĐẶT HÀNG (TRANSACTION CHECKOUT)
+    // BẮT SỰ KIỆN XÁC NHẬN ĐẶT HÀNG (SELECTIVE CHECKOUT)
     if (placeOrderBtn) {
       placeOrderBtn.addEventListener('click', async () => {
         const selectedAddress = document.querySelector('input[name="address"]:checked');
         if (!selectedAddress) {
           window.showStoreToast?.('Vui lòng chọn địa chỉ nhận hàng.');
+          return;
+        }
+
+        const selectedMaGh = getSelectedMaGh();
+        if (selectedMaGh.length === 0) {
+          window.showStoreToast?.('Vui lòng chọn ít nhất một sản phẩm để đặt hàng.');
           return;
         }
 
@@ -441,7 +578,7 @@ $maxPointsToUse = min(50, $diemKhaDung);
         placeOrderBtn.innerHTML = `
           <span class="inline-flex items-center gap-2">
             <svg class="h-4 w-4 animate-spin text-white" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
-            Đang xử lý Transaction đặt hàng & khóa kho...
+            Đang xử lý đặt hàng...
           </span>
         `;
 
@@ -454,25 +591,27 @@ $maxPointsToUse = min(50, $diemKhaDung);
               pt_thanh_toan: ptThanhToan,
               ma_pgg: maPgg > 0 ? maPgg : null,
               dung_diem: dungDiem,
+              selected_ma_gh: selectedMaGh,
             }),
           });
 
           const data = await res.json();
 
           if (!data.success) {
-            window.showStoreToast?.(data.message || 'Đặt hàng không thành công');
+            if (data.require_login && window.openAuthModal) {
+              window.openAuthModal('login');
+            } else {
+              window.showStoreToast?.(data.message || 'Đặt hàng không thành công');
+            }
             placeOrderBtn.disabled = false;
             placeOrderBtn.innerHTML = originalBtnHtml;
             return;
           }
 
-          // Cập nhật ngay Badge giỏ hàng trên Header về 0
-          const badge = document.getElementById('cartBadge');
-          if (badge) {
-            badge.textContent = '0';
-            badge.classList.remove('flex');
-            badge.classList.add('hidden');
-          }
+          // Xóa lưu trữ selected_cart_ids sau khi đặt thành công
+          try { sessionStorage.removeItem('selected_cart_ids'); } catch (e) {}
+
+          // Cập nhật Badge giỏ hàng (chỉ trừ số lượng đã đặt, không reset toàn bộ)
           if (window.cartAPI) {
             window.cartAPI.get();
           }
@@ -494,6 +633,11 @@ $maxPointsToUse = min(50, $diemKhaDung);
             if (qrAmount) qrAmount.textContent = formatVnd(data.thanh_tien);
             if (qrAddInfo) qrAddInfo.textContent = data.vietqr.add_info;
             if (qrBankName) qrBankName.textContent = data.vietqr.bank_name;
+
+            const qrPageBtn = document.getElementById('modalQrDirectPageBtn');
+            if (qrPageBtn) {
+              qrPageBtn.href = data.vietqr.qr_page_url || ('thanh_toan_qr.php?ma_dh=' + data.ma_dh);
+            }
 
             rawFinalTotal = data.thanh_tien;
             showModal('vietQrModal', 'vietQrPanel');

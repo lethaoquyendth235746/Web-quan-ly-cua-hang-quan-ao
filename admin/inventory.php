@@ -57,7 +57,7 @@ require __DIR__ . '/includes/header.php';
     <div>
       <h1 class="text-2xl font-semibold leading-tight text-slate-900">Quản lý Nhập hàng &amp; Tồn kho SKU</h1>
       <p class="mt-1 text-sm text-slate-500">
-        Đối soát chính xác <?= count($skuList) ?> mã biến thể SKU: <strong>Tồn kho = Tổng nhập (<code>pnk_phieu_nhap_kho</code>) - Đã bán (<code>ctdh_chi_tiet_dh</code>)</strong>.
+        Theo dõi số lượng nhập kho, đã bán và tồn kho thực tế của từng phân loại sản phẩm.
       </p>
     </div>
     <button type="button" id="btnOpenImportModal" onclick="openImportModal()"
@@ -159,7 +159,7 @@ require __DIR__ . '/includes/header.php';
 <section aria-labelledby="receiptsTitle" class="fade-up mt-8 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
   <div class="border-b border-slate-200 px-6 py-5">
     <h2 id="receiptsTitle" class="text-base font-semibold text-slate-900">
-      Lịch sử Chứng từ Phiếu nhập kho (Bảng <code>pnk_phieu_nhap_kho</code> &mdash; <?= count($importReceipts) ?> phiếu)
+      Lịch sử Chứng từ Phiếu nhập kho (<?= count($importReceipts) ?> phiếu)
     </h2>
     <p class="mt-1 text-sm text-slate-500">Toàn bộ chứng từ nhập kho đầu kỳ và người lập phiếu trong CSDL.</p>
   </div>
@@ -209,7 +209,7 @@ require __DIR__ . '/includes/header.php';
       <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
         <div>
           <h3 class="text-lg font-semibold text-slate-900">Lập phiếu nhập kho mới</h3>
-          <p class="text-xs text-slate-500 mt-0.5">Lưu vào bảng <code>pnk_phieu_nhap_kho</code> &amp; tự động cộng tồn kho <code>bt_bien_the_sp</code></p>
+          <p class="text-xs text-slate-500 mt-0.5">Tạo chứng từ nhập kho và tự động cập nhật số lượng tồn kho</p>
         </div>
         <button type="button" onclick="closeImportModal()" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors">
           <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>

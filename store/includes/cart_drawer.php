@@ -1,8 +1,7 @@
 <?php
 /**
  * TẦNG CỬA HÀNG: Drawer Giỏ hàng (store/includes/cart_drawer.php)
- * Đổ dữ liệu thực tế từ bảng gh_gio_hang trong CSDL csdl_cua_hang_quan_ao
- * Tích hợp Fetch API tương tác hai chiều thời gian thực (Add, Update, Remove)
+ * Tích hợp Fetch API tương tác hai chiều thời gian thực (Add, Update, Remove, Selective Checkout)
  */
 $cartTotalQty = 0;
 $cartSubtotalAmount = 0;
@@ -22,7 +21,7 @@ $expectedCartPoints = (int) floor(($cartSubtotalAmount / POINTS_PER_VND) * $tier
             Giỏ hàng của <?= htmlspecialchars($loyaltyProfile['ho_ten'] ?? 'bạn') ?>
             <span id="cartCountText" class="tabular-nums text-sm font-normal text-muted">(<?= $cartTotalQty ?>)</span>
           </h2>
-          <p class="mt-0.5 text-xs text-muted">Đồng bộ trực tuyến với bảng <code class="text-charcoal font-mono">gh_gio_hang</code></p>
+          <p class="mt-0.5 text-xs text-muted">Đồng bộ trực tuyến với giỏ hàng của bạn</p>
         </div>
         <button type="button" id="cartCloseBtn" aria-label="Đóng giỏ hàng" class="tap-feedback rounded-full p-2 text-charcoal hover:bg-stone-100">
           <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -31,18 +30,42 @@ $expectedCartPoints = (int) floor(($cartSubtotalAmount / POINTS_PER_VND) * $tier
         </button>
       </div>
 
-      <div id="cartItems" class="flex-1 space-y-6 overflow-y-auto px-6 py-6">
+      <!-- 1 Thanh điều khiển duy nhất ở đầu Drawer giỏ hàng -->
+      <div id="drawerToolbar" class="<?= empty($cartItems) ? 'hidden' : 'flex' ?> items-center justify-between px-6 py-2.5 border-b border-stone-200 bg-stone-50/70">
+        <label class="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-charcoal">
+          <input type="checkbox" id="drawerSelectAll" class="h-4 w-4 rounded border-stone-300 accent-accent cursor-pointer" checked />
+          <span>Chọn mua tất cả (<span id="drawerSelectedCount" class="tabular-nums font-bold text-accent">0 đã chọn</span>)</span>
+        </label>
+        <button type="button" id="drawerClearCartBtn" class="tap-feedback inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 transition border border-transparent hover:border-red-200">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          Xóa tất cả
+        </button>
+      </div>
+
+      <div id="cartItems" class="flex-1 space-y-4 overflow-y-auto px-6 py-4">
         <?php if (empty($cartItems)): ?>
           <div class="py-16 text-center" id="cartEmptyState">
             <svg class="mx-auto h-12 w-12 text-stone-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
               <path d="M6 7h12l-1 13H7L6 7Z" stroke-linejoin="round" /><path d="M9 7V5a3 3 0 0 1 6 0v2" stroke-linecap="round" />
             </svg>
             <p class="mt-4 text-base font-medium text-charcoal">Giỏ hàng của bạn đang trống</p>
-            <p class="mt-1 text-xs text-muted">Khách hàng <strong><?= htmlspecialchars($loyaltyProfile['ho_ten'] ?? '') ?></strong> chưa có sản phẩm nào trong bảng <code>gh_gio_hang</code>.</p>
+            <p class="mt-1 text-xs text-muted">Khách hàng <strong><?= htmlspecialchars($loyaltyProfile['ho_ten'] ?? '') ?></strong> chưa có sản phẩm nào trong giỏ hàng.</p>
           </div>
         <?php else: ?>
           <?php foreach ($cartItems as $item): ?>
-            <div class="flex gap-4 rounded-xl bg-white p-3.5 shadow-sm transition-all" data-cart-row="<?= (int)$item['ma_bt'] ?>">
+            <div class="flex gap-3 rounded-xl bg-white p-3.5 shadow-sm transition-all" data-cart-row="<?= (int)$item['ma_bt'] ?>" data-ma-gh="<?= (int)$item['ma_gh'] ?>">
+              <!-- Checkbox chọn sản phẩm -->
+              <div class="flex items-center pt-1">
+                <input type="checkbox"
+                  class="drawer-item-check h-4 w-4 rounded border-stone-300 accent-accent cursor-pointer"
+                  data-ma-gh="<?= (int)$item['ma_gh'] ?>"
+                  data-ma-bt="<?= (int)$item['ma_bt'] ?>"
+                  data-thanh-tien="<?= (float)$item['thanh_tien'] ?>"
+                  data-so-luong="<?= (int)$item['so_luong_mua'] ?>"
+                  checked />
+              </div>
               <a href="index.php?page=product&id=<?= (int)$item['ma_sp'] ?>" class="h-28 w-20 shrink-0 overflow-hidden rounded-lg bg-stone-100">
                 <img src="<?= htmlspecialchars($item['image_url']) ?>" alt="<?= htmlspecialchars($item['ten_sp']) ?>" class="h-full w-full object-cover" />
               </a>
@@ -51,9 +74,6 @@ $expectedCartPoints = (int) floor(($cartSubtotalAmount / POINTS_PER_VND) * $tier
                   <a href="index.php?page=product&id=<?= (int)$item['ma_sp'] ?>" class="text-sm font-medium leading-snug hover:text-accent">
                     <?= htmlspecialchars($item['ten_sp']) ?>
                   </a>
-                  <p class="mt-1 text-xs text-muted">
-                    SKU: <span class="font-mono text-charcoal"><?= htmlspecialchars($item['ma_sku']) ?></span>
-                  </p>
                   <p class="text-xs text-muted">
                     Màu: <?= htmlspecialchars($item['mau_sac']) ?> &middot; Size: <?= htmlspecialchars($item['kich_co']) ?>
                   </p>
@@ -90,21 +110,21 @@ $expectedCartPoints = (int) floor(($cartSubtotalAmount / POINTS_PER_VND) * $tier
 
       <div class="space-y-4 border-t border-stone-200 bg-white px-6 py-5">
         <div class="flex items-center justify-between text-sm">
-          <span class="text-muted">Tạm tính (<span id="cartFooterCount"><?= $cartTotalQty ?></span> sản phẩm)</span>
+          <span class="text-muted">Tạm tính đã chọn (<span id="cartFooterCount"><?= $cartTotalQty ?></span>)</span>
           <span id="cartSubtotal" class="tabular-nums text-base font-semibold text-charcoal"><?= formatVND($cartSubtotalAmount) ?></span>
         </div>
         <p id="cartPoints" class="text-xs text-olive <?= $expectedCartPoints > 0 ? '' : 'hidden' ?>">
-          Đơn hàng này dự kiến tích lũy <strong class="tabular-nums font-semibold">+<?= $expectedCartPoints ?> điểm</strong> (<?= htmlspecialchars($loyaltyProfile['ten_hang'] ?? 'Hạng Đồng') ?> x<?= number_format($tierMultiplier, 1) ?>)
+          Dự kiến tích lũy <strong class="tabular-nums font-semibold">+<?= $expectedCartPoints ?> điểm</strong> (<?= htmlspecialchars($loyaltyProfile['ten_hang'] ?? 'Hạng Đồng') ?> x<?= number_format($tierMultiplier, 1) ?>)
         </p>
         <div class="grid grid-cols-2 gap-3">
-          <a href="index.php?page=checkout"
+          <a href="index.php?page=checkout" id="drawerCheckoutLink"
             class="tap-feedback flex items-center justify-center rounded-full bg-charcoal px-4 py-3.5 text-center text-sm font-medium text-white hover:bg-accent">
             Xem trang Thanh toán
           </a>
           <button type="button" id="cartRefreshBtn"
             class="tap-feedback flex items-center justify-center gap-1.5 rounded-full border border-stone-300 px-4 py-3.5 text-xs font-medium text-charcoal hover:border-charcoal hover:bg-stone-50">
             <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5" /></svg>
-            Làm mới giỏ hàng
+            Làm mới
           </button>
         </div>
       </div>
@@ -127,6 +147,127 @@ $expectedCartPoints = (int) floor(($cartSubtotalAmount / POINTS_PER_VND) * $tier
         return Math.round(Number(val) || 0).toLocaleString('vi-VN') + 'đ';
       }
 
+      // ---- Selective Checkout Logic ----
+      // Lưu state tích chọn: Set<ma_gh>
+      window._drawerSelectedMaGh = new Set();
+
+      function getDrawerCheckboxes() {
+        return Array.from(document.querySelectorAll('.drawer-item-check'));
+      }
+
+      function updateDrawerSelection() {
+        const checks = getDrawerCheckboxes();
+        const selectAll = document.getElementById('drawerSelectAll');
+        const countEl = document.getElementById('drawerSelectedCount');
+        const subtotalEl = document.getElementById('cartSubtotal');
+        const footerCountEl = document.getElementById('cartFooterCount');
+        const ptsEl = document.getElementById('cartPoints');
+        const ckLink = document.getElementById('drawerCheckoutLink');
+
+        window._drawerSelectedMaGh.clear();
+        let selectedCount = 0;
+        let selectedSubtotal = 0;
+        let selectedQty = 0;
+
+        checks.forEach((cb) => {
+          if (cb.checked) {
+            const maGh = Number(cb.dataset.maGh);
+            if (maGh) window._drawerSelectedMaGh.add(maGh);
+            selectedCount++;
+            selectedSubtotal += Number(cb.dataset.thanhTien || 0);
+            selectedQty += Number(cb.dataset.soLuong || 0);
+          }
+        });
+
+        const selectedIds = Array.from(window._drawerSelectedMaGh);
+
+        // Lưu vào sessionStorage để đồng bộ sang trang checkout
+        try {
+          sessionStorage.setItem('selected_cart_ids', JSON.stringify(selectedIds));
+        } catch (e) {}
+
+        // Cập nhật link nút Xem trang Thanh toán kèm query items
+        if (ckLink) {
+          if (selectedIds.length > 0) {
+            ckLink.href = 'index.php?page=checkout&items=' + selectedIds.join(',');
+            ckLink.classList.remove('opacity-50');
+          } else {
+            ckLink.href = 'index.php?page=checkout';
+            ckLink.classList.add('opacity-50');
+          }
+        }
+
+        if (countEl) countEl.textContent = `${selectedCount} đã chọn`;
+        if (subtotalEl) subtotalEl.textContent = formatVnd(selectedSubtotal);
+        if (footerCountEl) footerCountEl.textContent = String(selectedQty);
+
+        // Cập nhật điểm dự kiến (tính từ subtotal đã chọn)
+        const tierMul = <?= json_encode($tierMultiplier) ?>;
+        const expPts = Math.floor((selectedSubtotal / <?= POINTS_PER_VND ?>) * tierMul);
+        if (ptsEl) {
+          if (expPts > 0) {
+            ptsEl.innerHTML = `Dự kiến tích lũy <strong class="tabular-nums font-semibold">+${expPts} điểm</strong>`;
+            ptsEl.classList.remove('hidden');
+          } else {
+            ptsEl.classList.add('hidden');
+          }
+        }
+
+        // Select-all trạng thái
+        if (selectAll) {
+          selectAll.checked = checks.length > 0 && selectedCount === checks.length;
+          selectAll.indeterminate = selectedCount > 0 && selectedCount < checks.length;
+        }
+      }
+
+      function bindDrawerCheckboxEvents() {
+        document.getElementById('drawerSelectAll')?.addEventListener('change', (e) => {
+          getDrawerCheckboxes().forEach((cb) => { cb.checked = e.target.checked; });
+          updateDrawerSelection();
+        });
+
+        document.addEventListener('change', (e) => {
+          if (e.target.classList.contains('drawer-item-check')) {
+            updateDrawerSelection();
+          }
+        });
+
+        // Xử lý nút Xóa tất cả sản phẩm trong giỏ hàng có xác nhận
+        document.getElementById('drawerClearCartBtn')?.addEventListener('click', async () => {
+          if (!confirm('Bạn có chắc chắn muốn xóa toàn bộ sản phẩm trong giỏ hàng không?')) {
+            return;
+          }
+          try {
+            const res = await window.cartAPI.clear();
+            if (res.success) {
+              window.showStoreToast?.('Đã xóa toàn bộ sản phẩm trong giỏ hàng.');
+            } else {
+              window.showStoreToast?.(res.message || 'Không thể xóa giỏ hàng.');
+            }
+          } catch (err) {
+            console.error(err);
+            window.showStoreToast?.('Lỗi kết nối khi xóa giỏ hàng.');
+          }
+        });
+
+        // Chặn chuyển trang checkout nếu không có sản phẩm nào được chọn
+        document.getElementById('drawerCheckoutLink')?.addEventListener('click', (e) => {
+          if (window._drawerSelectedMaGh.size === 0) {
+            e.preventDefault();
+            window.showStoreToast?.('Vui lòng tích chọn ít nhất 1 sản phẩm để thanh toán!');
+          }
+        });
+      }
+
+      // Khởi tạo lần đầu
+      bindDrawerCheckboxEvents();
+      // Chọn tất cả mặc định rồi tính
+      setTimeout(() => {
+        getDrawerCheckboxes().forEach((cb) => { cb.checked = true; });
+        updateDrawerSelection();
+      }, 0);
+
+      // ---- renderCartDrawer ----
       window.renderCartDrawer = function(summary) {
         if (!summary) return;
         const totalQty = Number(summary.total_qty || 0);
@@ -147,26 +288,24 @@ $expectedCartPoints = (int) floor(($cartSubtotalAmount / POINTS_PER_VND) * $tier
           }
         }
 
-        // 2. Cập nhật text số lượng ở tiêu đề và footer drawer
+        // 2. Cập nhật text số lượng ở tiêu đề drawer
         const countText = document.getElementById('cartCountText');
         if (countText) countText.textContent = `(${totalQty})`;
 
-        const footerCount = document.getElementById('cartFooterCount');
-        if (footerCount) footerCount.textContent = String(totalQty);
-
-        // 3. Cập nhật tạm tính & điểm dự kiến
-        const subtotalEl = document.getElementById('cartSubtotal');
-        if (subtotalEl) subtotalEl.textContent = summary.formatted_subtotal || formatVnd(subtotal);
-
-        const ptsEl = document.getElementById('cartPoints');
-        if (ptsEl) {
-          if (expectedPts > 0) {
-            ptsEl.innerHTML = `Đơn hàng này dự kiến tích lũy <strong class="tabular-nums font-semibold">+${expectedPts} điểm</strong> (${escapeHtml(summary.tier_name || 'Hạng Đồng')} x${Number(summary.tier_multiplier || 1).toFixed(1)})`;
-            ptsEl.classList.remove('hidden');
+        // 3. Quản lý hiển thị thanh công cụ duy nhất
+        const toolbar = document.getElementById('drawerToolbar');
+        if (toolbar) {
+          if (items.length > 0) {
+            toolbar.classList.remove('hidden');
+            toolbar.classList.add('flex');
           } else {
-            ptsEl.classList.add('hidden');
+            toolbar.classList.remove('flex');
+            toolbar.classList.add('hidden');
           }
         }
+
+        // Dọn sạch nếu có drawer-select-bar trùng lặp
+        document.querySelectorAll('.drawer-select-bar').forEach(el => el.remove());
 
         // 4. Render danh sách mặt hàng
         const container = document.getElementById('cartItems');
@@ -182,13 +321,35 @@ $expectedCartPoints = (int) floor(($cartSubtotalAmount / POINTS_PER_VND) * $tier
               <p class="mt-1 text-xs text-muted">Hãy chọn thêm sản phẩm vào giỏ nhé!</p>
             </div>
           `;
+          // Reset totals
+          const subtotalEl = document.getElementById('cartSubtotal');
+          if (subtotalEl) subtotalEl.textContent = '0đ';
+          const footerCountEl = document.getElementById('cartFooterCount');
+          if (footerCountEl) footerCountEl.textContent = '0';
+          const countEl = document.getElementById('drawerSelectedCount');
+          if (countEl) countEl.textContent = '0 đã chọn';
+          window._drawerSelectedMaGh.clear();
+          try { sessionStorage.removeItem('selected_cart_ids'); } catch (e) {}
           return;
         }
 
+        // Nhớ trạng thái đã chọn cũ
+        const prevSelected = new Set(window._drawerSelectedMaGh);
+
         let html = '';
         items.forEach((item) => {
+          const wasChecked = prevSelected.size === 0 || prevSelected.has(Number(item.ma_gh));
           html += `
-            <div class="flex gap-4 rounded-xl bg-white p-3.5 shadow-sm transition-all" data-cart-row="${item.ma_bt}">
+            <div class="flex gap-3 rounded-xl bg-white p-3.5 shadow-sm transition-all" data-cart-row="${item.ma_bt}" data-ma-gh="${item.ma_gh}">
+              <div class="flex items-center pt-1">
+                <input type="checkbox"
+                  class="drawer-item-check h-4 w-4 rounded border-stone-300 accent-accent cursor-pointer"
+                  data-ma-gh="${item.ma_gh}"
+                  data-ma-bt="${item.ma_bt}"
+                  data-thanh-tien="${item.thanh_tien}"
+                  data-so-luong="${item.so_luong_mua}"
+                  ${wasChecked ? 'checked' : ''} />
+              </div>
               <a href="index.php?page=product&id=${item.ma_sp}" class="h-28 w-20 shrink-0 overflow-hidden rounded-lg bg-stone-100">
                 <img src="${escapeHtml(item.image_url)}" alt="${escapeHtml(item.ten_sp)}" class="h-full w-full object-cover" />
               </a>
@@ -197,7 +358,7 @@ $expectedCartPoints = (int) floor(($cartSubtotalAmount / POINTS_PER_VND) * $tier
                   <a href="index.php?page=product&id=${item.ma_sp}" class="text-sm font-medium leading-snug hover:text-accent">
                     ${escapeHtml(item.ten_sp)}
                   </a>
-                  <p class="mt-1 text-xs text-muted">
+                  <p class="text-xs text-muted">
                     SKU: <span class="font-mono text-charcoal">${escapeHtml(item.ma_sku)}</span>
                   </p>
                   <p class="text-xs text-muted">
@@ -233,6 +394,8 @@ $expectedCartPoints = (int) floor(($cartSubtotalAmount / POINTS_PER_VND) * $tier
           `;
         });
         container.innerHTML = html;
+
+        updateDrawerSelection();
       };
 
       // Đối tượng Cart API Client (Fetch API Async/Await)
@@ -283,6 +446,19 @@ $expectedCartPoints = (int) floor(($cartSubtotalAmount / POINTS_PER_VND) * $tier
             window.renderCartDrawer(json.data);
           }
           return json;
+        },
+
+        async clear() {
+          const res = await fetch('api/cart.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'clear' })
+          });
+          const json = await res.json();
+          if (json.success && json.data) {
+            window.renderCartDrawer(json.data);
+          }
+          return json;
         }
       };
 
@@ -302,16 +478,28 @@ $expectedCartPoints = (int) floor(($cartSubtotalAmount / POINTS_PER_VND) * $tier
           if (action === 'plus') {
             const res = await window.cartAPI.update(maBt, currentQty + 1);
             if (!res.success) {
-              window.showStoreToast?.(res.message || 'Không thể tăng số lượng');
+              if (res.require_login && window.openAuthModal) {
+                window.openAuthModal('login');
+              } else {
+                window.showStoreToast?.(res.message || 'Không thể tăng số lượng');
+              }
             }
           } else if (action === 'minus') {
             const res = await window.cartAPI.update(maBt, currentQty - 1);
             if (!res.success) {
-              window.showStoreToast?.(res.message || 'Không thể giảm số lượng');
+              if (res.require_login && window.openAuthModal) {
+                window.openAuthModal('login');
+              } else {
+                window.showStoreToast?.(res.message || 'Không thể giảm số lượng');
+              }
             }
           } else if (action === 'remove') {
             const res = await window.cartAPI.remove(maBt);
-            window.showStoreToast?.(res.message || 'Đã xóa sản phẩm khỏi giỏ');
+            if (!res.success && res.require_login && window.openAuthModal) {
+              window.openAuthModal('login');
+            } else {
+              window.showStoreToast?.(res.message || 'Đã xóa sản phẩm khỏi giỏ');
+            }
           }
         } catch (err) {
           console.error('Cart interaction error:', err);
@@ -325,7 +513,7 @@ $expectedCartPoints = (int) floor(($cartSubtotalAmount / POINTS_PER_VND) * $tier
       document.getElementById('cartRefreshBtn')?.addEventListener('click', async () => {
         try {
           await window.cartAPI.get();
-          window.showStoreToast?.('Đã đồng bộ giỏ hàng mới nhất từ CSDL');
+          window.showStoreToast?.('Đã đồng bộ giỏ hàng mới nhất');
         } catch (err) {
           window.showStoreToast?.('Không thể làm mới giỏ hàng');
         }

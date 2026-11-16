@@ -133,19 +133,24 @@ $cartTotalCount = array_sum(array_column($cartItems, 'so_luong_mua'));
         </nav>
       </div>
 
-      <div class="mx-auto hidden max-w-md flex-1 lg:block">
-        <form action="index.php" method="GET" class="relative block">
+      <div class="mx-auto hidden flex-1 max-w-md shrink-0 lg:block min-w-[240px] w-60 lg:w-72">
+        <form action="index.php" method="GET" class="relative block" id="searchHeaderForm">
           <input type="hidden" name="page" value="home" />
           <?php if ($currentGender !== 'all'): ?>
             <input type="hidden" name="gender" value="<?= htmlspecialchars($currentGender) ?>" />
           <?php endif; ?>
           <span class="sr-only">Tìm kiếm sản phẩm</span>
-          <svg class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" stroke-linecap="round" />
           </svg>
-          <input id="searchInput" name="q" type="search" value="<?= htmlspecialchars($searchQuery) ?>"
-            placeholder="Tìm kiếm áo polo, đầm taffeta, sơ mi lụa..."
-            class="w-full rounded-full border border-stone-200 bg-white py-2 pl-11 pr-4 text-sm text-charcoal placeholder:text-muted transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20" />
+          <input id="searchInput" name="q" type="text" value="<?= htmlspecialchars($searchQuery) ?>"
+            placeholder="Tìm kiếm sản phẩm..."
+            autocomplete="off"
+            class="w-full rounded-full border border-stone-200 bg-white py-2 pl-10 pr-9 text-sm text-charcoal placeholder:text-muted transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20" />
+          <button type="button" id="clearSearchBtn" aria-label="Xóa từ khóa tìm kiếm"
+            class="<?= !empty($searchQuery) ? '' : 'hidden' ?> absolute right-2.5 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full bg-stone-200 text-xs font-semibold text-stone-600 hover:bg-stone-300 hover:text-charcoal transition">
+            &times;
+          </button>
         </form>
       </div>
 
@@ -162,7 +167,7 @@ $cartTotalCount = array_sum(array_column($cartItems, 'so_luong_mua'));
 
           <div id="loyaltyPanel" class="popover-origin popover-hidden absolute right-0 top-full z-50 mt-3 w-80 rounded-xl border border-stone-200 bg-white p-5 shadow-lg">
             <div class="flex items-center justify-between">
-              <p class="text-xs uppercase tracking-wider text-muted">Thẻ thành viên CSDL</p>
+              <p class="text-xs uppercase tracking-wider text-muted">Thẻ thành viên</p>
               <span class="font-mono text-xs font-medium text-accent"><?= htmlspecialchars($loyaltyProfile['ma_so_the'] ?? 'CHƯA CẤP') ?></span>
             </div>
             <p class="mt-1 text-lg font-semibold text-charcoal"><?= htmlspecialchars($tierName) ?></p>
@@ -229,7 +234,7 @@ $cartTotalCount = array_sum(array_column($cartItems, 'so_luong_mua'));
             <div class="border-b border-stone-100 pb-3">
               <div class="flex items-center justify-between">
                 <p class="text-xs font-semibold uppercase tracking-wider text-muted">
-                  <?= $isLoggedIn ? 'Tài khoản đang đăng nhập' : 'Phiên khách mẫu (CSDL)' ?>
+                  <?= $isLoggedIn ? 'Tài khoản đang đăng nhập' : 'Phiên khách' ?>
                 </p>
                 <?php if ($isLoggedIn): ?>
                   <span class="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">Đã đăng nhập</span>
@@ -253,30 +258,17 @@ $cartTotalCount = array_sum(array_column($cartItems, 'so_luong_mua'));
               </div>
               <?php if (hasAdminAccess()): ?>
                 <a href="admin/index.php" class="font-semibold text-purple-700 hover:underline">
+<<<<<<< HEAD
                   Vào Quản trị (Admin) &rarr;
                 </a>
               <?php else: ?>
                 <a href="admin/index.php" class="text-stone-500 hover:underline">
                   Vào Quản trị &rarr;
+=======
+                  Trang Quản trị &rarr;
+>>>>>>> origin/main
                 </a>
               <?php endif; ?>
-            </div>
-
-            <p class="mt-3 border-t border-stone-100 pt-3 text-[11px] font-medium uppercase tracking-wider text-muted">Chuyển nhanh khách hàng trong DB để test:</p>
-            <div class="mt-2 space-y-1.5 max-h-48 overflow-y-auto">
-              <?php foreach ($demoCustomers as $cus): ?>
-                <?php $isCurrent = ((int)$cus['ma_nd'] === (int)($loyaltyProfile['ma_nd'] ?? 0)); ?>
-                <a href="index.php?page=<?= urlencode($currentPage) ?><?= isset($_GET['id']) ? '&id=' . (int)$_GET['id'] : '' ?>&switch_user=<?= (int)$cus['ma_nd'] ?>"
-                  class="flex items-center justify-between rounded-lg px-3 py-2 text-xs transition <?= $isCurrent ? 'bg-stone-100 font-semibold text-charcoal' : 'text-muted hover:bg-stone-50 hover:text-charcoal' ?>">
-                  <div>
-                    <p class="text-charcoal font-medium"><?= htmlspecialchars($cus['ho_ten']) ?></p>
-                    <p class="text-[11px] text-muted"><?= htmlspecialchars($cus['ten_hang'] ?? 'Chưa mở thẻ') ?></p>
-                  </div>
-                  <span class="tabular-nums rounded-full bg-gold px-2 py-0.5 text-[11px] font-medium text-charcoal">
-                    <?= number_format((int)($cus['diem_kha_dung'] ?? 0), 0, ',', '.') ?> đ
-                  </span>
-                </a>
-              <?php endforeach; ?>
             </div>
 
             <div class="mt-3 border-t border-stone-100 pt-3 flex items-center justify-between">
@@ -296,12 +288,20 @@ $cartTotalCount = array_sum(array_column($cartItems, 'so_luong_mua'));
     </div>
 
     <div class="border-t border-stone-200 px-6 pb-3 pt-3 lg:hidden">
-      <form action="index.php" method="GET" class="relative block">
+      <form action="index.php" method="GET" class="relative block" id="searchHeaderMobileForm">
         <input type="hidden" name="page" value="home" />
         <span class="sr-only">Tìm kiếm sản phẩm</span>
-        <input id="searchInputMobile" name="q" type="search" value="<?= htmlspecialchars($searchQuery) ?>"
-          placeholder="Tìm kiếm áo polo, đầm taffeta..."
-          class="w-full rounded-full border border-stone-200 bg-white py-2 pl-4 pr-4 text-sm text-charcoal placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20" />
+        <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" stroke-linecap="round" />
+        </svg>
+        <input id="searchInputMobile" name="q" type="text" value="<?= htmlspecialchars($searchQuery) ?>"
+          placeholder="Tìm kiếm sản phẩm..."
+          autocomplete="off"
+          class="w-full rounded-full border border-stone-200 bg-white py-2 pl-10 pr-9 text-sm text-charcoal placeholder:text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20" />
+        <button type="button" id="clearSearchMobileBtn" aria-label="Xóa từ khóa tìm kiếm"
+          class="<?= !empty($searchQuery) ? '' : 'hidden' ?> absolute right-2.5 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full bg-stone-200 text-xs font-semibold text-stone-600 hover:bg-stone-300 hover:text-charcoal transition">
+          &times;
+        </button>
       </form>
     </div>
   </header>

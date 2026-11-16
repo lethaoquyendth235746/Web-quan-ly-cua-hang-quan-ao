@@ -151,10 +151,45 @@ class ProductStoreService
     }
 
     /**
+     * Tăng lượt xem sản phẩm 1 đơn vị (ghi thẳng vào sp_san_pham.luot_xem)
+     */
+    public function incrementProductView(int $maSp): void
+    {
+        $stmt = $this->pdo->prepare(
+            "UPDATE sp_san_pham SET luot_xem = luot_xem + 1 WHERE ma_sp = :id"
+        );
+        $stmt->execute(['id' => $maSp]);
+    }
+
+    /**
+     * Lấy danh sách ảnh phụ của sản phẩm từ bảng ha_hinh_anh_sp
+     */
+    public function getProductImages(int $maSp): array
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT ma_ha, ma_sp, duong_dan_anh, mau_sac_lien_ket, thu_tu, la_anh_chinh
+             FROM ha_hinh_anh_sp
+             WHERE ma_sp = :ma_sp
+             ORDER BY la_anh_chinh DESC, thu_tu ASC"
+        );
+        $stmt->execute(['ma_sp' => $maSp]);
+        $rows = $stmt->fetchAll();
+        foreach ($rows as &$row) {
+            $row['resolved_url'] = resolveProductImage($row['duong_dan_anh']);
+        }
+        unset($row);
+        return $rows;
+    }
+
+    /**
      * Lấy chi tiết 1 sản phẩm theo ma_sp kèm biến thể, ảnh và đánh giá thực tế từ khách hàng đã mua
+     * Tự động tăng lượt xem mỗi lần khách truy cập trang chi tiết.
      */
     public function getProductById(int $maSp): ?array
     {
+        // Tăng lượt xem trước khi trả dữ liệu
+        $this->incrementProductView($maSp);
+
         $all = $this->getAllActiveProducts();
         foreach ($all as $p) {
             if ((int) $p['ma_sp'] === $maSp) {

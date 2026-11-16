@@ -15,6 +15,15 @@ $voucherService = new VoucherAdminService();
 // Phải chạy trước khi nạp header HTML để tránh lỗi "headers already sent"
 // =============================================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Phân quyền: Chỉ Super-Admin (ma_vt = 1) mới được thay đổi chiến dịch Voucher
+    if (!isSuperAdminRole()) {
+        $_SESSION['admin_flash'] = [
+            'type'    => 'error',
+            'message' => 'Chỉ Quản trị viên cấp cao (Admin) mới có quyền thay đổi cấu hình Hạng thành viên và Chiến dịch Khuyến mãi!'
+        ];
+        header('Location: vouchers.php');
+        exit;
+    }
     $action = $_POST['action'] ?? '';
     try {
         switch ($action) {
@@ -77,16 +86,24 @@ require __DIR__ . '/includes/header.php';
     <div>
       <h1 class="text-2xl font-semibold leading-tight text-slate-900">Quản lý Chiến dịch Voucher Loyalty</h1>
       <p class="mt-1 text-sm text-slate-500">
-        Dữ liệu thực tế từ bảng <code>pgg_phieu_giam_gia</code> (<?= count($vouchers) ?> chiến dịch) và lịch sử đổi ví <code>vkh_vi_voucher_kh</code>.
+        Danh sách <?= count($vouchers) ?> chiến dịch Voucher và lịch sử đổi thưởng của khách hàng.
       </p>
     </div>
     <button type="button" onclick="openCreateVoucherModal()"
-      class="tap-feedback inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-800 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-900 transition-colors">
+      class="tap-feedback inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-800 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-900 transition-colors"
+      <?= !isSuperAdminRole() ? 'disabled title="Chỉ Admin mới có quyền tạo Voucher"' : '' ?>>
       <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
       Tạo Voucher mới
     </button>
   </div>
 </header>
+
+<?php if (!isSuperAdminRole()): ?>
+<div class="mt-4 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-5 py-3 text-sm text-amber-800">
+  <svg class="h-5 w-5 shrink-0 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 3a9 9 0 110 18A9 9 0 0112 3z"/></svg>
+  <span>Bạn đang xem với quyền <strong>Nhân viên (Chỉ xem)</strong> — Chỉ Quản trị viên cấp cao mới có thể tạo, chỉnh sửa hoặc kết thúc sớm chiến dịch Voucher.</span>
+</div>
+<?php endif; ?>
 
 <!-- Danh sách Chiến dịch Voucher từ bảng pgg_phieu_giam_gia -->
 <section aria-label="Bảng chiến dịch voucher" class="fade-up mt-8 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
@@ -159,10 +176,12 @@ require __DIR__ . '/includes/header.php';
               <div class="inline-flex items-center gap-1.5">
                 <button type="button"
                   class="tap-feedback rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-50 hover:border-blue-400 transition-colors"
-                  onclick="openEditVoucherModal(<?= htmlspecialchars(json_encode($v), ENT_QUOTES, 'UTF-8') ?>)">
+                  onclick="openEditVoucherModal(<?= htmlspecialchars(json_encode($v), ENT_QUOTES, 'UTF-8') ?>)"
+                  <?= !isSuperAdminRole() ? 'disabled title="Chỉ Admin mới có quyền cấu hình"' : '' ?>>
                   Cấu hình
                 </button>
                 <?php if (!$isExpired && !$isOutOfStock): ?>
+                  <?php if (isSuperAdminRole()): ?>
                   <form method="POST" action="vouchers.php" class="inline-block"
                     onsubmit="return confirm('Bạn có chắc chắn muốn kết thúc sớm chiến dịch <?= htmlspecialchars(addslashes($v['ma_code'])) ?>? Số lượng phát hành còn lại sẽ đặt về 0 và thời hạn kết thúc sẽ chuyển về thời điểm hiện tại.');">
                     <input type="hidden" name="action" value="end_voucher_early" />
@@ -172,6 +191,12 @@ require __DIR__ . '/includes/header.php';
                       Đóng sớm
                     </button>
                   </form>
+                  <?php else: ?>
+                  <button type="button" disabled title="Chỉ Admin mới có quyền đóng sớm"
+                    class="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-medium text-slate-400 cursor-not-allowed">
+                    Đóng sớm
+                  </button>
+                  <?php endif; ?>
                 <?php endif; ?>
               </div>
             </td>
@@ -188,7 +213,7 @@ require __DIR__ . '/includes/header.php';
 <!-- Lịch sử Ví Voucher khách hàng đã đổi từ bảng vkh_vi_voucher_kh -->
 <section aria-labelledby="walletLogTitle" class="fade-up mt-8 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
   <div class="border-b border-slate-200 px-6 py-5">
-    <h2 id="walletLogTitle" class="text-base font-semibold text-slate-900">Ví Voucher Khách hàng đã đổi (Bảng <code>vkh_vi_voucher_kh</code>)</h2>
+    <h2 id="walletLogTitle" class="text-base font-semibold text-slate-900">Ví Voucher Khách hàng đã đổi</h2>
     <p class="mt-1 text-sm text-slate-500">Theo dõi các mã giảm giá khách hàng đã dùng điểm khả dụng để đổi về ví cá nhân.</p>
   </div>
   <div class="overflow-x-auto">
@@ -243,7 +268,7 @@ require __DIR__ . '/includes/header.php';
       <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
         <div>
           <h3 class="text-lg font-semibold text-slate-900">Tạo chiến dịch Voucher mới</h3>
-          <p class="text-xs text-slate-500 mt-0.5">Lưu vào bảng <code>pgg_phieu_giam_gia</code></p>
+          <p class="text-xs text-slate-500 mt-0.5">Thiết lập chương trình khuyến mãi và đổi điểm</p>
         </div>
         <button type="button" onclick="closeCreateVoucherModal()" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors">
           <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>

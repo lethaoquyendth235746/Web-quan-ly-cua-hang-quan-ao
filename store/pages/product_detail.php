@@ -114,9 +114,9 @@ if ($reviewCount > 0) {
           </div>
         </div>
 
-        <!-- Chọn kích cỡ từ bt_bien_the_sp -->
+        <!-- Chọn kích cỡ -->
         <div>
-          <p class="text-sm font-medium">Kích cỡ (Biến thể thực tế trong kho)</p>
+          <p class="text-sm font-medium">Kích cỡ</p>
           <div id="sizeOptions" class="mt-3 flex flex-wrap gap-3">
             <?php foreach ($p['sizes'] as $sIdx => $sizeName): ?>
               <button type="button" data-size="<?= htmlspecialchars($sizeName) ?>"
@@ -153,7 +153,7 @@ if ($reviewCount > 0) {
       <div class="mt-10 divide-y divide-stone-200 border-y border-stone-200 text-sm">
         <details class="group py-4" open>
           <summary class="flex cursor-pointer list-none items-center justify-between font-medium">
-            Mô tả chi tiết sản phẩm (Từ CSDL)
+            Mô tả chi tiết sản phẩm
             <span class="accordion-icon text-xl leading-none text-muted">+</span>
           </summary>
           <p class="mt-4 leading-relaxed text-muted"><?= nl2br(htmlspecialchars($p['mo_ta_chi_tiet'] ?? 'Đang cập nhật')) ?></p>
@@ -167,7 +167,7 @@ if ($reviewCount > 0) {
         </details>
         <details class="group py-4">
           <summary class="flex cursor-pointer list-none items-center justify-between font-medium">
-            Danh sách toàn bộ biến thể SKU của sản phẩm này (<?= count($variants) ?> SKU)
+            Danh sách phân loại sản phẩm (<?= count($variants) ?> phân loại)
             <span class="accordion-icon text-xl leading-none text-muted">+</span>
           </summary>
           <div class="mt-4 overflow-x-auto">
@@ -203,59 +203,111 @@ if ($reviewCount > 0) {
   <section class="mt-20 border-t border-stone-200 pt-12" aria-labelledby="reviewTitle">
     <div class="grid gap-10 lg:grid-cols-3">
       <div class="lg:col-span-1">
-        <h2 id="reviewTitle" class="text-xl font-semibold">Đánh giá thực tế từ CSDL</h2>
-        <?php if ($reviewCount > 0): ?>
-          <p class="mt-2 text-sm text-amber-700 tabular-nums">
-            ★★★★★ <span class="text-muted"><?= $avgRating ?> trên 5 &middot; <?= $reviewCount ?> đánh giá trong <code>ctdh_chi_tiet_dh</code></span>
-          </p>
-        <?php else: ?>
-          <p class="mt-2 text-sm text-muted">Chưa có lượt đánh giá nào cho sản phẩm này trong CSDL.</p>
-        <?php endif; ?>
+        <h2 id="reviewTitle" class="text-xl font-semibold">Đánh giá sản phẩm</h2>
+        <div id="reviewRatingSummary">
+          <?php if ($reviewCount > 0): ?>
+            <p class="mt-2 text-sm text-amber-700 tabular-nums">
+              ★★★★★ <span class="text-muted"><span id="avgRatingText"><?= $avgRating ?></span> trên 5 &middot; <span id="reviewCountText"><?= $reviewCount ?></span> đánh giá thực tế</span>
+            </p>
+          <?php else: ?>
+            <p class="mt-2 text-sm text-muted">Chưa có lượt đánh giá nào cho sản phẩm này trong CSDL.</p>
+          <?php endif; ?>
+        </div>
 
         <div class="mt-6 rounded-xl bg-gold p-5 text-sm leading-relaxed">
           <p class="font-medium text-charcoal">Đánh giá sản phẩm đã mua để nhận ngay +10 điểm thưởng vào Thẻ thành viên.</p>
-          <button type="button" data-dev-feature="Gửi đánh giá sao & cộng +10 điểm thưởng tự động"
-            class="tap-feedback mt-4 rounded-full bg-charcoal px-4 py-2 text-xs font-medium text-white hover:bg-accent">
-            Viết đánh giá nhận +10 điểm (Đang phát triển)
+          <button type="button" id="btnOpenReviewModal"
+            class="tap-feedback mt-4 rounded-full bg-charcoal px-4 py-2 text-xs font-medium text-white hover:bg-accent transition shadow-sm">
+            Viết đánh giá nhận +10 điểm
           </button>
         </div>
       </div>
 
       <div class="lg:col-span-2">
-        <?php if (empty($reviews)): ?>
-          <div class="rounded-xl border border-dashed border-stone-300 bg-white p-8 text-center">
-            <p class="text-base font-medium text-charcoal">Sản phẩm này hiện chưa có dữ liệu đánh giá trong CSDL</p>
-            <p class="mt-1 text-sm text-muted">Chức năng gửi đánh giá mới từ đơn hàng hoàn thành hiện <strong>đang phát triển</strong>.</p>
-          </div>
-        <?php else: ?>
-          <ul class="space-y-8">
-            <?php foreach ($reviews as $rev): ?>
-              <li class="border-b border-stone-200 pb-8 last:border-b-0">
-                <div class="flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <p class="text-sm font-semibold text-charcoal"><?= htmlspecialchars($rev['ho_ten']) ?></p>
-                    <p class="text-xs text-muted"><?= htmlspecialchars($rev['ten_hang'] ?? 'Thành viên') ?></p>
-                  </div>
-                  <?php if ((int)$rev['da_cong_diem_dg'] === 1): ?>
-                    <span class="rounded-full bg-olive/10 px-3 py-1 text-xs font-medium text-olive">Đã cộng +10 điểm thưởng</span>
-                  <?php else: ?>
-                    <span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-800">Chờ cộng điểm đánh giá (Đang phát triển)</span>
-                  <?php endif; ?>
+        <div id="reviewEmptyBox" class="<?= !empty($reviews) ? 'hidden' : '' ?> rounded-xl border border-dashed border-stone-300 bg-white p-8 text-center">
+          <p class="text-base font-medium text-charcoal">Sản phẩm này hiện chưa có lượt đánh giá nào</p>
+          <p class="mt-1 text-sm text-muted">Hãy là người đầu tiên trải nghiệm và để lại nhận xét nhận +10 điểm thưởng!</p>
+        </div>
+
+        <ul id="reviewListContainer" class="space-y-8 <?= empty($reviews) ? 'hidden' : '' ?>">
+          <?php foreach ($reviews as $rev): ?>
+            <li class="border-b border-stone-200 pb-8 last:border-b-0">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <p class="text-sm font-semibold text-charcoal"><?= htmlspecialchars($rev['ho_ten']) ?></p>
+                  <p class="text-xs text-muted"><?= htmlspecialchars($rev['ten_hang'] ?? 'Thành viên') ?></p>
                 </div>
-                <p class="mt-2 text-sm text-amber-600">
-                  <?= str_repeat('★', (int)$rev['so_sao_danh_gia']) . str_repeat('☆', max(0, 5 - (int)$rev['so_sao_danh_gia'])) ?>
-                </p>
-                <p class="mt-1 text-xs text-muted">
-                  Phân loại mua: Màu <?= htmlspecialchars($rev['mau_sac']) ?>, Size <?= htmlspecialchars($rev['kich_co']) ?> &middot; Ngày đặt: <?= formatDateVN($rev['ngay_dat']) ?>
-                </p>
-                <p class="mt-3 text-sm leading-relaxed text-charcoal"><?= htmlspecialchars($rev['noi_dung_danh_gia']) ?></p>
-              </li>
-            <?php endforeach; ?>
-          </ul>
-        <?php endif; ?>
+                <?php if ((int)$rev['da_cong_diem_dg'] === 1): ?>
+                  <span class="rounded-full bg-olive/10 px-3 py-1 text-xs font-medium text-olive">✓ Đã nhận +10 điểm thưởng</span>
+                <?php endif; ?>
+              </div>
+              <p class="mt-2 text-sm text-amber-600">
+                <?= str_repeat('★', (int)$rev['so_sao_danh_gia']) . str_repeat('☆', max(0, 5 - (int)$rev['so_sao_danh_gia'])) ?>
+              </p>
+              <p class="mt-1 text-xs text-muted">
+                Phân loại mua: Màu <?= htmlspecialchars($rev['mau_sac'] ?: 'Mặc định') ?>, Size <?= htmlspecialchars($rev['kich_co'] ?: 'Tiêu chuẩn') ?> &middot; Ngày đặt: <?= formatDateVN($rev['ngay_dat']) ?>
+              </p>
+              <p class="mt-3 text-sm leading-relaxed text-charcoal"><?= htmlspecialchars($rev['noi_dung_danh_gia']) ?></p>
+            </li>
+          <?php endforeach; ?>
+        </ul>
       </div>
     </div>
   </section>
+</div>
+
+<!-- Modal Viết Đánh Giá Sản Phẩm Nhận +10 Điểm -->
+<div id="reviewModal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true">
+  <div class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm transition-opacity" onclick="closeReviewModal()"></div>
+  <div class="flex min-h-full items-center justify-center p-4">
+    <div class="relative w-full max-w-lg rounded-2xl bg-white shadow-2xl transition-all">
+      <div class="flex items-center justify-between border-b border-stone-200 px-6 py-4">
+        <div>
+          <h3 class="text-lg font-semibold text-charcoal">Đánh giá sản phẩm</h3>
+          <p class="text-xs text-muted mt-0.5">Thưởng ngay <strong class="text-olive">+10 điểm tích lũy</strong> vào thẻ thành viên</p>
+        </div>
+        <button type="button" onclick="closeReviewModal()" class="rounded-lg p-1.5 text-stone-400 hover:bg-stone-100 hover:text-charcoal">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+        </button>
+      </div>
+
+      <form id="reviewForm" class="p-6 space-y-5">
+        <input type="hidden" name="ma_sp" value="<?= (int)$p['ma_sp'] ?>" />
+        <input type="hidden" id="reviewStarValue" name="so_sao" value="5" />
+
+        <!-- Chọn số sao trực quan 1-5 -->
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-charcoal mb-2">Đánh giá độ hài lòng</label>
+          <div class="flex items-center gap-2" id="starPicker">
+            <?php for ($s = 1; $s <= 5; $s++): ?>
+              <button type="button" data-star="<?= $s ?>" class="star-btn text-2xl text-amber-500 hover:scale-125 transition-transform" title="<?= $s ?> sao">★</button>
+            <?php endfor; ?>
+            <span id="starRatingLabel" class="ml-2 text-xs font-semibold text-stone-600">5 sao (Rất hài lòng)</span>
+          </div>
+        </div>
+
+        <!-- Nội dung nhận xét -->
+        <div>
+          <label for="reviewContent" class="block text-xs font-semibold uppercase tracking-wider text-charcoal mb-1">Nội dung nhận xét <span class="text-rose-600">*</span></label>
+          <textarea id="reviewContent" name="noi_dung" rows="4" required
+            placeholder="Chia sẻ cảm nhận về chất liệu vải, form dáng, độ vừa vặn và đóng gói..."
+            class="w-full rounded-xl border border-stone-300 p-3.5 text-sm text-charcoal placeholder:text-muted focus:border-charcoal focus:outline-none focus:ring-1 focus:ring-charcoal"></textarea>
+          <p class="mt-1 text-xs text-muted">Đánh giá chân thực giúp các thành viên khác lựa chọn sản phẩm phù hợp hơn.</p>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 border-t border-stone-200 pt-4">
+          <button type="button" onclick="closeReviewModal()"
+            class="tap-feedback rounded-full border border-stone-300 px-5 py-2 text-xs font-medium text-stone-600 hover:bg-stone-50">
+            Hủy
+          </button>
+          <button type="submit" id="btnSubmitReview"
+            class="tap-feedback inline-flex items-center gap-1.5 rounded-full bg-charcoal px-6 py-2.5 text-xs font-medium text-white hover:bg-accent transition shadow-sm">
+            <span>Gửi đánh giá & Nhận +10 điểm</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -411,7 +463,11 @@ if ($reviewCount > 0) {
             window.showStoreToast?.(res.message || 'Đã thêm sản phẩm vào giỏ hàng!');
             window.openCartDrawer?.();
           } else {
-            window.showStoreToast?.(res?.message || 'Có lỗi khi thêm vào giỏ hàng');
+            if (res && res.require_login && window.openAuthModal) {
+              window.openAuthModal('login');
+            } else {
+              window.showStoreToast?.(res?.message || 'Có lỗi khi thêm vào giỏ hàng');
+            }
           }
         } catch (err) {
           console.error(err);
@@ -424,6 +480,158 @@ if ($reviewCount > 0) {
     }
 
     updateVariantUI();
+
+    // -------------------------------------------------------------------------
+    // XỬ LÝ MODAL VIẾT ĐÁNH GIÁ SẢN PHẨM & CỘNG +10 ĐIỂM
+    // -------------------------------------------------------------------------
+    const reviewModal = document.getElementById('reviewModal');
+    const btnOpenReviewModal = document.getElementById('btnOpenReviewModal');
+    const reviewForm = document.getElementById('reviewForm');
+    const starPicker = document.getElementById('starPicker');
+    const starRatingLabel = document.getElementById('starRatingLabel');
+    const reviewStarValue = document.getElementById('reviewStarValue');
+    const btnSubmitReview = document.getElementById('btnSubmitReview');
+
+    const starLabels = {
+      1: '1 sao (Rất tệ)',
+      2: '2 sao (Chưa hài lòng)',
+      3: '3 sao (Bình thường)',
+      4: '4 sao (Hài lòng)',
+      5: '5 sao (Rất hài lòng)'
+    };
+
+    window.openReviewModal = function() {
+      reviewModal?.classList.remove('hidden');
+    };
+
+    window.closeReviewModal = function() {
+      reviewModal?.classList.add('hidden');
+    };
+
+    btnOpenReviewModal?.addEventListener('click', () => {
+      window.openReviewModal();
+    });
+
+    // Bắt sự kiện chọn sao
+    starPicker?.addEventListener('click', (e) => {
+      const btn = e.target.closest('.star-btn');
+      if (!btn) return;
+      const rating = Number(btn.dataset.star || 5);
+      reviewStarValue.value = rating;
+      if (starRatingLabel) starRatingLabel.textContent = starLabels[rating] || `${rating} sao`;
+
+      document.querySelectorAll('#starPicker .star-btn').forEach((b) => {
+        const val = Number(b.dataset.star);
+        if (val <= rating) {
+          b.textContent = '★';
+          b.className = 'star-btn text-2xl text-amber-500 hover:scale-125 transition-transform';
+        } else {
+          b.textContent = '☆';
+          b.className = 'star-btn text-2xl text-stone-300 hover:scale-125 transition-transform';
+        }
+      });
+    });
+
+    // Submit form đánh giá
+    reviewForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const content = document.getElementById('reviewContent')?.value.trim();
+      if (!content) {
+        window.showStoreToast?.('Vui lòng nhập nội dung đánh giá');
+        return;
+      }
+
+      btnSubmitReview.disabled = true;
+      const originalBtnText = btnSubmitReview.innerHTML;
+      btnSubmitReview.innerHTML = `
+        <svg class="h-4 w-4 animate-spin text-white inline-block mr-1" viewBox="0 0 24 24" fill="none">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+        </svg>
+        Đang gửi đánh giá...
+      `;
+
+      try {
+        const res = await fetch('api/review_product.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ma_sp: Number(<?= (int)$p['ma_sp'] ?>),
+            so_sao: Number(reviewStarValue.value || 5),
+            noi_dung: content
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.require_login) {
+          window.closeReviewModal();
+          if (window.openAuthModal) {
+            window.openAuthModal('login');
+          } else {
+            window.showStoreToast?.('Vui lòng đăng nhập để gửi đánh giá.');
+          }
+          return;
+        }
+
+        if (!data.success) {
+          window.showStoreToast?.(data.message || 'Không thể gửi đánh giá.');
+          return;
+        }
+
+        // Thành công: thông báo và cập nhật giao diện
+        window.showStoreToast?.(data.message || 'Gửi đánh giá thành công! Nhận ngay +10 điểm.');
+        window.closeReviewModal();
+        reviewForm.reset();
+
+        // 1. Cập nhật điểm trên Header Popover nếu có
+        const tierBtn = document.getElementById('tierBtn');
+        if (tierBtn && data.diem_kha_dung !== undefined) {
+          const pointsSpan = tierBtn.querySelector('.tabular-nums');
+          if (pointsSpan) pointsSpan.textContent = Number(data.diem_kha_dung).toLocaleString('vi-VN') + ' điểm';
+        }
+
+        // 2. Chèn review mới vào đầu danh sách
+        const listContainer = document.getElementById('reviewListContainer');
+        const emptyBox = document.getElementById('reviewEmptyBox');
+        if (emptyBox) emptyBox.classList.add('hidden');
+        if (listContainer) {
+          listContainer.classList.remove('hidden');
+          const rev = data.review;
+          const starsHtml = '★'.repeat(rev.so_sao_danh_gia) + '☆'.repeat(Math.max(0, 5 - rev.so_sao_danh_gia));
+          const newLi = document.createElement('li');
+          newLi.className = 'border-b border-stone-200 pb-8 last:border-b-0 fade-up';
+          newLi.innerHTML = `
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <p class="text-sm font-semibold text-charcoal">${rev.ho_ten}</p>
+                <p class="text-xs text-muted">${rev.ten_hang || 'Thành viên'}</p>
+              </div>
+              <span class="rounded-full bg-olive/10 px-3 py-1 text-xs font-medium text-olive">✓ Đã nhận +10 điểm thưởng</span>
+            </div>
+            <p class="mt-2 text-sm text-amber-600">${starsHtml}</p>
+            <p class="mt-1 text-xs text-muted">
+              Phân loại mua: Màu ${rev.mau_sac || 'Mặc định'}, Size ${rev.kich_co || 'Tiêu chuẩn'} &middot; Vừa xong
+            </p>
+            <p class="mt-3 text-sm leading-relaxed text-charcoal">${rev.noi_dung_danh_gia}</p>
+          `;
+          listContainer.prepend(newLi);
+        }
+
+        // 3. Cập nhật đếm review
+        const countSpan = document.getElementById('reviewCountText');
+        if (countSpan) {
+          const currentCount = parseInt(countSpan.textContent || '0') + 1;
+          countSpan.textContent = String(currentCount);
+        }
+      } catch (err) {
+        console.error('Review submit error:', err);
+        window.showStoreToast?.('Lỗi kết nối khi gửi đánh giá');
+      } finally {
+        btnSubmitReview.disabled = false;
+        btnSubmitReview.innerHTML = originalBtnText;
+      }
+    });
   })();
 </script>
 

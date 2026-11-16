@@ -1,20 +1,25 @@
 <?php
 /**
- * BẢN MẪU CẤU HÌNH KẾT NỐI (SAMPLE / TEMPLATE)
- * Sao chép file này thành `db.php` và cập nhật thông tin kết nối CSDL của bạn.
+ * BẢN MẪU CẤU HÌNH KẾT NỐI & TIỆN ÍCH CỐT LÕI (SAMPLE / TEMPLATE)
+ * Sao chép file này thành `config/db.php` và cập nhật thông tin kết nối CSDL cục bộ của bạn.
+ * Lưu ý: `config/db.php` được khai báo trong `.gitignore` để tránh xung đột cấu hình giữa các máy.
  */
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Cấu hình kết nối MySQL
+date_default_timezone_set('Asia/Ho_Chi_Minh');
+
 define('DB_HOST', '127.0.0.1');
-define('DB_PORT', '3306'); // Hoặc 3308 tùy cấu hình XAMPP của bạn
+define('DB_PORT', '3306'); // Hoặc 3308 tùy cấu hình XAMPP/MySQL của bạn
 define('DB_NAME', 'csdl_cua_hang_quan_ao');
 define('DB_USER', 'root');
-define('DB_PASS', '');
-define('POINTS_PER_VND', 10000);
+define('DB_PASS', ''); // Điền mật khẩu MySQL cục bộ nếu có
+define('POINTS_PER_VND', 10000); // Quy chuẩn: 10.000đ = 1 điểm cơ bản
+
+// Cấu hình tài khoản ngân hàng & VietQR
+require_once __DIR__ . '/vietqr.php';
 
 /**
  * Khởi tạo và trả về đối tượng kết nối PDO (Singleton)
@@ -23,55 +28,126 @@ function getDBConnection(): PDO
 {
     static $pdo = null;
     if ($pdo === null) {
-        $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', DB_HOST, DB_PORT, DB_NAME);
-        $options = [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES   => false,
-        ];
-        try {
-            $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
-        } catch (PDOException $e) {
+        $portsToTry = array_unique([DB_PORT, '3308', '3306']);
+        $lastException = null;
+
+        foreach ($portsToTry as $port) {
+            $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', DB_HOST, $port, DB_NAME);
+            $options = [
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES   => false,
+            ];
+            try {
+                $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+                break;
+            } catch (PDOException $e) {
+                $lastException = $e;
+            }
+        }
+
+        if ($pdo === null && $lastException !== null) {
             die('<div style="font-family:sans-serif;padding:2rem;max-width:640px;margin:2rem auto;border:1px solid #fca5a5;background:#fef2f2;border-radius:12px;color:#991b1b;">'
                 . '<h2 style="margin-top:0;">Không thể kết nối Cơ sở dữ liệu</h2>'
                 . '<p>Vui lòng kiểm tra MySQL trong XAMPP Control Panel và đảm bảo đã nạp file <code>SQL/file_mau-duLieu.sql</code> vào CSDL <strong>' . htmlspecialchars(DB_NAME) . '</strong>.</p>'
-                . '<p style="font-size:13px;color:#b91c1c;">Chi tiết lỗi: ' . htmlspecialchars($e->getMessage()) . '</p>'
+                . '<p style="font-size:13px;color:#b91c1c;">Chi tiết lỗi: ' . htmlspecialchars($lastException->getMessage()) . '</p>'
                 . '</div>');
         }
     }
     return $pdo;
 }
 
-if (isset($_GET['switch_user'])) {
-    $uid = (int) $_GET['switch_user'];
-    if ($uid > 0) {
-        $_SESSION['current_user_id'] = $uid;
-    }
-    $redirect = strtok($_SERVER['REQUEST_URI'], '?');
-    $queryParams = $_GET;
-    unset($queryParams['switch_user']);
-    if (!empty($queryParams)) {
-        $redirect .= '?' . http_build_query($queryParams);
-    }
-    header('Location: ' . $redirect);
-    exit;
+// Cơ chế switch_user trực tiếp qua URL đã bị vô hiệu hóa vì lý do bảo mật.
+
+
+/**
+ * Kiểm tra người dùng hiện tại đã đăng nhập hay chưa
+ */
+function isUserLoggedIn(): bool
+{
+    return !empty($_SESSION['current_user_id']) && empty($_SESSION['explicit_logout']);
 }
 
+/**
+ * Lấy thông tin người dùng đang đăng nhập trong Session
+ */
+function getCurrentUser(): ?array
+{
+    if (!isUserLoggedIn()) {
+        return null;
+    }
+    if (!empty($_SESSION['user'])) {
+        return $_SESSION['user'];
+    }
+    // Nếu có ID nhưng chưa nạp đủ Session, nạp từ CSDL
+    $stmt = getDBConnection()->prepare("
+        SELECT nd.*, vt.ten_vt, vt.mo_ta_quyen
+        FROM nd_nguoi_dung nd
+        INNER JOIN vt_vai_tro vt ON nd.ma_vt = vt.ma_vt
+        WHERE nd.ma_nd = :id AND nd.trang_thai = 1
+        LIMIT 1
+    ");
+    $stmt->execute(['id' => (int)$_SESSION['current_user_id']]);
+    $u = $stmt->fetch();
+    if ($u) {
+        $_SESSION['user'] = [
+            'ma_nd'         => (int)$u['ma_nd'],
+            'ma_vt'         => (int)$u['ma_vt'],
+            'ten_vt'        => $u['ten_vt'],
+            'ho_ten'        => $u['ho_ten'],
+            'ten_dang_nhap' => $u['ten_dang_nhap'],
+            'email'         => $u['email'],
+            'sdt'           => $u['sdt'],
+            'anh_dai_dien'  => $u['anh_dai_dien'],
+        ];
+        return $_SESSION['user'];
+    }
+    return null;
+}
+
+/**
+ * Lấy mã người dùng hiện tại từ Session (trả về 0 nếu chưa đăng nhập)
+ */
 function getCurrentUserId(): int
 {
-    return isset($_SESSION['current_user_id']) ? (int) $_SESSION['current_user_id'] : 4;
+    if (isset($_SESSION['current_user_id']) && empty($_SESSION['explicit_logout'])) {
+        return (int) $_SESSION['current_user_id'];
+    }
+    return 0;
 }
 
+/**
+ * Lấy mã quản trị viên/nhân viên hiện tại (chỉ trả về hợp lệ nếu có vai trò ma_vt = 1 hoặc 2)
+ */
 function getCurrentAdminId(): int
 {
-    return isset($_SESSION['current_admin_id']) ? (int) $_SESSION['current_admin_id'] : 1;
+    $u = getCurrentUser();
+    if ($u && in_array((int)$u['ma_vt'], [1, 2], true)) {
+        return (int)$u['ma_nd'];
+    }
+    return isset($_SESSION['current_admin_id']) ? (int)$_SESSION['current_admin_id'] : 0;
 }
 
+/**
+ * Kiểm tra xem người dùng hiện tại có quyền truy cập Quản trị không (Admin: 1, Nhân viên: 2)
+ */
+function hasAdminAccess(): bool
+{
+    $u = getCurrentUser();
+    return $u && in_array((int)$u['ma_vt'], [1, 2], true);
+}
+
+/**
+ * Định dạng tiền tệ VNĐ
+ */
 function formatVND($amount): string
 {
     return number_format((float) $amount, 0, ',', '.') . 'đ';
 }
 
+/**
+ * Định dạng ngày giờ từ CSDL
+ */
 function formatDateVN(?string $datetime, bool $includeTime = false): string
 {
     if (!$datetime) {
@@ -84,6 +160,9 @@ function formatDateVN(?string $datetime, bool $includeTime = false): string
     return date($includeTime ? 'd/m/Y H:i' : 'd/m/Y', $timestamp);
 }
 
+/**
+ * Ánh xạ mã màu HEX từ tên màu tiếng Việt trong CSDL (bt_bien_the_sp / ha_hinh_anh_sp)
+ */
 function getColorHex(string $colorName): string
 {
     $map = [
@@ -103,6 +182,10 @@ function getColorHex(string $colorName): string
     return $map[$colorName] ?? '#94A3B8';
 }
 
+/**
+ * Giải quyết đường dẫn ảnh sản phẩm từ tên file lưu trong CSDL (sp_san_pham / ha_hinh_anh_sp)
+ * Nếu file nội bộ chưa có trong thư mục assets/images/, tự động ánh xạ sang ảnh minh họa tương ứng với đúng mã SP/màu trong CSDL
+ */
 function resolveProductImage(?string $dbFileName): string
 {
     if (!$dbFileName) {

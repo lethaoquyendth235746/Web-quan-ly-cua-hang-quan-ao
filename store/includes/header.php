@@ -117,10 +117,10 @@ $cartTotalCount = array_sum(array_column($cartItems, 'so_luong_mua'));
 <body class="bg-cream font-sans text-charcoal antialiased">
 
   <header id="siteHeader" class="sticky top-0 z-40 border-b border-stone-200 bg-cream/95 backdrop-blur transition-shadow duration-300">
-    <div class="mx-auto flex h-16 max-w-7xl items-center gap-6 px-6 lg:px-8">
+    <div class="mx-auto flex h-16 max-w-[1380px] items-center gap-4 px-4 sm:px-6 lg:px-8">
       <div class="flex items-center gap-8">
         <a href="index.php" class="text-sm font-semibold tracking-[0.25em] text-charcoal">AURA STUDIO</a>
-        <nav class="hidden items-center gap-6 md:flex" aria-label="Danh mục chính">
+        <nav class="hidden items-center gap-4 md:flex flex-1" aria-label="Danh mục chính">
           <a href="index.php?page=home&gender=all"
             class="nav-link text-sm transition hover:text-charcoal <?= ($currentPage === 'home' && $currentGender === 'all') ? 'font-medium text-charcoal' : 'text-muted' ?>">
             Trang chủ

@@ -47,10 +47,8 @@
         <div>
           &copy; <?= date('Y') ?> AURA STUDIO. Bản quyền thuộc nhóm phát triển dự án.
         </div>
-        <div class="d-flex gap-3">
-          <span>CSDL: <code>csdl_cua_hang_quan_ao</code></span>
-          <span>&middot;</span>
-          <span>16 bảng chuẩn hóa 3NF</span>
+
+
         </div>
       </div>
     </div>

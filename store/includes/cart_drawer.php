@@ -3,6 +3,7 @@
  * TẦNG CỬA HÀNG: Drawer Giỏ hàng (store/includes/cart_drawer.php)
  * Tích hợp Fetch API tương tác hai chiều thời gian thực (Add, Update, Remove, Selective Checkout)
  */
+$isLoggedIn = isUserLoggedIn();
 $cartTotalQty = 0;
 $cartSubtotalAmount = 0;
 foreach ($cartItems as $ci) {
@@ -18,10 +19,10 @@ $expectedCartPoints = (int) floor(($cartSubtotalAmount / POINTS_PER_VND) * $tier
       <div class="flex items-center justify-between border-b border-stone-200 px-6 py-5">
         <div>
           <h2 id="cartTitle" class="text-lg font-semibold">
-            Giỏ hàng của <?= htmlspecialchars($loyaltyProfile['ho_ten'] ?? 'bạn') ?>
-            <span id="cartCountText" class="tabular-nums text-sm font-normal text-muted">(<?= $cartTotalQty ?>)</span>
+            Giỏ hàng của <?= htmlspecialchars($isLoggedIn ? ($loyaltyProfile['ho_ten'] ?? 'bạn') : 'bạn') ?>
+            <span id="cartCountText" class="tabular-nums text-sm font-normal text-muted">(<?= $isLoggedIn ? $cartTotalQty : 0 ?>)</span>
           </h2>
-          <p class="mt-0.5 text-xs text-muted">Đồng bộ trực tuyến với giỏ hàng của bạn</p>
+          <p class="mt-0.5 text-xs text-muted"><?= $isLoggedIn ? 'Đồng bộ trực tuyến với giỏ hàng của bạn' : 'Đăng nhập để mua sắm và tích điểm' ?></p>
         </div>
         <button type="button" id="cartCloseBtn" aria-label="Đóng giỏ hàng" class="tap-feedback rounded-full p-2 text-charcoal hover:bg-stone-100">
           <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -31,7 +32,7 @@ $expectedCartPoints = (int) floor(($cartSubtotalAmount / POINTS_PER_VND) * $tier
       </div>
 
       <!-- 1 Thanh điều khiển duy nhất ở đầu Drawer giỏ hàng -->
-      <div id="drawerToolbar" class="<?= empty($cartItems) ? 'hidden' : 'flex' ?> items-center justify-between px-6 py-2.5 border-b border-stone-200 bg-stone-50/70">
+      <div id="drawerToolbar" class="<?= (!$isLoggedIn || empty($cartItems)) ? 'hidden' : 'flex' ?> items-center justify-between px-6 py-2.5 border-b border-stone-200 bg-stone-50/70">
         <label class="flex items-center gap-2 cursor-pointer select-none text-xs font-semibold text-charcoal">
           <input type="checkbox" id="drawerSelectAll" class="h-4 w-4 rounded border-stone-300 accent-accent cursor-pointer" checked />
           <span>Chọn mua tất cả (<span id="drawerSelectedCount" class="tabular-nums font-bold text-accent">0 đã chọn</span>)</span>
@@ -45,7 +46,25 @@ $expectedCartPoints = (int) floor(($cartSubtotalAmount / POINTS_PER_VND) * $tier
       </div>
 
       <div id="cartItems" class="flex-1 space-y-4 overflow-y-auto px-6 py-4">
-        <?php if (empty($cartItems)): ?>
+        <?php if (!$isLoggedIn): ?>
+          <!-- Khách vãng lai: Hiển thị thông báo mời đăng nhập -->
+          <div class="py-12 text-center" id="cartGuestState">
+            <svg class="mx-auto h-12 w-12 text-stone-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+              <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12z" stroke-linejoin="round" />
+              <path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke-linecap="round" />
+            </svg>
+            <p class="mt-4 text-base font-medium text-charcoal">Chưa đăng nhập</p>
+            <p class="mt-1 text-xs text-muted">Vui lòng đăng nhập hoặc đăng ký để xem và quản lý giỏ hàng của bạn.</p>
+            <div class="mt-5 flex flex-col gap-2.5 px-4">
+              <a href="login.php" class="tap-feedback rounded-full bg-charcoal px-5 py-2.5 text-sm font-medium text-white hover:bg-accent transition text-center">
+                Đăng nhập
+              </a>
+              <a href="login.php" class="tap-feedback rounded-full border border-stone-300 px-5 py-2.5 text-sm font-medium text-charcoal hover:border-charcoal hover:bg-stone-50 transition text-center">
+                Đăng ký ngay
+              </a>
+            </div>
+          </div>
+        <?php elseif (empty($cartItems)): ?>
           <div class="py-16 text-center" id="cartEmptyState">
             <svg class="mx-auto h-12 w-12 text-stone-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
               <path d="M6 7h12l-1 13H7L6 7Z" stroke-linejoin="round" /><path d="M9 7V5a3 3 0 0 1 6 0v2" stroke-linecap="round" />

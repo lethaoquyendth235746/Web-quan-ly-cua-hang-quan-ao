@@ -97,6 +97,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $pageTitle = 'Đăng nhập tài khoản | AURA STUDIO';
+// Lấy và xóa flash message từ Session (nếu có)
+$flashMessage = $_SESSION['flash_message'] ?? '';
+$flashType    = $_SESSION['flash_type'] ?? 'info';
+unset($_SESSION['flash_message'], $_SESSION['flash_type']);
 require_once __DIR__ . '/includes/header.php';
 ?>
 <div class="container py-5">
@@ -104,6 +108,12 @@ require_once __DIR__ . '/includes/header.php';
     <div class="col-lg-5 col-md-7">
       <!-- Card Đăng nhập -->
       <div class="card border-0 shadow-sm rounded-4 p-4 p-sm-5 bg-white">
+        <!-- Nút Quay trở lại trang chủ -->
+        <div class="mb-3">
+          <a href="index.php" class="btn btn-sm btn-light border text-secondary text-decoration-none d-inline-flex align-items-center gap-1 rounded-pill px-3 py-1" style="font-size:13px;">
+            <i class="bi bi-arrow-left me-1"></i> Quay trở lại trang chủ
+          </a>
+        </div>
         <div class="text-center mb-4">
           <span class="badge bg-light text-secondary border px-3 py-1.5 rounded-pill small mb-2"></span>
           <h2 class="h3 fw-bold text-dark">Đăng nhập</h2>
@@ -119,6 +129,12 @@ require_once __DIR__ . '/includes/header.php';
         <?php if (isset($_GET['registered'])): ?>
           <div class="alert alert-success alert-dismissible fade show small" role="alert">
             <i class="bi bi-gift me-1"></i>Đăng ký thành công! Bạn đã được tự động mở Thẻ thành viên Hạng Đồng.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        <?php endif; ?>
+        <?php if (!empty($flashMessage)): ?>
+          <div class="alert alert-<?= $flashType === 'warning' ? 'warning' : ($flashType === 'success' ? 'success' : 'info') ?> alert-dismissible fade show small" role="alert">
+            <i class="bi bi-<?= $flashType === 'warning' ? 'exclamation-triangle' : 'info-circle' ?> me-1"></i><?= htmlspecialchars($flashMessage) ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
           </div>
         <?php endif; ?>
@@ -149,6 +165,11 @@ require_once __DIR__ . '/includes/header.php';
           </div>
           <div class="d-grid mt-4">
             <button type="submit" class="btn btn-aura py-2.5 rounded-3 fw-semibold"><i class="bi bi-box-arrow-in-right me-1"></i>Đăng nhập ngay</button>
+          </div>
+          <div class="text-center mt-3">
+            <a href="index.php" class="text-secondary small text-decoration-none d-inline-flex align-items-center gap-1">
+              <i class="bi bi-arrow-left"></i> Quay trở lại trang chủ
+            </a>
           </div>
         </form>
         <div class="text-center mt-4 pt-3 border-top small text-secondary">

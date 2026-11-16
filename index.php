@@ -68,6 +68,13 @@ switch ($page) {
         break;
 
     case 'checkout':
+        // Chặn truy cập trang Thanh toán nếu chưa đăng nhập
+        if (!isUserLoggedIn()) {
+            $_SESSION['flash_message'] = 'Vui lòng đăng nhập để tiến hành thanh toán!';
+            $_SESSION['flash_type'] = 'warning';
+            header('Location: login.php');
+            exit;
+        }
         $pageTitle = 'Thanh toán Đa tầng | AURA STUDIO';
         $customerAddresses = $checkoutService->getCustomerAddresses($currentUserId);
         $availableVouchers = $checkoutService->getCustomerAvailableVouchers($currentUserId);

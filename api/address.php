@@ -37,7 +37,7 @@ if ($currentUserId <= 0 || !isUserLoggedIn()) {
     $resp = [
         'success'       => false,
         'require_login' => true,
-        'message'       => 'Vui lòng đăng nhập để thực hiện thao tác này.',
+        'message'       => 'Vui lòng đăng nhập hoặc đăng ký tài khoản để mua hàng!',
     ];
     if ($isAjax) {
         echo json_encode($resp, JSON_UNESCAPED_UNICODE);

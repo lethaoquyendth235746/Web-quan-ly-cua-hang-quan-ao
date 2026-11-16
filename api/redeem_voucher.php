@@ -18,7 +18,7 @@ try {
         echo json_encode([
             'success'       => false,
             'require_login' => true,
-            'message'       => 'Vui lòng đăng nhập để thực hiện thao tác này.'
+            'message'       => 'Vui lòng đăng nhập hoặc đăng ký tài khoản để mua hàng!'
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }

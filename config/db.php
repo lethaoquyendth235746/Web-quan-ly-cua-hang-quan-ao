@@ -105,19 +105,19 @@ function getCurrentUser(): ?array
 }
 
 /**
- * Lấy mã người dùng hiện tại từ Session (nếu chưa đăng nhập và chưa từng logout, mặc định demo ID = 4)
+ * Lấy mã người dùng hiện tại từ Session.
+ * Trả về 0 nếu chưa đăng nhập hoặc đã đăng xuất chủ động.
+ * KHÔNG tự động gán tài khoản demo mặc định.
  */
 function getCurrentUserId(): int
 {
     if (!empty($_SESSION['explicit_logout'])) {
         return 0; // Đã đăng xuất chủ động
     }
-    if (isset($_SESSION['current_user_id'])) {
+    if (!empty($_SESSION['current_user_id'])) {
         return (int) $_SESSION['current_user_id'];
     }
-    // Khởi tạo phiên demo mặc định (Neàng Ra - Hạng Đồng) cho lần đầu truy cập khi chưa logout
-    $_SESSION['current_user_id'] = 4;
-    return 4;
+    return 0; // Khách vãng lai chưa đăng nhập
 }
 
 /**

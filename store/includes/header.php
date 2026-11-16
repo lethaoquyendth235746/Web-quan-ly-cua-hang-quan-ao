@@ -105,7 +105,14 @@ $cartTotalCount = array_sum(array_column($cartItems, 'so_luong_mua'));
         scroll-behavior: auto !important;
       }
     }
-  </style>
+  /* Khóa 1 dòng duy nhất cho toàn bộ menubar trên header */
+#siteHeader nav a,
+#siteHeader .nav-link,
+#siteHeader button,
+#siteHeader span {
+  white-space: nowrap;
+}
+</style>
 </head>
 <body class="bg-cream font-sans text-charcoal antialiased">
 

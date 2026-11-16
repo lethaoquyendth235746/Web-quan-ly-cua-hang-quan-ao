@@ -154,6 +154,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $redirectUrl = 'products.php?open_images=' . $maSp;
                 break;
 
+            // ----- NEW: upload gallery images -----
+            case 'upload_gallery':
+                $maSp = (int)($_POST['ma_sp'] ?? 0);
+                $color = trim($_POST['mau_sac_lien_ket'] ?? '');
+                $uploaded = $productAdminService->addProductGalleryImages(
+                    $maSp,
+                    $_FILES['gallery_images'] ?? [],
+                    $color
+                );
+                $_SESSION['admin_flash'] = [
+                    'type'    => 'success',
+                    'message' => "Đã tải lên {$uploaded} ảnh phụ cho sản phẩm #SP-" .
+                                 sprintf('%03d', $maSp) . " (Màu: {$color})."
+                ];
+                $redirectUrl = 'products.php?open_images=' . $maSp;
+                break;
+
+            // ----- NEW: delete gallery image -----
+            case 'delete_gallery_image':
+                $maHa = (int)($_POST['ma_ha'] ?? 0);
+                $maSp = (int)($_POST['ma_sp'] ?? 0);
+                $productAdminService->deleteGalleryImage($maHa, $maSp);
+                $_SESSION['admin_flash'] = [
+                    'type'    => 'success',
+                    'message' => "Đã xóa ảnh phụ (ID {$maHa}) khỏi sản phẩm #SP-" .
+                                 sprintf('%03d', $maSp) . '.'
+                ];
+                $redirectUrl = 'products.php?open_images=' . $maSp;
+                break;
+
             default:
                 throw new Exception('Thao tác yêu cầu không hợp lệ.');
         }

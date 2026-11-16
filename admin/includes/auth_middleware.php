@@ -28,8 +28,8 @@ if (!$currentUser) {
 
 $maVt = (int)($currentUser['ma_vt'] ?? 0);
 
-// 3. Phân quyền: Chỉ cho phép ma_vt = 1 (Admin) và ma_vt = 2 (Nhân viên)
-if (!in_array($maVt, [1, 2], true)) {
+// 3. Phân quyền: Chỉ cho phép ROLE_ADMIN và ROLE_STAFF
+if (!in_array($maVt, [ROLE_ADMIN, ROLE_STAFF], true)) {
     header('Location: ../index.php');
     exit;
 }

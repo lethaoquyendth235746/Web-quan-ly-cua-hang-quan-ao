@@ -12,7 +12,7 @@ if (session_status() === PHP_SESSION_NONE) {
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 
 define('DB_HOST', '127.0.0.1');
-define('DB_PORT', '3307'); // Hoặc 3308 tùy cấu hình XAMPP/MySQL của bạn
+define('DB_PORT', '3306'); // Hoặc 3308 tùy cấu hình XAMPP/MySQL của bạn
 define('DB_NAME', 'csdl_cua_hang_quan_ao');
 define('DB_USER', 'root');
 define('DB_PASS', ''); // Điền mật khẩu MySQL cục bộ nếu có

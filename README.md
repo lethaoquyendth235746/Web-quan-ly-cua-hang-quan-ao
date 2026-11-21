@@ -28,6 +28,7 @@
 
 Trong lĩnh vực bán lẻ thời trang, việc thu hút khách hàng mới tốn kém gấp nhiều lần so với việc giữ chân khách hàng cũ. Dự án này hiện thực hóa các tài liệu đặc tả (*Báo cáo Quản lý Phạm vi, Điểm Use Case 123 UCP, Điểm chức năng, Phụ lục C & Kế hoạch MS Project 77 ngày*) thành một ứng dụng Web hoàn chỉnh với 3 trụ cột nghiệp vụ:
 
+* **Quản lý Biến thể Thời trang (SKU Management):** Kiểm soát giá bán, hình ảnh và tồn kho chính xác đến từng tổ hợp **Kích cỡ (S/M/L/XL)** và **Màu sắc** của mỗi mẫu quần áo, kèm phiếu nhập kho tự động cộng tồn.
 * **Cơ chế Tích điểm Kép & Nâng hạng Tự động (Automated Loyalty Tiering):** Tách bạch giữa **Điểm xét hạng** (tích lũy trọn đời để thăng cấp Đồng $\rightarrow$ Bạc $\rightarrow$ Vàng $\rightarrow$ Kim Cương) và **Điểm khả dụng** (dùng như tiền tệ để đổi Voucher hoặc giảm trừ hóa đơn).
 * **Khuyến mãi Đa tầng & Thanh toán VietQR (Multi-layer Checkout):** Cho phép khách hàng hưởng đồng thời đặc quyền giảm giá tự động theo Hạng thẻ hiện tại kết hợp với Phiếu giảm giá (Voucher) trong ví cá nhân, hỗ trợ thanh toán COD và chuyển khoản mã **VietQR** động.
 

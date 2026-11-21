@@ -179,7 +179,7 @@ class LoyaltyEngineService
             }
 
             // =========================================================
-            // NHÁNH DA_HUY: Hoàn trả tồn kho + mở khóa Voucher
+            // NHÁNH DA_HUY: Hoàn trả tồn kho + mở khóa Voucher + hoàn điểm đã tiêu
             // =========================================================
             if ($newStatus === 'DA_HUY') {
                 // 9. Lấy danh sách chi tiết đơn hàng để hoàn kho
@@ -189,12 +189,16 @@ class LoyaltyEngineService
                 $stmtItems->execute(['ma_dh' => $maDh]);
                 $items = $stmtItems->fetchAll();
 
+                $stmtReturnStock = $this->pdo->prepare("
+                    UPDATE bt_bien_the_sp
+                    SET so_luong_ton = so_luong_ton + :qty
+                    WHERE ma_bt = :ma_bt
+                ");
                 foreach ($items as $item) {
-                    $this->pdo->prepare("
-                        UPDATE bt_bien_the_sp
-                        SET so_luong_ton = so_luong_ton + :qty
-                        WHERE ma_bt = :ma_bt
-                    ")->execute(['qty' => (int)$item['so_luong'], 'ma_bt' => (int)$item['ma_bt']]);
+                    $stmtReturnStock->execute([
+                        'qty'   => (int)$item['so_luong'],
+                        'ma_bt' => (int)$item['ma_bt'],
+                    ]);
                 }
 
                 // 10. Mở khóa Voucher nếu đơn có áp dụng
@@ -203,7 +207,55 @@ class LoyaltyEngineService
                         UPDATE vkh_vi_voucher_kh
                         SET trang_thai_su_dung = 0, ngay_su_dung = NULL
                         WHERE ma_nd = :ma_nd AND ma_pgg = :ma_pgg AND trang_thai_su_dung = 1
-                    ")->execute(['ma_nd' => $maNd, 'ma_pgg' => (int)$order['ma_pgg']]);
+                        ORDER BY ngay_su_dung DESC
+                        LIMIT 1
+                    ")->execute([
+                        'ma_nd'  => $maNd,
+                        'ma_pgg' => (int)$order['ma_pgg'],
+                    ]);
+                }
+
+                // 11. Hoàn trả điểm tiêu dùng nếu đơn hàng có sử dụng điểm
+                $diemSuDung = (int)($order['diem_su_dung'] ?? 0);
+                if ($diemSuDung > 0) {
+                    $stmtCardRefund = $this->pdo->prepare("
+                        SELECT ma_the, diem_kha_dung, tong_diem_tich_luy
+                        FROM ttd_the_tich_diem
+                        WHERE ma_nd = :ma_nd
+                        FOR UPDATE
+                    ");
+                    $stmtCardRefund->execute(['ma_nd' => $maNd]);
+                    $cardRefund = $stmtCardRefund->fetch();
+
+                    if ($cardRefund) {
+                        $newDiemKhaDung = (int)$cardRefund['diem_kha_dung'] + $diemSuDung;
+                        $newTongDiem    = (int)$cardRefund['tong_diem_tich_luy'];
+
+                        $this->pdo->prepare("
+                            UPDATE ttd_the_tich_diem
+                            SET diem_kha_dung = diem_kha_dung + :pts, ngay_cap_nhat = NOW()
+                            WHERE ma_the = :ma_the
+                        ")->execute([
+                            'pts'    => $diemSuDung,
+                            'ma_the' => $cardRefund['ma_the'],
+                        ]);
+
+                        $this->pdo->prepare("
+                            INSERT INTO lsd_lich_su_diem (
+                                ma_the, ma_dh, loai_giao_dich, so_diem_thay_doi,
+                                so_du_sau_gd, noi_dung, thoi_gian
+                            ) VALUES (
+                                :ma_the, :ma_dh, 'CONG_MUA_HANG', :pts,
+                                :balance, :note, NOW()
+                            )
+                        ")->execute([
+                            'ma_the'  => $cardRefund['ma_the'],
+                            'ma_dh'   => $maDh,
+                            'pts'     => $diemSuDung,
+                            'balance' => $newDiemKhaDung,
+                            'note'    => "Hoàn lại {$diemSuDung} điểm khi hủy đơn #{$dhCode}",
+                        ]);
+                    }
                 }
             }
 
@@ -224,7 +276,7 @@ class LoyaltyEngineService
                 $msg .= " 🎉 Thăng lên {$tenHangMoi}!";
             }
             if ($newStatus === 'DA_HUY') {
-                $msg .= " Đã hoàn trả tồn kho và mở khóa voucher (nếu có).";
+                $msg .= " Đã hoàn trả tồn kho, mở khóa voucher và hoàn điểm tiêu dùng (nếu có).";
             }
 
             return [

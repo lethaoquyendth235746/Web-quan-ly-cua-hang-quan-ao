@@ -129,10 +129,22 @@ $statusBadges = [
               </span>
             </td>
             <td class="px-6 py-4 text-right">
-              <?php if ($od['trang_thai_dh'] !== 'HOAN_THANH' && $od['trang_thai_dh'] !== 'DA_HUY'): ?>
+              <?php if ($od['trang_thai_dh'] === 'CHO_XAC_NHAN'): ?>
                 <button type="button"
                   data-approve-order="<?= (int)$od['ma_dh'] ?>"
                   data-order-code="<?= htmlspecialchars($od['ma_dh_code']) ?>"
+                  data-target-status="DANG_GIAO"
+                  class="tap-feedback inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 transition">
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                  </svg>
+                  Xác nhận &amp; Giao hàng
+                </button>
+              <?php elseif ($od['trang_thai_dh'] === 'DANG_GIAO'): ?>
+                <button type="button"
+                  data-approve-order="<?= (int)$od['ma_dh'] ?>"
+                  data-order-code="<?= htmlspecialchars($od['ma_dh_code']) ?>"
+                  data-target-status="HOAN_THANH"
                   class="tap-feedback inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 transition">
                   <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -254,15 +266,20 @@ $statusBadges = [
       },
     });
 
-    // Xử lý duyệt đơn hàng thật qua API & Loyalty Engine
+    // Xử lý cập nhật trạng thái đơn hàng theo quy trình 2 bước (CHO_XAC_NHAN -> DANG_GIAO -> HOAN_THANH)
     document.addEventListener('click', async (e) => {
       const btn = e.target.closest('[data-approve-order]');
       if (!btn) return;
 
       const maDh = btn.dataset.approveOrder;
       const orderCode = btn.dataset.orderCode || maDh;
+      const targetStatus = btn.dataset.targetStatus || 'HOAN_THANH';
 
-      if (!confirm(`Xác nhận duyệt HOÀN THÀNH đơn hàng #${orderCode} và kích hoạt cộng điểm tích lũy cho khách hàng?`)) {
+      const confirmMsg = targetStatus === 'DANG_GIAO'
+        ? `Xác nhận chuyển đơn hàng #${orderCode} sang trạng thái "Đang giao hàng" (Bước 1/2)?`
+        : `Xác nhận duyệt HOÀN THÀNH đơn hàng #${orderCode} (Bước 2/2) và kích hoạt cộng điểm tích lũy cho khách hàng?`;
+
+      if (!confirm(confirmMsg)) {
         return;
       }
 
@@ -280,7 +297,7 @@ $statusBadges = [
         const res = await fetch('../api/admin_order.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'approve', ma_dh: Number(maDh), trang_thai_dh: 'HOAN_THANH' })
+          body: JSON.stringify({ action: 'update_status', ma_dh: Number(maDh), trang_thai_dh: targetStatus })
         });
         const data = await res.json();
 

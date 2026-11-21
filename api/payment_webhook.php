@@ -52,6 +52,11 @@ try {
 
     $dhCode = 'DH' . str_pad((string) $order['ma_dh'], 2, '0', STR_PAD_LEFT);
 
+    // Nếu đơn hàng đã bị hủy trước đó thì từ chối
+    if ($order['trang_thai_dh'] === 'DA_HUY') {
+        throw new Exception("Đơn hàng #{$dhCode} đã bị hủy, không thể xác nhận thanh toán.");
+    }
+
     // Nếu đơn hàng đã hoàn thành trước đó
     if ($order['trang_thai_dh'] === 'HOAN_THANH') {
         echo json_encode([
@@ -64,9 +69,13 @@ try {
         exit;
     }
 
-    // 3. Thực hiện duyệt đơn sang HOAN_THANH và kích hoạt Loyalty Engine qua OrderAdminService
+    // 3. Thực hiện chuyển trạng thái tuần tự 2 bước chuẩn (CHO_XAC_NHAN -> DANG_GIAO -> HOAN_THANH)
+    // để tuân thủ nghiêm ngặt quy tắc một chiều của LoyaltyEngineService và kích hoạt cộng điểm
     $orderAdminService = new OrderAdminService();
-    $result = $orderAdminService->approveOrder($maDh, 'HOAN_THANH');
+    if ($order['trang_thai_dh'] === 'CHO_XAC_NHAN') {
+        $orderAdminService->updateOrderStatus($maDh, 'DANG_GIAO');
+    }
+    $result = $orderAdminService->updateOrderStatus($maDh, 'HOAN_THANH');
 
     echo json_encode([
         'success'    => true,

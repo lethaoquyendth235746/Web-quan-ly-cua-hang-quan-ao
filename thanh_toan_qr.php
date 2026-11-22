@@ -35,7 +35,7 @@ if (!$order) {
 }
 
 // Kiểm tra quyền sở hữu đơn hàng (chỉ chủ đơn hàng hoặc admin mới được xem)
-if ((int) $order['ma_nd'] !== $currentUserId && $currentUserId !== 1) {
+if ($currentUserId <= 0 || ((int) $order['ma_nd'] !== $currentUserId && !hasAdminAccess())) {
     die('<div style="font-family:sans-serif;max-width:600px;margin:3rem auto;padding:2rem;background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;color:#92400e;text-align:center;">'
         . '<h2 style="margin-top:0;">Truy cập bị từ chối</h2>'
         . '<p>Bạn không có quyền truy cập vào thông tin thanh toán của đơn hàng này.</p>'

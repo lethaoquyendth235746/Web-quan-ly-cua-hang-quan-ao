@@ -69,6 +69,23 @@ try {
         exit;
     }
 
+    // 2.1. Đối soát số tiền chuyển khoản (nếu payload có gửi kèm số tiền hoặc bắt buộc khớp giá trị đơn)
+    $receivedAmount = null;
+    if (isset($data['so_tien']) && is_numeric($data['so_tien'])) {
+        $receivedAmount = (float) $data['so_tien'];
+    } elseif (isset($data['transferAmount']) && is_numeric($data['transferAmount'])) {
+        $receivedAmount = (float) $data['transferAmount'];
+    } elseif (isset($data['amount']) && is_numeric($data['amount'])) {
+        $receivedAmount = (float) $data['amount'];
+    }
+
+    $expectedAmount = (float) $order['thanh_tien'];
+    if ($receivedAmount === null || round($receivedAmount) < round($expectedAmount)) {
+        throw new Exception(
+            "Số tiền thanh toán không hợp lệ hoặc chưa đủ giá trị đơn hàng #{$dhCode} (Cần: " . formatVND($expectedAmount) . ")."
+        );
+    }
+
     // 3. Thực hiện chuyển trạng thái tuần tự 2 bước chuẩn (CHO_XAC_NHAN -> DANG_GIAO -> HOAN_THANH)
     // để tuân thủ nghiêm ngặt quy tắc một chiều của LoyaltyEngineService và kích hoạt cộng điểm
     $orderAdminService = new OrderAdminService();

@@ -10,6 +10,16 @@ require_once __DIR__ . '/../config/db.php';
 
 try {
     $currentUserId = getCurrentUserId();
+    if ($currentUserId <= 0 || !isUserLoggedIn()) {
+        http_response_code(401);
+        echo json_encode([
+            'success'       => false,
+            'require_login' => true,
+            'message'       => 'Vui lòng đăng nhập để kiểm tra trạng thái thanh toán.'
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     $maDh = (int) ($_GET['ma_dh'] ?? $_POST['ma_dh'] ?? 0);
 
     if ($maDh <= 0) {
@@ -31,7 +41,7 @@ try {
     }
 
     // Kiểm tra quyền: chỉ chủ đơn hàng hoặc admin mới được truy vấn
-    if ($currentUserId > 0 && (int) $order['ma_nd'] !== $currentUserId && !hasAdminAccess()) {
+    if ((int) $order['ma_nd'] !== $currentUserId && !hasAdminAccess()) {
         http_response_code(403);
         echo json_encode([
             'success' => false,

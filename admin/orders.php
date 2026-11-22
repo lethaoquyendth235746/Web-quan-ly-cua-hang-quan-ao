@@ -237,6 +237,16 @@ $statusBadges = [
     const summary = document.getElementById('orderSummary');
     const modal = document.getElementById('orderDetailModal') || document.getElementById('orderModal');
 
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
     function filterOrders() {
       const q = (searchInput?.value || '').trim().toLowerCase();
       const st = statusFilter?.value || '';
@@ -273,9 +283,9 @@ $statusBadges = [
       const tbody = document.getElementById('orderItemsBody');
       tbody.innerHTML = (order.items || []).map((item) => `
         <tr>
-          <td class="px-4 py-2.5 font-mono font-medium text-slate-800">${item.ma_sku}</td>
-          <td class="px-4 py-2.5 text-slate-800">${item.ten_sp} (${item.mau_sac}, ${item.kich_co})</td>
-          <td class="px-4 py-2.5 text-right">${item.so_luong}</td>
+          <td class="px-4 py-2.5 font-mono font-medium text-slate-800">${escapeHtml(item.ma_sku)}</td>
+          <td class="px-4 py-2.5 text-slate-800">${escapeHtml(item.ten_sp)} (${escapeHtml(item.mau_sac)}, ${escapeHtml(item.kich_co)})</td>
+          <td class="px-4 py-2.5 text-right">${Number(item.so_luong || 0)}</td>
           <td class="px-4 py-2.5 text-right">${Number(item.don_gia_luc_mua).toLocaleString('vi-VN')}đ</td>
           <td class="px-4 py-2.5 text-right font-semibold">${Number(item.thanh_tien_muc).toLocaleString('vi-VN')}đ</td>
         </tr>
@@ -302,8 +312,8 @@ $statusBadges = [
         actionContainer.innerHTML = `
           <button type="button"
             data-update-status="DANG_GIAO"
-            data-order-id="${order.ma_dh}"
-            data-order-code="${order.ma_dh_code}"
+            data-order-id="${Number(order.ma_dh)}"
+            data-order-code="${escapeHtml(order.ma_dh_code)}"
             class="tap-feedback inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
@@ -312,8 +322,8 @@ $statusBadges = [
           </button>
           <button type="button"
             data-update-status="DA_HUY"
-            data-order-id="${order.ma_dh}"
-            data-order-code="${order.ma_dh_code}"
+            data-order-id="${Number(order.ma_dh)}"
+            data-order-code="${escapeHtml(order.ma_dh_code)}"
             class="tap-feedback inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-700 hover:bg-rose-100 transition">
             Hủy đơn
           </button>
@@ -322,8 +332,8 @@ $statusBadges = [
         actionContainer.innerHTML = `
           <button type="button"
             data-update-status="HOAN_THANH"
-            data-order-id="${order.ma_dh}"
-            data-order-code="${order.ma_dh_code}"
+            data-order-id="${Number(order.ma_dh)}"
+            data-order-code="${escapeHtml(order.ma_dh_code)}"
             class="tap-feedback inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 transition">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -332,8 +342,8 @@ $statusBadges = [
           </button>
           <button type="button"
             data-update-status="DA_HUY"
-            data-order-id="${order.ma_dh}"
-            data-order-code="${order.ma_dh_code}"
+            data-order-id="${Number(order.ma_dh)}"
+            data-order-code="${escapeHtml(order.ma_dh_code)}"
             class="tap-feedback inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-700 hover:bg-rose-100 transition">
             Hủy đơn
           </button>

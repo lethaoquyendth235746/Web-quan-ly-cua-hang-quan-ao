@@ -125,7 +125,7 @@ try {
 
     if (!$card) {
         // Tự động tạo thẻ nếu chưa có
-        $cardNo = 'AUR' . str_pad((string)$currentUserId, 5, '0', STR_PAD_LEFT);
+        $cardNo = 'THE-AGU-' . str_pad((string)$currentUserId, 6, '0', STR_PAD_LEFT);
         $stmtCreateCard = $pdo->prepare("
             INSERT INTO ttd_the_tich_diem (ma_nd, ma_hang, ma_so_the, tong_diem_tich_luy, diem_kha_dung, ngay_cap, ngay_cap_nhat)
             VALUES (?, 1, ?, 0, 0, NOW(), NOW())

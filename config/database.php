@@ -49,6 +49,18 @@ function getDBConnection(): PDO
         try {
             $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
         } catch (PDOException $e) {
+            $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
+            $acceptHeader = $_SERVER['HTTP_ACCEPT'] ?? '';
+            if (str_contains($scriptName, '/api/') || str_contains($acceptHeader, 'application/json')) {
+                if (!headers_sent()) {
+                    http_response_code(500);
+                    header('Content-Type: application/json; charset=utf-8');
+                }
+                die(json_encode([
+                    'success' => false,
+                    'message' => 'Không thể kết nối Cơ sở dữ liệu: ' . $e->getMessage(),
+                ], JSON_UNESCAPED_UNICODE));
+            }
             die('<div style="font-family:sans-serif;padding:2rem;max-width:640px;margin:2rem auto;border:1px solid #fca5a5;background:#fef2f2;border-radius:12px;color:#991b1b;">'
                 . '<h2 style="margin-top:0;">Không thể kết nối Cơ sở dữ liệu</h2>'
                 . '<p>Vui lòng kiểm tra MySQL trong XAMPP Control Panel và đảm bảo đã nạp file <code>database/init.sql</code> vào CSDL <strong>' . htmlspecialchars(DB_NAME) . '</strong>.</p>'

@@ -346,6 +346,16 @@ if ($reviewCount > 0) {
     const images = <?= json_encode($images) ?>;
     const tierMultiplier = <?= json_encode($tierMultiplier) ?>;
 
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
     let currentColor = variants[0]?.mau_sac || '';
     let currentSize = variants[0]?.kich_co || '';
     let currentQty = 1;
@@ -634,16 +644,16 @@ if ($reviewCount > 0) {
           newLi.innerHTML = `
             <div class="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <p class="text-sm font-semibold text-charcoal">${rev.ho_ten}</p>
-                <p class="text-xs text-muted">${rev.ten_hang || 'Thành viên'}</p>
+                <p class="text-sm font-semibold text-charcoal">${escapeHtml(rev.ho_ten)}</p>
+                <p class="text-xs text-muted">${escapeHtml(rev.ten_hang || 'Thành viên')}</p>
               </div>
               <span class="rounded-full bg-olive/10 px-3 py-1 text-xs font-medium text-olive">✓ Đã nhận +10 điểm thưởng</span>
             </div>
             <p class="mt-2 text-sm text-amber-600">${starsHtml}</p>
             <p class="mt-1 text-xs text-muted">
-              Phân loại mua: Màu ${rev.mau_sac || 'Mặc định'}, Size ${rev.kich_co || 'Tiêu chuẩn'} &middot; Vừa xong
+              Phân loại mua: Màu ${escapeHtml(rev.mau_sac || 'Mặc định')}, Size ${escapeHtml(rev.kich_co || 'Tiêu chuẩn')} &middot; Vừa xong
             </p>
-            <p class="mt-3 text-sm leading-relaxed text-charcoal">${rev.noi_dung_danh_gia}</p>
+            <p class="mt-3 text-sm leading-relaxed text-charcoal">${escapeHtml(rev.noi_dung_danh_gia)}</p>
           `;
           listContainer.prepend(newLi);
         }

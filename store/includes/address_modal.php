@@ -46,13 +46,21 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <label for="addrTinhThanh" class="block text-xs font-semibold uppercase tracking-wider text-charcoal mb-1">
             Tỉnh / Thành phố <span class="text-red-500">*</span>
           </label>
           <input type="text" id="addrTinhThanh" name="tinh_thanh" required
             placeholder="VD: An Giang"
+            class="w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2 text-sm text-charcoal focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 transition" />
+        </div>
+        <div>
+          <label for="addrQuanHuyen" class="block text-xs font-semibold uppercase tracking-wider text-charcoal mb-1">
+            Quận / Huyện <span class="text-red-500">*</span>
+          </label>
+          <input type="text" id="addrQuanHuyen" name="quan_huyen" required
+            placeholder="VD: TP. Long Xuyên"
             class="w-full rounded-xl border border-stone-300 bg-white px-3.5 py-2 text-sm text-charcoal focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 transition" />
         </div>
         <div>
@@ -117,6 +125,7 @@
       document.getElementById('addrTenNguoiNhan').value = data.ten_nguoi_nhan || '';
       document.getElementById('addrSdtNhan').value = data.sdt_nhan || '';
       document.getElementById('addrTinhThanh').value = data.tinh_thanh || '';
+      document.getElementById('addrQuanHuyen').value = data.quan_huyen || '';
       document.getElementById('addrPhuongXa').value = data.phuong_xa || '';
       document.getElementById('addrDiaChiCuThe').value = data.dia_chi_cu_the || '';
       document.getElementById('addrMacDinh').checked = (parseInt(data.mac_dinh, 10) === 1);

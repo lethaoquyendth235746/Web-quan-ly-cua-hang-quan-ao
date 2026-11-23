@@ -59,7 +59,7 @@ $expectedCartPoints = (int) floor(($cartSubtotalAmount / POINTS_PER_VND) * $tier
               <a href="login.php" class="tap-feedback rounded-full bg-charcoal px-5 py-2.5 text-sm font-medium text-white hover:bg-accent transition text-center">
                 Đăng nhập
               </a>
-              <a href="login.php" class="tap-feedback rounded-full border border-stone-300 px-5 py-2.5 text-sm font-medium text-charcoal hover:border-charcoal hover:bg-stone-50 transition text-center">
+              <a href="register.php" class="tap-feedback rounded-full border border-stone-300 px-5 py-2.5 text-sm font-medium text-charcoal hover:border-charcoal hover:bg-stone-50 transition text-center">
                 Đăng ký ngay
               </a>
             </div>

@@ -22,11 +22,6 @@ $tierMultiplier = (float) ($loyaltyProfile['he_so_tich_diem'] ?? 1.0);
 $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
 $pointsExpected = (int) floor(((float) ($firstVariant['gia_ban_rieng'] ?? $p['gia_khuyen_mai']) / POINTS_PER_VND) * $tierMultiplier);
 
-// Tự động tăng lượt xem sản phẩm hợp lệ
-if (isset($productService) && isset($p['ma_sp'])) {
-    $productService->incrementViewCount((int)$p['ma_sp']);
-}
-
 // Kiểm tra xem khách đã mua sản phẩm này trong đơn HOAN_THANH và chưa đánh giá (da_cong_diem_dg = 0)
 $canReviewAndEarnPoints = false;
 $currentUserId = getCurrentUserId();

@@ -409,15 +409,3 @@ require __DIR__ . '/includes/header.php';
 </script>
 
 <?php require __DIR__ . '/includes/footer.php'; ?>
-
-<!-- Hiển thị Toast thông báo PRG từ Session -->
-<?php if (isset($_SESSION['admin_flash'])): ?>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      if (typeof window.showAdminToast === 'function') {
-        window.showAdminToast(<?= json_encode($_SESSION['admin_flash']['message'], JSON_UNESCAPED_UNICODE) ?>);
-      }
-    });
-  </script>
-  <?php unset($_SESSION['admin_flash']); ?>
-<?php endif; ?>

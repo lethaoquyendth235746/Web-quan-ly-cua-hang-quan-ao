@@ -289,7 +289,15 @@ $orderStatusBadges = [
                 </div>
                 <p class="mt-1 text-xs text-stone-600 font-medium">SĐT nhận: <?= htmlspecialchars($addr['sdt_nhan']) ?></p>
                 <p class="mt-2 text-xs text-muted leading-relaxed">
-                  <?= htmlspecialchars($addr['dia_chi_cu_the']) ?>, <?= htmlspecialchars($addr['phuong_xa']) ?>, <?= htmlspecialchars($addr['tinh_thanh']) ?>
+                  <?php
+                    $addrParts = array_filter([
+                        trim((string)($addr['dia_chi_cu_the'] ?? '')),
+                        trim((string)($addr['phuong_xa'] ?? '')),
+                        trim((string)($addr['quan_huyen'] ?? '')),
+                        trim((string)($addr['tinh_thanh'] ?? '')),
+                    ], fn($v) => $v !== '');
+                    echo htmlspecialchars(implode(', ', $addrParts));
+                  ?>
                 </p>
               </div>
 

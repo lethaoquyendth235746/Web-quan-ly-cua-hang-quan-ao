@@ -95,7 +95,7 @@ class AddressService
         $diaChiCuThe  = trim($data['dia_chi_cu_the'] ?? '');
         $macDinhReq   = !empty($data['mac_dinh']) ? 1 : 0;
 
-        if ($tenNguoiNhan === '' || $sdtNhan === '' || $tinhThanh === '' || $phuongXa === '' || $diaChiCuThe === '') {
+        if ($tenNguoiNhan === '' || $sdtNhan === '' || $tinhThanh === '' || $quanHuyen === '' || $phuongXa === '' || $diaChiCuThe === '') {
             return ['success' => false, 'message' => 'Vui lòng điền đầy đủ các thông tin địa chỉ nhận hàng.'];
         }
 
@@ -193,7 +193,7 @@ class AddressService
         $diaChiCuThe  = trim($data['dia_chi_cu_the'] ?? '');
         $macDinhReq   = !empty($data['mac_dinh']) ? 1 : 0;
 
-        if ($tenNguoiNhan === '' || $sdtNhan === '' || $tinhThanh === '' || $phuongXa === '' || $diaChiCuThe === '') {
+        if ($tenNguoiNhan === '' || $sdtNhan === '' || $tinhThanh === '' || $quanHuyen === '' || $phuongXa === '' || $diaChiCuThe === '') {
             return ['success' => false, 'message' => 'Vui lòng điền đầy đủ các thông tin địa chỉ.'];
         }
 

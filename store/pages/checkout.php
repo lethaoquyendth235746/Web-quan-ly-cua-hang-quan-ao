@@ -53,7 +53,15 @@ $maxPointsToUse = min(50, $diemKhaDung);
                       </div>
                       <span class="mt-1 block text-xs font-medium text-stone-600">SĐT nhận: <?= htmlspecialchars($addr['sdt_nhan']) ?></span>
                       <span class="mt-1 block text-sm text-muted leading-relaxed">
-                        <?= htmlspecialchars($addr['dia_chi_cu_the']) ?>, <?= htmlspecialchars($addr['phuong_xa']) ?>, <?= htmlspecialchars($addr['tinh_thanh']) ?>
+                        <?php
+                          $addrParts = array_filter([
+                              trim((string)($addr['dia_chi_cu_the'] ?? '')),
+                              trim((string)($addr['phuong_xa'] ?? '')),
+                              trim((string)($addr['quan_huyen'] ?? '')),
+                              trim((string)($addr['tinh_thanh'] ?? '')),
+                          ], fn($v) => $v !== '');
+                          echo htmlspecialchars(implode(', ', $addrParts));
+                        ?>
                       </span>
                     </div>
                   </label>

@@ -47,9 +47,6 @@
         <div>
           &copy; <?= date('Y') ?> AURA STUDIO. Bản quyền thuộc nhóm phát triển dự án.
         </div>
-
-
-        </div>
       </div>
     </div>
   </footer>

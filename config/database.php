@@ -61,11 +61,17 @@ function getDBConnection(): PDO
                     'message' => 'Không thể kết nối Cơ sở dữ liệu: ' . $e->getMessage(),
                 ], JSON_UNESCAPED_UNICODE));
             }
-            die('<div style="font-family:sans-serif;padding:2rem;max-width:640px;margin:2rem auto;border:1px solid #fca5a5;background:#fef2f2;border-radius:12px;color:#991b1b;">'
+            $dbErrorStyle = 'font-family:sans-serif;padding:2rem;max-width:640px;margin:2rem auto;'
+                . 'border:1px solid #fca5a5;background:#fef2f2;border-radius:12px;color:#991b1b;';
+            die(
+                '<div style="' . $dbErrorStyle . '">'
                 . '<h2 style="margin-top:0;">Không thể kết nối Cơ sở dữ liệu</h2>'
-                . '<p>Vui lòng kiểm tra MySQL trong XAMPP Control Panel và đảm bảo đã nạp file <code>database/init.sql</code> vào CSDL <strong>' . htmlspecialchars(DB_NAME) . '</strong>.</p>'
-                . '<p style="font-size:13px;color:#b91c1c;">Chi tiết lỗi: ' . htmlspecialchars($e->getMessage()) . '</p>'
-                . '</div>');
+                . '<p>Vui lòng kiểm tra MySQL trong XAMPP Control Panel và đảm bảo đã nạp file '
+                . '<code>database/init.sql</code> vào CSDL <strong>' . htmlspecialchars(DB_NAME) . '</strong>.</p>'
+                . '<p style="font-size:13px;color:#b91c1c;">Chi tiết lỗi: '
+                . htmlspecialchars($e->getMessage()) . '</p>'
+                . '</div>'
+            );
         }
     }
     return $pdo;

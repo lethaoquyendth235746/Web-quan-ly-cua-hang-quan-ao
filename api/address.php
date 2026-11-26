@@ -89,7 +89,9 @@ try {
             }
 
             if ($isAjax) {
-                if (!$res['success']) http_response_code(400);
+                if (!$res['success']) {
+                    http_response_code(400);
+                }
                 echo json_encode($res, JSON_UNESCAPED_UNICODE);
                 exit;
             }
@@ -106,7 +108,9 @@ try {
             }
 
             if ($isAjax) {
-                if (!$res['success']) http_response_code(400);
+                if (!$res['success']) {
+                    http_response_code(400);
+                }
                 echo json_encode($res, JSON_UNESCAPED_UNICODE);
                 exit;
             }
@@ -123,7 +127,9 @@ try {
             }
 
             if ($isAjax) {
-                if (!$res['success']) http_response_code(400);
+                if (!$res['success']) {
+                    http_response_code(400);
+                }
                 echo json_encode($res, JSON_UNESCAPED_UNICODE);
                 exit;
             }
@@ -140,7 +146,9 @@ try {
             }
 
             if ($isAjax) {
-                if (!$res['success']) http_response_code(400);
+                if (!$res['success']) {
+                    http_response_code(400);
+                }
                 echo json_encode($res, JSON_UNESCAPED_UNICODE);
                 exit;
             }

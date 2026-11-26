@@ -172,9 +172,13 @@ $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
         <div>
           <h2 id="storeTitle" class="text-xl font-semibold">
             <?php
-              if ($currentGender === 'nam') echo 'Thời trang Nam';
-              elseif ($currentGender === 'nu') echo 'Thời trang Nữ';
-              else echo 'Tất cả sản phẩm';
+            if ($currentGender === 'nam') {
+                echo 'Thời trang Nam';
+            } elseif ($currentGender === 'nu') {
+                echo 'Thời trang Nữ';
+            } else {
+                echo 'Tất cả sản phẩm';
+            }
             ?>
           </h2>
           <p id="resultCount" class="tabular-nums mt-1 text-sm text-muted">Hiển thị <?= count($allProducts) ?> sản phẩm</p>

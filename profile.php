@@ -68,10 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $successMsg = 'Cập nhật thông tin cá nhân thành công.';
             }
         }
-    }
-
-    // 2.2 Đổi mật khẩu (xác thực mật khẩu cũ)
-    elseif ($action === 'change_password') {
+    } elseif ($action === 'change_password') {
+        // 2.2 Đổi mật khẩu (xác thực mật khẩu cũ)
         $matKhauCu  = $_POST['mat_khau_cu'] ?? '';
         $matKhauMoi = $_POST['mat_khau_moi'] ?? '';
         $xacNhanMk  = $_POST['xac_nhan_mk'] ?? '';
@@ -102,10 +100,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $successMsg = 'Đổi mật khẩu thành công! Mật khẩu mới đã được kích hoạt.';
             }
         }
-    }
-
-    // 2.3 Thêm mới địa chỉ nhận hàng
-    elseif ($action === 'add_address') {
+    } elseif ($action === 'add_address') {
+        // 2.3 Thêm mới địa chỉ nhận hàng
         $tenNguoiNhan = trim($_POST['ten_nguoi_nhan'] ?? '');
         $sdtNhan      = trim($_POST['sdt_nhan'] ?? '');
         $tinhThanh    = trim($_POST['tinh_thanh'] ?? '');
@@ -154,14 +150,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pdo->commit();
                 $successMsg = 'Đã thêm địa chỉ nhận hàng mới thành công.';
             } catch (Exception $e) {
-                if ($pdo->inTransaction()) $pdo->rollBack();
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
                 $errorMsg = 'Lỗi khi thêm địa chỉ: ' . $e->getMessage();
             }
         }
-    }
-
-    // 2.4 Chỉnh sửa địa chỉ nhận hàng (Chống IDOR: ràng buộc ma_nd)
-    elseif ($action === 'edit_address') {
+    } elseif ($action === 'edit_address') {
+        // 2.4 Chỉnh sửa địa chỉ nhận hàng (Chống IDOR: ràng buộc ma_nd)
         $maDc         = (int)($_POST['ma_dc'] ?? 0);
         $tenNguoiNhan = trim($_POST['ten_nguoi_nhan'] ?? '');
         $sdtNhan      = trim($_POST['sdt_nhan'] ?? '');
@@ -223,14 +219,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pdo->commit();
                 $successMsg = 'Cập nhật địa chỉ nhận hàng thành công.';
             } catch (Exception $e) {
-                if ($pdo->inTransaction()) $pdo->rollBack();
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
                 $errorMsg = 'Lỗi khi cập nhật địa chỉ: ' . $e->getMessage();
             }
         }
-    }
-
-    // 2.5 Đặt làm địa chỉ mặc định (Transaction)
-    elseif ($action === 'set_default_address') {
+    } elseif ($action === 'set_default_address') {
+        // 2.5 Đặt làm địa chỉ mặc định (Transaction)
         $maDc = (int)($_POST['ma_dc'] ?? 0);
 
         $chkOwner = $pdo->prepare("SELECT COUNT(*) FROM dc_dia_chi_kh WHERE ma_dc = :dc AND ma_nd = :uid");
@@ -251,14 +247,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pdo->commit();
                 $successMsg = 'Đã đặt địa chỉ làm mặc định thành công.';
             } catch (Exception $e) {
-                if ($pdo->inTransaction()) $pdo->rollBack();
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
                 $errorMsg = 'Lỗi khi đặt địa chỉ mặc định: ' . $e->getMessage();
             }
         }
-    }
-
-    // 2.6 Xóa địa chỉ nhận hàng (Chống IDOR & Đôn địa chỉ còn lại)
-    elseif ($action === 'delete_address') {
+    } elseif ($action === 'delete_address') {
+        // 2.6 Xóa địa chỉ nhận hàng (Chống IDOR & Đôn địa chỉ còn lại)
         $maDc = (int)($_POST['ma_dc'] ?? 0);
 
         $chk = $pdo->prepare("SELECT mac_dinh FROM dc_dia_chi_kh WHERE ma_dc = :dc AND ma_nd = :uid");
@@ -289,7 +285,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $pdo->commit();
                 $successMsg = 'Đã xóa địa chỉ thành công.';
             } catch (Exception $e) {
-                if ($pdo->inTransaction()) $pdo->rollBack();
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
                 $errorMsg = 'Lỗi khi xóa địa chỉ: ' . $e->getMessage();
             }
         }

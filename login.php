@@ -35,7 +35,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($identifier === '' || $password === '') {
         $error = 'Vui lòng nhập đầy đủ tên đăng nhập/email và mật khẩu.';
     } else {
-        $stmt = $pdo->prepare("SELECT nd.*, vt.ten_vt, vt.mo_ta_quyen FROM nd_nguoi_dung nd INNER JOIN vt_vai_tro vt ON nd.ma_vt = vt.ma_vt WHERE (nd.ten_dang_nhap = :id1 OR nd.email = :id2) LIMIT 1");
+        $stmt = $pdo->prepare("
+            SELECT nd.*, vt.ten_vt, vt.mo_ta_quyen
+            FROM nd_nguoi_dung nd
+            INNER JOIN vt_vai_tro vt ON nd.ma_vt = vt.ma_vt
+            WHERE (nd.ten_dang_nhap = :id1 OR nd.email = :id2)
+            LIMIT 1
+        ");
         $stmt->execute(['id1' => $identifier, 'id2' => $identifier]);
         $user = $stmt->fetch();
 

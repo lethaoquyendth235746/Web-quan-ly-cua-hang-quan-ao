@@ -44,7 +44,9 @@ try {
     if (is_array($selectedMaGhRaw)) {
         foreach ($selectedMaGhRaw as $v) {
             $id = (int) $v;
-            if ($id > 0) $selectedMaGh[] = $id;
+            if ($id > 0) {
+                $selectedMaGh[] = $id;
+            }
         }
     }
 

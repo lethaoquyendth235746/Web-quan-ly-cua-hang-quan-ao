@@ -16,7 +16,6 @@ $checkoutService = new CartCheckoutService();
 
 $currentUserId   = getCurrentUserId();
 $loyaltyProfile  = $loyaltyService->getCustomerLoyaltyProfile($currentUserId);
-$demoCustomers   = $loyaltyService->getDemoCustomers();
 $cartItems       = $checkoutService->getCustomerCart($currentUserId);
 
 $page = $_GET['page'] ?? 'home';

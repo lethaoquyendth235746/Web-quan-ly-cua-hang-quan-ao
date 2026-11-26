@@ -16,32 +16,6 @@ class LoyaltyStoreService
     }
 
     /**
-     * Lấy danh sách tài khoản khách hàng (ma_vt = 3) để phục vụ chuyển đổi kiểm thử trên Header
-     */
-    public function getDemoCustomers(): array
-    {
-        $stmt = $this->pdo->query("
-            SELECT 
-                nd.ma_nd,
-                nd.ho_ten,
-                nd.ten_dang_nhap,
-                nd.email,
-                ttd.ma_so_the,
-                ttd.tong_diem_tich_luy,
-                ttd.diem_kha_dung,
-                htv.ma_hang,
-                htv.ten_hang,
-                htv.mau_sac_the
-            FROM nd_nguoi_dung nd
-            LEFT JOIN ttd_the_tich_diem ttd ON nd.ma_nd = ttd.ma_nd
-            LEFT JOIN htv_hang_thanh_vien htv ON ttd.ma_hang = htv.ma_hang
-            WHERE nd.ma_vt = 3 AND nd.trang_thai = 1
-            ORDER BY nd.ma_nd ASC
-        ");
-        return $stmt->fetchAll();
-    }
-
-    /**
      * Lấy toàn bộ 4 bậc Hạng thành viên từ CSDL
      */
     public function getAllTiers(): array

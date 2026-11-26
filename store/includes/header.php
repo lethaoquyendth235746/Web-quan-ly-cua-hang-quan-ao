@@ -1,19 +1,21 @@
 <?php
+
 /**
  * TẦNG CỬA HÀNG: Header dùng chung (store/includes/header.php)
  * Hiển thị thanh điều hướng, tìm kiếm, Popover Thẻ thành viên (Origin-aware animation)
  * và bộ chuyển đổi nhanh khách hàng thực tế từ CSDL để kiểm thử các bậc Hạng thẻ.
  */
+
 $currentPage = $_GET['page'] ?? 'home';
 $currentGender = $_GET['gender'] ?? 'all';
 $searchQuery = trim($_GET['q'] ?? '');
 
 $tierName = $loyaltyProfile['ten_hang'] ?? 'Khách vãng lai';
-$availablePoints = (int) ($loyaltyProfile['diem_kha_dung'] ?? 0);
-$totalPoints = (int) ($loyaltyProfile['tong_diem_tich_luy'] ?? 0);
+$availablePoints = (int)($loyaltyProfile['diem_kha_dung'] ?? 0);
+$totalPoints = (int)($loyaltyProfile['tong_diem_tich_luy'] ?? 0);
 $nextTier = $loyaltyProfile['next_tier'] ?? null;
-$pointsNeeded = (int) ($loyaltyProfile['points_needed'] ?? 0);
-$progressPercent = (float) ($loyaltyProfile['progress_percent'] ?? 0);
+$pointsNeeded = (int)($loyaltyProfile['points_needed'] ?? 0);
+$progressPercent = (float)($loyaltyProfile['progress_percent'] ?? 0);
 $allTiers = $loyaltyProfile['all_tiers'] ?? [];
 $tierColor = $loyaltyProfile['mau_sac_the'] ?? '#5F6F52';
 $cartTotalCount = array_sum(array_column($cartItems, 'so_luong_mua'));

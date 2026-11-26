@@ -1,4 +1,5 @@
 <?php
+
 /**
  * TRANG QUẢN LÝ TÀI KHOẢN, THẺ TÍCH ĐIỂM & SỔ ĐỊA CHỈ (profile.php)
  * Giao diện Bootstrap 5 chuẩn hóa, tích hợp đầy đủ:

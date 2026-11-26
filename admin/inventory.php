@@ -1,4 +1,5 @@
 <?php
+
 /**
  * TẦNG QUẢN TRỊ: Quản lý Nhập hàng & Tồn kho Biến thể SKU (admin/inventory.php)
  * Đổ dữ liệu thực tế từ bảng bt_bien_the_sp (20 SKU) và pnk_phieu_nhap_kho (20 phiếu nhập)

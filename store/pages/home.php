@@ -1,11 +1,13 @@
 <?php
+
 /**
  * TẦNG CỬA HÀNG: Trang chủ & Danh sách sản phẩm (store/pages/home.php)
  * Đổ 100% dữ liệu từ bảng sp_san_pham, dm_danh_muc_sp, bt_bien_the_sp, ha_hinh_anh_sp
  */
+
 $currentGender = $_GET['gender'] ?? 'all';
 $searchQuery = trim($_GET['q'] ?? '');
-$tierMultiplier = (float) ($loyaltyProfile['he_so_tich_diem'] ?? 1.0);
+$tierMultiplier = (float)($loyaltyProfile['he_so_tich_diem'] ?? 1.0);
 $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
 ?>
 <div id="homeView" class="space-y-16">
@@ -42,7 +44,7 @@ $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
     <div class="mt-8 grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
       <?php foreach ($recommendedProducts as $idx => $p): ?>
         <?php
-          $pts = (int) floor(((float)$p['gia_khuyen_mai'] / POINTS_PER_VND) * $tierMultiplier);
+          $pts = (int)floor(((float)$p['gia_khuyen_mai'] / POINTS_PER_VND) * $tierMultiplier);
           $availableVariant = null;
           foreach (($p['variants'] ?? []) as $v) {
               if ((int)($v['so_luong_ton'] ?? 0) > 0 && (int)($v['trang_thai'] ?? 1) === 1) {
@@ -198,7 +200,7 @@ $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
       <div id="productGrid" class="mt-8 grid grid-cols-2 gap-x-6 gap-y-12 lg:grid-cols-3">
         <?php foreach ($allProducts as $idx => $p): ?>
           <?php
-            $pts = (int) floor(((float)$p['gia_khuyen_mai'] / POINTS_PER_VND) * $tierMultiplier);
+            $pts = (int)floor(((float)$p['gia_khuyen_mai'] / POINTS_PER_VND) * $tierMultiplier);
             $sizesAttr = implode('|', $p['sizes']);
             $colorsAttr = implode('|', $p['colors']);
             $availableVariant = null;

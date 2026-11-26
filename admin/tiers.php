@@ -1,4 +1,5 @@
 <?php
+
 /**
  * TẦNG QUẢN TRỊ: Cấu hình 4 Bậc Hạng Thành Viên & Danh sách Thẻ Tích Điểm (admin/tiers.php)
  * Đổ dữ liệu thực tế từ bảng htv_hang_thanh_vien và ttd_the_tich_diem

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * THANH ĐIỀU HƯỚNG NAVBAR CLIENT (includes/navbar.php)
  * Hiển thị linh hoạt theo trạng thái đăng nhập và vai trò người dùng (Bootstrap 5)

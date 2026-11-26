@@ -1,4 +1,5 @@
 <?php
+
 /**
  * PHÂN HỆ QUẢN TRỊ: KIỂM TRA QUYỀN TRUY CẬP (admin/includes/auth_check.php)
  * Bắt buộc nhúng tại đầu mọi trang trong thư mục admin/

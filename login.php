@@ -1,4 +1,5 @@
 <?php
+
 /**
  * TRANG ĐĂNG NHẬP HỆ THỐNG (login.php)
  * Giao diện Bootstrap 5 chuẩn hóa, hỗ trợ xác thực bằng Tên đăng nhập HOẶC Email + Mật khẩu

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * TRANG ĐĂNG KÝ THÀNH VIÊN & TỰ ĐỘNG MỞ THẺ HẠNG ĐỒNG (register.php)
  * Giao diện Bootstrap 5 chuẩn hóa, thực thi trong PDO Transaction an toàn tuyệt đối

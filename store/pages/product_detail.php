@@ -1,8 +1,10 @@
 <?php
+
 /**
  * TẦNG CỬA HÀNG: Trang Chi tiết Sản phẩm (store/pages/product_detail.php)
  * Đổ dữ liệu thực tế từ sp_san_pham, bt_bien_the_sp (20 SKU), ha_hinh_anh_sp và đánh giá ctdh_chi_tiet_dh
  */
+
 if (!$productDetail) {
     echo '<div class="py-20 text-center">'
        . '<h1 class="text-2xl font-semibold text-charcoal">Không tìm thấy sản phẩm trong CSDL</h1>'
@@ -18,9 +20,9 @@ $images = $p['images'] ?? [];
 $reviews = $p['reviews'] ?? [];
 $firstVariant = $variants[0] ?? null;
 
-$tierMultiplier = (float) ($loyaltyProfile['he_so_tich_diem'] ?? 1.0);
+$tierMultiplier = (float)($loyaltyProfile['he_so_tich_diem'] ?? 1.0);
 $tierName = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
-$pointsExpected = (int) floor(((float) ($firstVariant['gia_ban_rieng'] ?? $p['gia_khuyen_mai']) / POINTS_PER_VND) * $tierMultiplier);
+$pointsExpected = (int)floor(((float)($firstVariant['gia_ban_rieng'] ?? $p['gia_khuyen_mai']) / POINTS_PER_VND) * $tierMultiplier);
 
 // Kiểm tra xem khách đã mua sản phẩm này trong đơn HOAN_THANH và chưa đánh giá (da_cong_diem_dg = 0)
 $canReviewAndEarnPoints = false;

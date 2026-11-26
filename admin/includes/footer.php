@@ -1,4 +1,5 @@
 <?php
+
 /**
  * TẦNG QUẢN TRỊ: Footer & Script điều khiển tương tác chung (admin/includes/footer.php)
  */

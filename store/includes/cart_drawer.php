@@ -1,17 +1,19 @@
 <?php
+
 /**
  * TẦNG CỬA HÀNG: Drawer Giỏ hàng (store/includes/cart_drawer.php)
  * Tích hợp Fetch API tương tác hai chiều thời gian thực (Add, Update, Remove, Selective Checkout)
  */
+
 $isLoggedIn = isUserLoggedIn();
 $cartTotalQty = 0;
 $cartSubtotalAmount = 0;
 foreach ($cartItems as $ci) {
-    $cartTotalQty += (int) $ci['so_luong_mua'];
-    $cartSubtotalAmount += (float) $ci['thanh_tien'];
+    $cartTotalQty += (int)$ci['so_luong_mua'];
+    $cartSubtotalAmount += (float)$ci['thanh_tien'];
 }
-$tierMultiplier = (float) ($loyaltyProfile['he_so_tich_diem'] ?? 1.0);
-$expectedCartPoints = (int) floor(($cartSubtotalAmount / POINTS_PER_VND) * $tierMultiplier);
+$tierMultiplier = (float)($loyaltyProfile['he_so_tich_diem'] ?? 1.0);
+$expectedCartPoints = (int)floor(($cartSubtotalAmount / POINTS_PER_VND) * $tierMultiplier);
 ?>
   <div id="cartDrawer" class="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-labelledby="cartTitle" aria-hidden="true">
     <div id="cartBackdrop" class="drawer-backdrop absolute inset-0 bg-charcoal/30 opacity-0 pointer-events-none transition-opacity duration-300"></div>

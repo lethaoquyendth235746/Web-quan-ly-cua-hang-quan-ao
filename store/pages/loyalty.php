@@ -1,17 +1,19 @@
 <?php
+
 /**
  * TẦNG CỬA HÀNG: Trang Trung tâm Thành viên & Đổi điểm Voucher (store/pages/loyalty.php)
  * Đổ 100% dữ liệu từ ttd_the_tich_diem, htv_hang_thanh_vien, pgg_phieu_giam_gia, vkh_vi_voucher_kh, lsd_lich_su_diem, dh_don_hang
  */
+
 $maSoThe = $loyaltyProfile['ma_so_the'] ?? 'CHƯA CẤP THẺ';
 $hoTen = $loyaltyProfile['ho_ten'] ?? 'Khách hàng';
 $tenHang = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
 $mauSacThe = $loyaltyProfile['mau_sac_the'] ?? '#2D2D2D';
-$tongDiemTichLuy = (int) ($loyaltyProfile['tong_diem_tich_luy'] ?? 0);
-$diemKhaDung = (int) ($loyaltyProfile['diem_kha_dung'] ?? 0);
+$tongDiemTichLuy = (int)($loyaltyProfile['tong_diem_tich_luy'] ?? 0);
+$diemKhaDung = (int)($loyaltyProfile['diem_kha_dung'] ?? 0);
 $nextTier = $loyaltyProfile['next_tier'] ?? null;
-$pointsNeeded = (int) ($loyaltyProfile['points_needed'] ?? 0);
-$progressPercent = (float) ($loyaltyProfile['progress_percent'] ?? 0);
+$pointsNeeded = (int)($loyaltyProfile['points_needed'] ?? 0);
+$progressPercent = (float)($loyaltyProfile['progress_percent'] ?? 0);
 
 $txLabels = [
     'CONG_MUA_HANG'   => ['label' => 'Cộng mua hàng',   'class' => 'text-emerald-700', 'bg' => 'bg-emerald-50 text-emerald-800'],
@@ -219,7 +221,7 @@ $orderStatusBadges = [
             <?php foreach ($pointLedger as $row): ?>
               <?php
                 $txType = $txLabels[$row['loai_giao_dich']] ?? ['label' => $row['loai_giao_dich'], 'class' => 'text-charcoal', 'bg' => 'bg-stone-100'];
-                $delta = (int) $row['so_diem_thay_doi'];
+                $delta = (int)$row['so_diem_thay_doi'];
                 $deltaFormatted = ($delta > 0 ? '+' : '') . number_format($delta, 0, ',', '.');
               ?>
               <tr>

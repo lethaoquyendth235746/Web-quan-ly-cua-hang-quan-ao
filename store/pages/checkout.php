@@ -1,14 +1,16 @@
 <?php
+
 /**
  * TẦNG CỬA HÀNG: Trang Thanh toán Đa tầng (store/pages/checkout.php)
  * Đổ dữ liệu từ dc_dia_chi_kh, gh_gio_hang, vkh_vi_voucher_kh, ttd_the_tich_diem, htv_hang_thanh_vien
  * Tích hợp Transaction Đặt hàng & Khóa kho (api/checkout.php) kèm VietQR động
  */
+
 $hoTen = $loyaltyProfile['ho_ten'] ?? 'Khách hàng';
 $tenHang = $loyaltyProfile['ten_hang'] ?? 'Hạng Đồng';
-$phanTramGiamHang = (float) ($loyaltyProfile['phan_tram_giam'] ?? 0);
-$heSoTichDiem = (float) ($loyaltyProfile['he_so_tich_diem'] ?? 1.0);
-$diemKhaDung = (int) ($loyaltyProfile['diem_kha_dung'] ?? 0);
+$phanTramGiamHang = (float)($loyaltyProfile['phan_tram_giam'] ?? 0);
+$heSoTichDiem = (float)($loyaltyProfile['he_so_tich_diem'] ?? 1.0);
+$diemKhaDung = (int)($loyaltyProfile['diem_kha_dung'] ?? 0);
 $maxPointsToUse = min(50, $diemKhaDung);
 ?>
 <div id="checkoutView" class="fade-up">

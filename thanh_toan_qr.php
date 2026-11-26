@@ -1,4 +1,5 @@
 <?php
+
 /**
  * TRANG THANH TOÁN VIETQR ĐỘNG (thanh_toan_qr.php)
  * Phân hệ Giỏ hàng & Đặt hàng Đa tầng — Mục 2.3: Tích hợp mã QR Chuyển khoản
@@ -8,7 +9,7 @@
 require_once __DIR__ . '/config/db.php';
 
 $currentUserId = getCurrentUserId();
-$maDh = isset($_GET['ma_dh']) ? (int) $_GET['ma_dh'] : 0;
+$maDh = isset($_GET['ma_dh']) ? (int)$_GET['ma_dh'] : 0;
 
 if ($maDh <= 0) {
     header('Location: index.php?page=loyalty#myOrdersTitle');
@@ -34,7 +35,7 @@ if (!$order) {
 }
 
 // Kiểm tra quyền sở hữu đơn hàng (chỉ chủ đơn hàng hoặc admin mới được xem)
-if ($currentUserId <= 0 || ((int) $order['ma_nd'] !== $currentUserId && !hasAdminAccess())) {
+if ($currentUserId <= 0 || ((int)$order['ma_nd'] !== $currentUserId && !hasAdminAccess())) {
     die('<div style="font-family:sans-serif;max-width:600px;margin:3rem auto;padding:2rem;background:#fffbeb;border:1px solid #fcd34d;border-radius:12px;color:#92400e;text-align:center;">'
         . '<h2 style="margin-top:0;">Truy cập bị từ chối</h2>'
         . '<p>Bạn không có quyền truy cập vào thông tin thanh toán của đơn hàng này.</p>'
@@ -42,9 +43,9 @@ if ($currentUserId <= 0 || ((int) $order['ma_nd'] !== $currentUserId && !hasAdmi
         . '</div>');
 }
 
-$dhCode = 'DH' . str_pad((string) $order['ma_dh'], 2, '0', STR_PAD_LEFT);
-$addInfo = '#DH' . str_pad((string) $order['ma_dh'], 2, '0', STR_PAD_LEFT);
-$thanhTien = (float) $order['thanh_tien'];
+$dhCode = 'DH' . str_pad((string)$order['ma_dh'], 2, '0', STR_PAD_LEFT);
+$addInfo = '#DH' . str_pad((string)$order['ma_dh'], 2, '0', STR_PAD_LEFT);
+$thanhTien = (float)$order['thanh_tien'];
 $vietQrUrl = buildVietQRUrl($thanhTien, $order['ma_dh']);
 
 // Kiểm tra nếu đơn hàng là COD

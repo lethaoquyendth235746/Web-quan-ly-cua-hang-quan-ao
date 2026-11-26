@@ -1,8 +1,10 @@
 <?php
+
 /**
  * TẦNG QUẢN TRỊ: Header & Sidebar dùng chung (admin/includes/header.php)
  * Kết nối dữ liệu quản trị viên từ CSDL (bảng nd_nguoi_dung & vt_vai_tro)
  */
+
 require_once __DIR__ . '/../../config/db.php';
 require_once __DIR__ . '/auth_check.php';
 require_once __DIR__ . '/../../services/admin/DashboardService.php';

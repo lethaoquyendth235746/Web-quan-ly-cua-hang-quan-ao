@@ -1,4 +1,5 @@
 <?php
+
 /**
  * FOOTER DÙNG CHUNG CHO CLIENT (includes/footer.php)
  * Bootstrap 5 Footer & Script

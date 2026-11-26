@@ -1,4 +1,5 @@
 <?php
+
 /**
  * TẦNG CỬA HÀNG: Footer & Script điều khiển tương tác chung (store/includes/footer.php)
  * Tuân thủ kỹ năng Animation Vocabulary (Origin-aware popover, Slide-in drawer, Toast feedback)

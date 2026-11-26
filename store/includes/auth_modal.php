@@ -1,4 +1,5 @@
 <?php
+
 /**
  * MODAL ĐĂNG NHẬP & ĐĂNG KÝ THÀNH VIÊN (store/includes/auth_modal.php)
  * Tích hợp AJAX trực tiếp tại Header/Footer, cho phép khách hàng đăng nhập/đăng ký

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * HEADER DÙNG CHUNG CHO CLIENT (includes/header.php)
  * Tích hợp Bootstrap 5.3.2, Bootstrap Icons và Google Font

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * ĐĂNG XUẤT HỆ THỐNG AN TOÀN (logout.php)
  * Hủy toàn bộ $_SESSION, xóa session cookie và chuyển hướng về login.php

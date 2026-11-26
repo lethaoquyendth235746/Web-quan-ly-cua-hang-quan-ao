@@ -1,4 +1,5 @@
 <?php
+
 /**
  * API GIỎ HÀNG TRỰC TUYẾN (api/cart.php)
  * Xử lý các thao tác giỏ hàng: get, add, update, remove
@@ -50,8 +51,8 @@ try {
             break;
 
         case 'add':
-            $maBt = (int) ($requestData['ma_bt'] ?? 0);
-            $soLuong = (int) ($requestData['so_luong_mua'] ?? $requestData['so_luong'] ?? 1);
+            $maBt = (int)($requestData['ma_bt'] ?? 0);
+            $soLuong = (int)($requestData['so_luong_mua'] ?? $requestData['so_luong'] ?? 1);
 
             if ($maBt <= 0) {
                 throw new Exception('Vui lòng chọn biến thể sản phẩm hợp lệ.');
@@ -69,8 +70,8 @@ try {
             break;
 
         case 'add_by_product':
-            $maSp = (int) ($requestData['ma_sp'] ?? 0);
-            $soLuong = (int) ($requestData['so_luong_mua'] ?? 1);
+            $maSp = (int)($requestData['ma_sp'] ?? 0);
+            $soLuong = (int)($requestData['so_luong_mua'] ?? 1);
             if ($maSp <= 0) {
                 throw new Exception('Sản phẩm không hợp lệ.');
             }
@@ -97,8 +98,8 @@ try {
             break;
 
         case 'update':
-            $maBt = (int) ($requestData['ma_bt'] ?? 0);
-            $soLuong = (int) ($requestData['so_luong_mua'] ?? $requestData['so_luong'] ?? 0);
+            $maBt = (int)($requestData['ma_bt'] ?? 0);
+            $soLuong = (int)($requestData['so_luong_mua'] ?? $requestData['so_luong'] ?? 0);
 
             if ($maBt <= 0) {
                 throw new Exception('Mã biến thể sản phẩm không hợp lệ.');
@@ -114,7 +115,7 @@ try {
             break;
 
         case 'remove':
-            $maBt = (int) ($requestData['ma_bt'] ?? 0);
+            $maBt = (int)($requestData['ma_bt'] ?? 0);
             if ($maBt <= 0) {
                 throw new Exception('Mã biến thể sản phẩm không hợp lệ.');
             }

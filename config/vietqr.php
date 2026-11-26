@@ -1,4 +1,5 @@
 <?php
+
 /**
  * CẤU HÌNH THÔNG TIN TÀI KHOẢN THANH TOÁN VIETQR
  * Phân hệ Giỏ hàng & Đặt hàng Đa tầng — Mục 2.3: Tích hợp mã QR Chuyển khoản
@@ -35,7 +36,7 @@ function buildVietQRUrl(float|int $thanhTien, int $maDh): string
         'https://img.vietqr.io/image/%s-%s-compact2.png?amount=%d&addInfo=%s&accountName=%s',
         VIETQR_BANK_ID,
         VIETQR_ACCOUNT_NO,
-        (int) round($thanhTien),
+        (int)round($thanhTien),
         urlencode($noiDung),
         urlencode(VIETQR_ACCOUNT_NAME)
     );

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * DỊCH VỤ ĐỘNG CƠ KHÁCH HÀNG THÂN THIẾT (services/admin/LoyaltyEngineService.php)
  * Loyalty Engine: Quản lý tích điểm, nâng hạng tự động, ghi sổ cái lsd_lich_su_diem
@@ -92,9 +93,9 @@ class LoyaltyEngineService
                 throw new Exception("Không thể chuyển đơn #{$dhCode} từ '{$currentStatus}' sang '{$newStatus}'. Luồng không hợp lệ.");
             }
 
-            $maNd       = (int) $order['ma_nd'];
+            $maNd       = (int)$order['ma_nd'];
             $tenKhach   = $order['ho_ten'] ?? 'Khách hàng';
-            $diemCong   = (int) $order['diem_cong_du_kien'];
+            $diemCong   = (int)$order['diem_cong_du_kien'];
             $isUpgraded = false;
             $tenHangMoi = '';
             $newTongDiem = 0;
@@ -115,7 +116,7 @@ class LoyaltyEngineService
                     WHERE ma_dh = :ma_dh AND loai_giao_dich = 'CONG_MUA_HANG'
                 ");
                 $stmtIdempotency->execute(['ma_dh' => $maDh]);
-                $alreadyCredited = (int) $stmtIdempotency->fetchColumn();
+                $alreadyCredited = (int)$stmtIdempotency->fetchColumn();
 
                 if ($alreadyCredited === 0 && $diemCong > 0) {
                     // 5. Khóa thẻ tích điểm (FOR UPDATE)
@@ -134,9 +135,9 @@ class LoyaltyEngineService
                         $card = $stmtCard->fetch();
                     }
 
-                    $oldMaHang      = (int) $card['ma_hang'];
-                    $newTongDiem    = (int) $card['tong_diem_tich_luy'] + $diemCong;
-                    $newDiemKhaDung = (int) $card['diem_kha_dung'] + $diemCong;
+                    $oldMaHang      = (int)$card['ma_hang'];
+                    $newTongDiem    = (int)$card['tong_diem_tich_luy'] + $diemCong;
+                    $newDiemKhaDung = (int)$card['diem_kha_dung'] + $diemCong;
 
                     // 6. Xét nâng hạng tự động
                     $stmtTier = $this->pdo->prepare("
@@ -148,7 +149,7 @@ class LoyaltyEngineService
                     ");
                     $stmtTier->execute(['diem' => $newTongDiem]);
                     $targetTier  = $stmtTier->fetch();
-                    $targetMaHang = $targetTier ? (int) $targetTier['ma_hang'] : $oldMaHang;
+                    $targetMaHang = $targetTier ? (int)$targetTier['ma_hang'] : $oldMaHang;
                     $tenHangMoi   = $targetTier ? $targetTier['ten_hang'] : '';
                     $isUpgraded   = ($targetMaHang > $oldMaHang);
 

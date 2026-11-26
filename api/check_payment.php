@@ -1,4 +1,5 @@
 <?php
+
 /**
  * API KIỂM TRA TRẠNG THÁI THANH TOÁN ĐƠN HÀNG (api/check_payment.php)
  * Dùng cho cơ chế Polling tự động kiểm tra xem đơn hàng đã được chuyển khoản/xác nhận chưa
@@ -20,7 +21,7 @@ try {
         exit;
     }
 
-    $maDh = (int) ($_GET['ma_dh'] ?? $_POST['ma_dh'] ?? 0);
+    $maDh = (int)($_GET['ma_dh'] ?? $_POST['ma_dh'] ?? 0);
 
     if ($maDh <= 0) {
         throw new Exception("Mã đơn hàng không hợp lệ.");
@@ -41,7 +42,7 @@ try {
     }
 
     // Kiểm tra quyền: chỉ chủ đơn hàng hoặc admin mới được truy vấn
-    if ((int) $order['ma_nd'] !== $currentUserId && !hasAdminAccess()) {
+    if ((int)$order['ma_nd'] !== $currentUserId && !hasAdminAccess()) {
         http_response_code(403);
         echo json_encode([
             'success' => false,
@@ -51,7 +52,7 @@ try {
     }
 
     $st = $order['trang_thai_dh'];
-    $dhCode = 'DH' . str_pad((string) $order['ma_dh'], 2, '0', STR_PAD_LEFT);
+    $dhCode = 'DH' . str_pad((string)$order['ma_dh'], 2, '0', STR_PAD_LEFT);
 
     // Đơn được xem là đã thanh toán khi trạng thái đã sang HOAN_THANH hoặc DANG_GIAO
     $isPaid = ($st === 'HOAN_THANH' || $st === 'DANG_GIAO');
@@ -66,14 +67,14 @@ try {
     echo json_encode([
         'success'         => true,
         'paid'            => $isPaid,
-        'ma_dh'           => (int) $order['ma_dh'],
+        'ma_dh'           => (int)$order['ma_dh'],
         'ma_dh_code'      => $dhCode,
-        'thanh_tien'      => (float) $order['thanh_tien'],
+        'thanh_tien'      => (float)$order['thanh_tien'],
         'formatted_total' => formatVND($order['thanh_tien']),
         'pt_thanh_toan'   => $order['pt_thanh_toan'],
         'trang_thai_dh'   => $st,
         'status_label'    => $statusLabels[$st] ?? $st,
-        'diem_cong'       => (int) $order['diem_cong_du_kien'],
+        'diem_cong'       => (int)$order['diem_cong_du_kien'],
         'ngay_dat'        => $order['ngay_dat'],
     ], JSON_UNESCAPED_UNICODE);
 

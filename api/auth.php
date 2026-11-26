@@ -1,4 +1,5 @@
 <?php
+
 /**
  * API XÁC THỰC NGƯỜI DÙNG (api/auth.php)
  * Tiếp nhận yêu cầu Đăng nhập, Đăng ký thành viên mới & Đăng xuất

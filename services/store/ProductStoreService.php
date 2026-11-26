@@ -1,4 +1,5 @@
 <?php
+
 /**
  * DỊCH VỤ BÊN CỬA HÀNG: Sản phẩm, Danh mục, Biến thể (Size/Màu), Hình ảnh & Đánh giá
  * Truy vấn 100% từ CSDL csdl_cua_hang_quan_ao
@@ -128,12 +129,12 @@ class ProductStoreService
                 if (!in_array($v['kich_co'], $sizes, true)) {
                     $sizes[] = $v['kich_co'];
                 }
-                $totalStock += (int) $v['so_luong_ton'];
+                $totalStock += (int)$v['so_luong_ton'];
             }
             $p['colors'] = $colors;
             $p['sizes'] = $sizes;
             $p['tong_ton_kho'] = $totalStock;
-            $p['diem_thuong_du_kien'] = (int) floor((float) $p['gia_khuyen_mai'] / POINTS_PER_VND);
+            $p['diem_thuong_du_kien'] = (int)floor((float)$p['gia_khuyen_mai'] / POINTS_PER_VND);
         }
         unset($p);
 
@@ -222,7 +223,7 @@ class ProductStoreService
 
         $all = $this->getAllActiveProducts();
         foreach ($all as $p) {
-            if ((int) $p['ma_sp'] === $maSp) {
+            if ((int)$p['ma_sp'] === $maSp) {
                 $p['reviews'] = $this->getProductReviews($maSp);
                 return $p;
             }
@@ -277,4 +278,3 @@ class ProductStoreService
         ];
     }
 }
-

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * DỊCH VỤ BÊN CỬA HÀNG: Giỏ hàng trực tuyến, Sổ địa chỉ, Ví Voucher & Tính toán Thanh toán đa tầng
  * Truy vấn 100% từ CSDL csdl_cua_hang_quan_ao
@@ -63,7 +64,7 @@ class CartCheckoutService
         foreach ($items as &$item) {
             $imgFile = $item['anh_theo_mau'] ?: $item['anh_chinh'];
             $item['image_url'] = resolveProductImage($imgFile);
-            $item['thanh_tien'] = (float) $item['gia_ban_rieng'] * (int) $item['so_luong_mua'];
+            $item['thanh_tien'] = (float)$item['gia_ban_rieng'] * (int)$item['so_luong_mua'];
             $item['formatted_price'] = formatVND($item['gia_ban_rieng']);
             $item['formatted_total'] = formatVND($item['thanh_tien']);
         }
@@ -81,8 +82,8 @@ class CartCheckoutService
         $totalQty = 0;
         $subtotal = 0;
         foreach ($cartItems as $item) {
-            $totalQty += (int) $item['so_luong_mua'];
-            $subtotal += (float) $item['thanh_tien'];
+            $totalQty += (int)$item['so_luong_mua'];
+            $subtotal += (float)$item['thanh_tien'];
         }
 
         // Lấy hệ số tích điểm từ thẻ tích điểm của khách hàng
@@ -96,9 +97,9 @@ class CartCheckoutService
         $stmtTier->execute(['ma_nd' => $maNd]);
         $tier = $stmtTier->fetch();
 
-        $tierMultiplier = (float) ($tier['he_so_tich_diem'] ?? 1.0);
+        $tierMultiplier = (float)($tier['he_so_tich_diem'] ?? 1.0);
         $tierName = $tier['ten_hang'] ?? 'Hạng Đồng';
-        $expectedPoints = (int) floor(($subtotal / POINTS_PER_VND) * $tierMultiplier);
+        $expectedPoints = (int)floor(($subtotal / POINTS_PER_VND) * $tierMultiplier);
 
         return [
             'items'              => $cartItems,
@@ -130,11 +131,11 @@ class CartCheckoutService
         $stmtBt->execute(['ma_bt' => $maBt]);
         $variant = $stmtBt->fetch();
 
-        if (!$variant || (int) $variant['trang_thai'] === 0) {
+        if (!$variant || (int)$variant['trang_thai'] === 0) {
             throw new Exception("Biến thể sản phẩm không tồn tại hoặc đã ngừng kinh doanh.");
         }
 
-        $stock = (int) $variant['so_luong_ton'];
+        $stock = (int)$variant['so_luong_ton'];
         if ($stock <= 0) {
             throw new Exception("Sản phẩm \"{$variant['ten_sp']}\" ({$variant['mau_sac']} - {$variant['kich_co']}) hiện đã hết hàng.");
         }
@@ -150,7 +151,7 @@ class CartCheckoutService
 
         $notice = null;
         if ($existing) {
-            $currentQty = (int) $existing['so_luong_mua'];
+            $currentQty = (int)$existing['so_luong_mua'];
             if ($currentQty >= $stock) {
                 throw new Exception("Bạn đã có {$currentQty} sản phẩm trong giỏ, đạt mức tồn kho tối đa ({$stock}).");
             }
@@ -222,7 +223,7 @@ class CartCheckoutService
             throw new Exception("Biến thể sản phẩm không tồn tại.");
         }
 
-        $stock = (int) $variant['so_luong_ton'];
+        $stock = (int)$variant['so_luong_ton'];
         $notice = null;
         $validQty = $soLuongMoi;
         if ($validQty > $stock) {
@@ -345,30 +346,30 @@ class CartCheckoutService
         $subtotal = 0;
         $totalQty = 0;
         foreach ($cartItems as $item) {
-            $subtotal += (float) $item['thanh_tien'];
-            $totalQty += (int) $item['so_luong_mua'];
+            $subtotal += (float)$item['thanh_tien'];
+            $totalQty += (int)$item['so_luong_mua'];
         }
 
-        $tierDiscountPercent = (float) ($loyaltyProfile['phan_tram_giam'] ?? 0);
-        $tierMultiplier = (float) ($loyaltyProfile['he_so_tich_diem'] ?? 1.0);
+        $tierDiscountPercent = (float)($loyaltyProfile['phan_tram_giam'] ?? 0);
+        $tierMultiplier = (float)($loyaltyProfile['he_so_tich_diem'] ?? 1.0);
         $tierDiscountAmount = round($subtotal * ($tierDiscountPercent / 100));
 
         $voucherDiscountAmount = 0;
-        if ($selectedVoucher && $subtotal >= (float) $selectedVoucher['don_toi_thieu']) {
+        if ($selectedVoucher && $subtotal >= (float)$selectedVoucher['don_toi_thieu']) {
             if ($selectedVoucher['loai_giam'] === 'PHAN_TRAM') {
-                $voucherDiscountAmount = round($subtotal * ((float) $selectedVoucher['gia_tri_giam'] / 100));
+                $voucherDiscountAmount = round($subtotal * ((float)$selectedVoucher['gia_tri_giam'] / 100));
             } else {
-                $voucherDiscountAmount = (float) $selectedVoucher['gia_tri_giam'];
+                $voucherDiscountAmount = (float)$selectedVoucher['gia_tri_giam'];
             }
         }
 
         // Quy đổi 1 điểm tiêu dùng = 1.000đ giảm trực tiếp (khớp Đơn #5 trong SQL mẫu: 50 điểm = 50.000đ)
-        $availablePoints = (int) ($loyaltyProfile['diem_kha_dung'] ?? 0);
+        $availablePoints = (int)($loyaltyProfile['diem_kha_dung'] ?? 0);
         $validPointsToUse = min($pointsToUse, $availablePoints);
         $pointsDiscountAmount = $validPointsToUse * 1000;
 
         $finalTotal = max(0, $subtotal - $tierDiscountAmount - $voucherDiscountAmount - $pointsDiscountAmount);
-        $expectedPoints = (int) floor(($finalTotal / POINTS_PER_VND) * $tierMultiplier);
+        $expectedPoints = (int)floor(($finalTotal / POINTS_PER_VND) * $tierMultiplier);
 
         return [
             'total_qty'               => $totalQty,

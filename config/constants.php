@@ -1,4 +1,5 @@
 <?php
+
 /**
  * HẰNG SỐ TOÀN CỤC CỦA HỆ THỐNG (config/constants.php)
  * Khai báo BASE_URL và các hằng số vai trò, hạng thành viên

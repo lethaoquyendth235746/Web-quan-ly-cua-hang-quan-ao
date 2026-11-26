@@ -1,4 +1,5 @@
 <?php
+
 /**
  * TẦNG KẾT NỐI (CONNECTION LAYER)
  * Quản lý kết nối PDO MySQL tới CSDL: csdl_cua_hang_quan_ao
@@ -68,7 +69,7 @@ function getCurrentUserId(): int
         return 0; // Đã đăng xuất chủ động
     }
     if (!empty($_SESSION['current_user_id'])) {
-        return (int) $_SESSION['current_user_id'];
+        return (int)$_SESSION['current_user_id'];
     }
     return 0; // Khách vãng lai chưa đăng nhập
 }
@@ -99,7 +100,7 @@ function hasAdminAccess(): bool
  */
 function formatVND($amount): string
 {
-    return number_format((float) $amount, 0, ',', '.') . 'đ';
+    return number_format((float)$amount, 0, ',', '.') . 'đ';
 }
 
 /**
@@ -189,4 +190,3 @@ function resolveProductImage(?string $dbFileName): string
 
     return $photoMap[$dbFileName] ?? 'https://images.pexels.com/photos/9968526/pexels-photo-9968526.jpeg?auto=compress&cs=tinysrgb&h=650&w=940';
 }
-

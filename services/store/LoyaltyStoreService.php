@@ -1,4 +1,5 @@
 <?php
+
 /**
  * DỊCH VỤ BÊN CỬA HÀNG: Khách hàng Thân thiết (Loyalty), Thẻ tích điểm, Hạng thành viên, Kho Voucher & Lịch sử điểm
  * Truy vấn 100% từ CSDL csdl_cua_hang_quan_ao
@@ -68,19 +69,19 @@ class LoyaltyStoreService
         $tiers = $this->getAllTiers();
         $nextTier = null;
         foreach ($tiers as $t) {
-            if ((int) $t['diem_toi_thieu'] > (int) $profile['tong_diem_tich_luy']) {
+            if ((int)$t['diem_toi_thieu'] > (int)$profile['tong_diem_tich_luy']) {
                 $nextTier = $t;
                 break;
             }
         }
 
         if ($nextTier) {
-            $targetPoints = (int) $nextTier['diem_toi_thieu'];
-            $currentPoints = (int) $profile['tong_diem_tich_luy'];
+            $targetPoints = (int)$nextTier['diem_toi_thieu'];
+            $currentPoints = (int)$profile['tong_diem_tich_luy'];
             $pointsNeeded = max(0, $targetPoints - $currentPoints);
             $progressPercent = $targetPoints > 0 ? min(100, round(($currentPoints / $targetPoints) * 100, 1)) : 100;
         } else {
-            $targetPoints = (int) $profile['tong_diem_tich_luy'];
+            $targetPoints = (int)$profile['tong_diem_tich_luy'];
             $pointsNeeded = 0;
             $progressPercent = 100;
         }
@@ -136,9 +137,9 @@ class LoyaltyStoreService
         foreach ($vouchers as &$v) {
             $vid = $v['ma_pgg'];
             $v['owned_info'] = $ownedMap[$vid] ?? null;
-            $v['is_tier_eligible'] = $customerMinPoints >= (int) $v['moc_diem_hang'];
-            $v['is_points_eligible'] = $availablePoints >= (int) $v['diem_can_doi'];
-            $v['is_in_stock'] = (int) $v['so_luong'] > 0;
+            $v['is_tier_eligible'] = $customerMinPoints >= (int)$v['moc_diem_hang'];
+            $v['is_points_eligible'] = $availablePoints >= (int)$v['diem_can_doi'];
+            $v['is_in_stock'] = (int)$v['so_luong'] > 0;
             $v['can_redeem'] = $v['is_tier_eligible'] && $v['is_points_eligible'] && $v['is_in_stock'] && empty($v['owned_info']);
         }
         unset($v);
@@ -411,4 +412,3 @@ class LoyaltyStoreService
         }
     }
 }
-

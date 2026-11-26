@@ -1,4 +1,5 @@
 <?php
+
 /**
  * API KHÁCH HÀNG TỰ HỦY ĐƠN HÀNG (api/cancel_order.php)
  * Thực thi trong 1 PDO Transaction (SELECT ... FOR UPDATE):
@@ -41,7 +42,7 @@ try {
     }
     $data = array_merge($_POST, $body);
 
-    $maDh = (int) ($data['ma_dh'] ?? 0);
+    $maDh = (int)($data['ma_dh'] ?? 0);
     if ($maDh <= 0) {
         throw new Exception("Mã đơn hàng không hợp lệ.");
     }

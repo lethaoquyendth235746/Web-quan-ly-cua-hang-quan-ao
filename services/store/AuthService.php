@@ -1,4 +1,5 @@
 <?php
+
 /**
  * DỊCH VỤ XÁC THỰC & TÀI KHOẢN (AuthService)
  * Quản lý Đăng nhập, Đăng xuất, Đăng ký thành viên mới & Tự động mở thẻ Hạng Đồng

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * API WEBHOOK THANH TOÁN NGÂN HÀNG & MÔ PHỎNG TÍN HIỆU BÁO CÓ (api/payment_webhook.php)
  * - Tương thích chuẩn Webhook ngân hàng (SePay / Casso / MBBank Gateway)
@@ -26,14 +27,14 @@ try {
     // 1. Tìm mã đơn hàng từ payload
     $maDh = 0;
     if (!empty($data['ma_dh'])) {
-        $maDh = (int) $data['ma_dh'];
+        $maDh = (int)$data['ma_dh'];
     } elseif (!empty($data['order_id'])) {
-        $maDh = (int) $data['order_id'];
+        $maDh = (int)$data['order_id'];
     } elseif (!empty($data['content']) || !empty($data['description'])) {
         // Tự động bóc tách từ nội dung chuyển khoản của ngân hàng (VD: "DH04", "#DH04", "THANH TOAN DH12")
-        $text = (string) ($data['content'] ?? $data['description'] ?? '');
+        $text = (string)($data['content'] ?? $data['description'] ?? '');
         if (preg_match('/DH(\d+)/i', $text, $matches)) {
-            $maDh = (int) $matches[1];
+            $maDh = (int)$matches[1];
         }
     }
 
@@ -50,7 +51,7 @@ try {
         throw new Exception("Đơn hàng #DH" . sprintf('%02d', $maDh) . " không tồn tại.");
     }
 
-    $dhCode = 'DH' . str_pad((string) $order['ma_dh'], 2, '0', STR_PAD_LEFT);
+    $dhCode = 'DH' . str_pad((string)$order['ma_dh'], 2, '0', STR_PAD_LEFT);
 
     // Nếu đơn hàng đã bị hủy trước đó thì từ chối
     if ($order['trang_thai_dh'] === 'DA_HUY') {
@@ -72,14 +73,14 @@ try {
     // 2.1. Đối soát số tiền chuyển khoản (nếu payload có gửi kèm số tiền hoặc bắt buộc khớp giá trị đơn)
     $receivedAmount = null;
     if (isset($data['so_tien']) && is_numeric($data['so_tien'])) {
-        $receivedAmount = (float) $data['so_tien'];
+        $receivedAmount = (float)$data['so_tien'];
     } elseif (isset($data['transferAmount']) && is_numeric($data['transferAmount'])) {
-        $receivedAmount = (float) $data['transferAmount'];
+        $receivedAmount = (float)$data['transferAmount'];
     } elseif (isset($data['amount']) && is_numeric($data['amount'])) {
-        $receivedAmount = (float) $data['amount'];
+        $receivedAmount = (float)$data['amount'];
     }
 
-    $expectedAmount = (float) $order['thanh_tien'];
+    $expectedAmount = (float)$order['thanh_tien'];
     if ($receivedAmount === null || round($receivedAmount) < round($expectedAmount)) {
         throw new Exception(
             "Số tiền thanh toán không hợp lệ hoặc chưa đủ giá trị đơn hàng #{$dhCode} (Cần: " . formatVND($expectedAmount) . ")."
@@ -100,7 +101,7 @@ try {
         'message'    => "Xác nhận chuyển khoản thành công cho đơn hàng #{$dhCode}!",
         'ma_dh'      => $maDh,
         'ma_dh_code' => $dhCode,
-        'thanh_tien' => (float) $order['thanh_tien'],
+        'thanh_tien' => (float)$order['thanh_tien'],
         'detail'     => $result
     ], JSON_UNESCAPED_UNICODE);
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * API TRANSACTION ĐẶT HÀNG & KHẤU TRỪ TỒN KHO (api/checkout.php)
  * Sử dụng PDO Database Transaction ($pdo->beginTransaction(), commit(), rollBack())
@@ -34,16 +35,16 @@ try {
     }
     $data = array_merge($_POST, $body);
 
-    $maDc = (int) ($data['ma_dc'] ?? 0);
+    $maDc = (int)($data['ma_dc'] ?? 0);
     $ptThanhToan = strtoupper(trim($data['pt_thanh_toan'] ?? 'COD'));
-    $maPgg = !empty($data['ma_pgg']) ? (int) $data['ma_pgg'] : null;
+    $maPgg = !empty($data['ma_pgg']) ? (int)$data['ma_pgg'] : null;
     $dungDiem = !empty($data['dung_diem']);
     // Selective checkout: danh sách ma_gh được chọn (nếu trống = lấy tất cả)
     $selectedMaGhRaw = $data['selected_ma_gh'] ?? [];
     $selectedMaGh = [];
     if (is_array($selectedMaGhRaw)) {
         foreach ($selectedMaGhRaw as $v) {
-            $id = (int) $v;
+            $id = (int)$v;
             if ($id > 0) {
                 $selectedMaGh[] = $id;
             }
@@ -115,18 +116,18 @@ try {
         $stmtLockVariant->execute([$item['ma_bt']]);
         $variant = $stmtLockVariant->fetch();
 
-        if (!$variant || (int) $variant['trang_thai'] === 0) {
+        if (!$variant || (int)$variant['trang_thai'] === 0) {
             throw new Exception("Sản phẩm \"{$item['ten_sp']}\" (SKU: {$item['ma_sku']}) hiện đã ngừng kinh doanh.");
         }
 
-        $stock = (int) $variant['so_luong_ton'];
-        $buyQty = (int) $item['so_luong_mua'];
+        $stock = (int)$variant['so_luong_ton'];
+        $buyQty = (int)$item['so_luong_mua'];
 
         if ($stock < $buyQty) {
             throw new Exception("Sản phẩm \"{$item['ten_sp']}\" (SKU: {$item['ma_sku']}) chỉ còn {$stock} sản phẩm trong kho, không đủ số lượng đặt mua ({$buyQty}).");
         }
 
-        $tongTienHang += (float) $variant['gia_ban_rieng'] * $buyQty;
+        $tongTienHang += (float)$variant['gia_ban_rieng'] * $buyQty;
     }
 
     // 3.4. Tính toán & Xác thực lại giá trị ở Backend (Server-side multi-tier calculation)
@@ -142,8 +143,8 @@ try {
     $stmtCard->execute([$currentUserId]);
     $loyaltyCard = $stmtCard->fetch();
 
-    $tierDiscountPercent = (float) ($loyaltyCard['phan_tram_giam'] ?? 0);
-    $tierMultiplier = (float) ($loyaltyCard['he_so_tich_diem'] ?? 1.0);
+    $tierDiscountPercent = (float)($loyaltyCard['phan_tram_giam'] ?? 0);
+    $tierMultiplier = (float)($loyaltyCard['he_so_tich_diem'] ?? 1.0);
     $tienGiamHangTv = round($tongTienHang * ($tierDiscountPercent / 100));
 
     // b. Kiểm tra tính hợp lệ của Voucher trong ví cá nhân (vkh_vi_voucher_kh)
@@ -171,24 +172,24 @@ try {
             throw new Exception("Voucher \"{$voucher['ma_code']}\" hiện đã hết hạn sử dụng.");
         }
 
-        if ($tongTienHang < (float) $voucher['don_toi_thieu']) {
+        if ($tongTienHang < (float)$voucher['don_toi_thieu']) {
             $minVnd = formatVND($voucher['don_toi_thieu']);
             throw new Exception("Đơn hàng phải đạt từ {$minVnd} để áp dụng voucher \"{$voucher['ma_code']}\".");
         }
 
         if ($voucher['loai_giam'] === 'PHAN_TRAM') {
-            $tienGiamVoucher = round($tongTienHang * ((float) $voucher['gia_tri_giam'] / 100));
+            $tienGiamVoucher = round($tongTienHang * ((float)$voucher['gia_tri_giam'] / 100));
         } else {
-            $tienGiamVoucher = (float) $voucher['gia_tri_giam'];
+            $tienGiamVoucher = (float)$voucher['gia_tri_giam'];
         }
-        $appliedMaPgg = (int) $voucher['ma_pgg'];
+        $appliedMaPgg = (int)$voucher['ma_pgg'];
     }
 
     // c. Kiểm tra và tính toán Điểm tích lũy tiêu dùng (ttd_the_tich_diem)
     $diemSuDung = 0;
     $tienGiamDiem = 0;
     if ($dungDiem && $loyaltyCard) {
-        $availablePoints = (int) $loyaltyCard['diem_kha_dung'];
+        $availablePoints = (int)$loyaltyCard['diem_kha_dung'];
         if ($availablePoints > 0) {
             // Quy chuẩn: 1 điểm = 1.000đ, tối đa 50 điểm/đơn
             $diemSuDung = min(50, $availablePoints);
@@ -198,7 +199,7 @@ try {
 
     // d. Thành tiền cuối cùng và điểm thưởng dự kiến
     $thanhTien = max(0, $tongTienHang - $tienGiamHangTv - $tienGiamVoucher - $tienGiamDiem);
-    $diemCongDuKien = (int) floor(($thanhTien / POINTS_PER_VND) * $tierMultiplier);
+    $diemCongDuKien = (int)floor(($thanhTien / POINTS_PER_VND) * $tierMultiplier);
 
     // 3.5. Tạo đơn đặt hàng mới vào bảng dh_don_hang
     $stmtOrder = $pdo->prepare("
@@ -223,7 +224,7 @@ try {
         'diem_cong_du_kien' => $diemCongDuKien,
         'pt_thanh_toan'     => $ptThanhToan,
     ]);
-    $maDh = (int) $pdo->lastInsertId();
+    $maDh = (int)$pdo->lastInsertId();
 
     // 3.6. Lưu chi tiết mặt hàng vào ctdh_chi_tiet_dh & Khấu trừ kho bt_bien_the_sp
     $stmtItem = $pdo->prepare("
@@ -240,8 +241,8 @@ try {
     ");
 
     foreach ($cartItems as $item) {
-        $donGia = (float) $item['gia_ban_rieng'];
-        $soLuong = (int) $item['so_luong_mua'];
+        $donGia = (float)$item['gia_ban_rieng'];
+        $soLuong = (int)$item['so_luong_mua'];
         $thanhTienMuc = $donGia * $soLuong;
 
         $stmtItem->execute([$maDh, $item['ma_bt'], $soLuong, $donGia, $thanhTienMuc]);
@@ -268,8 +269,8 @@ try {
         ");
         $stmtDeductCard->execute([$diemSuDung, $loyaltyCard['ma_the']]);
 
-        $newBalance = (int) $loyaltyCard['diem_kha_dung'] - $diemSuDung;
-        $dhCode = 'DH' . str_pad((string) $maDh, 2, '0', STR_PAD_LEFT);
+        $newBalance = (int)$loyaltyCard['diem_kha_dung'] - $diemSuDung;
+        $dhCode = 'DH' . str_pad((string)$maDh, 2, '0', STR_PAD_LEFT);
 
         $stmtLedger = $pdo->prepare("
             INSERT INTO lsd_lich_su_diem (
@@ -301,8 +302,8 @@ try {
     $pdo->commit();
 
     // 4. Trả về kết quả JSON chuẩn
-    $dhCode = 'DH' . str_pad((string) $maDh, 2, '0', STR_PAD_LEFT);
-    $addInfo = '#DH' . str_pad((string) $maDh, 2, '0', STR_PAD_LEFT);
+    $dhCode = 'DH' . str_pad((string)$maDh, 2, '0', STR_PAD_LEFT);
+    $addInfo = '#DH' . str_pad((string)$maDh, 2, '0', STR_PAD_LEFT);
 
     $vietQrUrl = buildVietQRUrl($thanhTien, $maDh);
 
@@ -325,7 +326,7 @@ try {
             'bank_name'    => VIETQR_BANK_NAME,
             'account_no'   => VIETQR_ACCOUNT_NO,
             'account_name' => VIETQR_ACCOUNT_NAME,
-            'amount'       => (int) round($thanhTien),
+            'amount'       => (int)round($thanhTien),
             'add_info'     => $addInfo,
             'qr_url'       => $vietQrUrl,
             'qr_page_url'  => 'thanh_toan_qr.php?ma_dh=' . $maDh,

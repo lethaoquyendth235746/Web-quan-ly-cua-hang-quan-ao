@@ -1,4 +1,5 @@
 <?php
+
 /**
  * TẦNG KẾT NỐI CƠ SỞ DỮ LIỆU CHUẨN (config/database.php)
  * Kết nối CSDL bằng PDO (charset utf8mb4, ERRMODE_EXCEPTION)

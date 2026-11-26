@@ -1,4 +1,5 @@
 <?php
+
 /**
  * DỊCH VỤ BÊN QUẢN TRỊ: Quản lý Đơn hàng, Chi tiết hóa đơn & Xét nâng hạng khách hàng
  * Truy vấn 100% từ CSDL csdl_cua_hang_quan_ao
@@ -88,20 +89,20 @@ class OrderAdminService
             $order['ma_dh_code'] = sprintf('DH%02d', $orderId);
             $order['items'] = $itemsByOrder[$orderId] ?? [];
 
-            $currentPoints = (int) ($order['tong_diem_tich_luy'] ?? 0);
+            $currentPoints = (int)($order['tong_diem_tich_luy'] ?? 0);
             $nextTier = null;
             foreach ($tiers as $t) {
-                if ((int) $t['diem_toi_thieu'] > $currentPoints) {
+                if ((int)$t['diem_toi_thieu'] > $currentPoints) {
                     $nextTier = $t;
                     break;
                 }
             }
             $order['next_tier'] = $nextTier;
             if ($nextTier) {
-                $target = (int) $nextTier['diem_toi_thieu'];
+                $target = (int)$nextTier['diem_toi_thieu'];
                 $order['points_to_next_tier'] = max(0, $target - $currentPoints);
                 $order['progress_percent'] = $target > 0 ? min(100, round(($currentPoints / $target) * 100, 1)) : 100;
-                $order['will_upgrade_on_approve'] = ($currentPoints + (int) $order['diem_cong_du_kien']) >= $target;
+                $order['will_upgrade_on_approve'] = ($currentPoints + (int)$order['diem_cong_du_kien']) >= $target;
             } else {
                 $order['points_to_next_tier'] = 0;
                 $order['progress_percent'] = 100;
@@ -139,4 +140,3 @@ class OrderAdminService
         return $this->updateOrderStatus($maDh, $newStatus);
     }
 }
-

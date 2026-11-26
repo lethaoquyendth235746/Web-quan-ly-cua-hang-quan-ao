@@ -1,4 +1,5 @@
 <?php
+
 /**
  * API XỬ LÝ ĐƠN HÀNG DÀNH CHO ADMIN / NHÂN VIÊN (api/admin_order.php)
  * Xử lý duyệt đơn hàng, kích hoạt Loyalty Engine, cộng điểm và xét nâng hạng
@@ -32,7 +33,7 @@ try {
     $data = array_merge($_POST, $body);
 
     $action = strtolower(trim($data['action'] ?? 'approve'));
-    $maDh = (int) ($data['ma_dh'] ?? 0);
+    $maDh = (int)($data['ma_dh'] ?? 0);
     $newStatus = trim($data['trang_thai_dh'] ?? 'HOAN_THANH');
 
     if ($maDh <= 0) {

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * BẢN MẪU CẤU HÌNH KẾT NỐI & TIỆN ÍCH CỐT LÕI (SAMPLE / TEMPLATE)
  * Sao chép file này thành `config/db.php` và cập nhật thông tin kết nối CSDL cục bộ của bạn.
@@ -111,7 +112,7 @@ function getCurrentUser(): ?array
 function getCurrentUserId(): int
 {
     if (isset($_SESSION['current_user_id']) && empty($_SESSION['explicit_logout'])) {
-        return (int) $_SESSION['current_user_id'];
+        return (int)$_SESSION['current_user_id'];
     }
     return 0;
 }
@@ -142,7 +143,7 @@ function hasAdminAccess(): bool
  */
 function formatVND($amount): string
 {
-    return number_format((float) $amount, 0, ',', '.') . 'đ';
+    return number_format((float)$amount, 0, ',', '.') . 'đ';
 }
 
 /**

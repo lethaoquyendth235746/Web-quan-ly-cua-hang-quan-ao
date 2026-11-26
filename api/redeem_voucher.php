@@ -1,4 +1,5 @@
 <?php
+
 /**
  * API ĐỔI ĐIỂM LẤY VOUCHER (api/redeem_voucher.php)
  * Thực thi trong 1 PDO Transaction: Khóa thẻ & voucher (Pessimistic Locking),
@@ -34,7 +35,7 @@ try {
     }
     $data = array_merge($_POST, $body);
 
-    $maPgg = (int) ($data['ma_pgg'] ?? 0);
+    $maPgg = (int)($data['ma_pgg'] ?? 0);
     if ($maPgg <= 0) {
         throw new Exception("Vui lòng chọn phiếu giảm giá hợp lệ.");
     }
@@ -81,20 +82,20 @@ try {
     }
 
     // 3.4. Kiểm tra số lượng voucher còn lại
-    if ((int) $voucher['so_luong'] <= 0) {
+    if ((int)$voucher['so_luong'] <= 0) {
         throw new Exception("Voucher \"{$voucher['ma_code']}\" đã hết lượt đổi hoặc đang tạm dừng tiếp nhận đổi mới.");
     }
 
     // 3.5. Kiểm tra hạng thành viên yêu cầu (so sánh diem_toi_thieu của hạng thẻ khách với hạng yêu cầu)
-    $cardMinPoints = (int) ($card['card_diem_toi_thieu'] ?? 0);
-    $reqMinPoints  = (int) ($voucher['req_diem_toi_thieu'] ?? 0);
+    $cardMinPoints = (int)($card['card_diem_toi_thieu'] ?? 0);
+    $reqMinPoints  = (int)($voucher['req_diem_toi_thieu'] ?? 0);
     if ($cardMinPoints < $reqMinPoints) {
         throw new Exception("Voucher này chỉ dành cho thành viên từ {$voucher['ten_hang_yeu_cau']} trở lên.");
     }
 
     // 3.6. Kiểm tra số dư điểm khả dụng
-    $diemCanDoi = (int) $voucher['diem_can_doi'];
-    $diemHienCo = (int) $card['diem_kha_dung'];
+    $diemCanDoi = (int)$voucher['diem_can_doi'];
+    $diemHienCo = (int)$card['diem_kha_dung'];
     if ($diemHienCo < $diemCanDoi) {
         $thieu = $diemCanDoi - $diemHienCo;
         throw new Exception("Bạn không đủ điểm khả dụng để đổi voucher này (Còn thiếu {$thieu} điểm).");
@@ -112,7 +113,7 @@ try {
     $existing = $stmtWallet->fetch();
 
     if ($existing) {
-        if ((int) $existing['trang_thai_su_dung'] === 0) {
+        if ((int)$existing['trang_thai_su_dung'] === 0) {
             throw new Exception("Bạn đã có voucher \"{$voucher['ma_code']}\" trong Ví cá nhân chưa sử dụng.");
         } else {
             throw new Exception("Bạn đã từng đổi và sử dụng voucher \"{$voucher['ma_code']}\" này.");
@@ -142,7 +143,7 @@ try {
         VALUES (?, ?, NOW(), 0)
     ");
     $stmtAddWallet->execute([$currentUserId, $maPgg]);
-    $maViVch = (int) $pdo->lastInsertId();
+    $maViVch = (int)$pdo->lastInsertId();
 
     // 3.11. Ghi 1 dòng giao dịch TRU_DOI_VOUCHER vào sổ cái lịch sử điểm (lsd_lich_su_diem)
     $stmtLedger = $pdo->prepare("

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * TẬP HỢP HÀM TIỆN ÍCH TOÀN CỤC (includes/helpers.php)
  * Cung cấp các helper truy vấn Sổ địa chỉ, Xác thực phiên và Flash messages

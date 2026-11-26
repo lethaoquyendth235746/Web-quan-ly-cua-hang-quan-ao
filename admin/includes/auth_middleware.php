@@ -1,4 +1,5 @@
 <?php
+
 /**
  * PHÂN HỆ QUẢN TRỊ: Middleware Phân quyền (admin/includes/auth_middleware.php)
  * Nối tiếp với admin/includes/auth_check.php để đảm bảo tính tương thích
@@ -49,4 +50,3 @@ function isSuperAdminRole(): bool
     global $adminCurrentUser;
     return isset($adminCurrentUser['ma_vt']) && (int)$adminCurrentUser['ma_vt'] === 1;
 }
-

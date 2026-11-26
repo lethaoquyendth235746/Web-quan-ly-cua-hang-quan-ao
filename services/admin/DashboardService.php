@@ -1,4 +1,5 @@
 <?php
+
 /**
  * DỊCH VỤ BÊN QUẢN TRỊ: Thống kê Tổng quan Dashboard, Biểu đồ Doanh thu & Phân bổ Hạng thành viên
  * Truy vấn 100% từ CSDL csdl_cua_hang_quan_ao
@@ -49,13 +50,13 @@ class DashboardService
         $pendingStmt = $this->pdo->query("
             SELECT COUNT(*) FROM dh_don_hang WHERE trang_thai_dh = 'CHO_XAC_NHAN'
         ");
-        $pendingCount = (int) $pendingStmt->fetchColumn();
+        $pendingCount = (int)$pendingStmt->fetchColumn();
 
         // Tổng thành viên có thẻ Loyalty
         $membersStmt = $this->pdo->query("
             SELECT COUNT(*) FROM ttd_the_tich_diem
         ");
-        $membersCount = (int) $membersStmt->fetchColumn();
+        $membersCount = (int)$membersStmt->fetchColumn();
 
         // Tổng điểm khả dụng đang lưu hành trên toàn hệ thống
         $pointsStmt = $this->pdo->query("
@@ -66,12 +67,12 @@ class DashboardService
         $pointsRow = $pointsStmt->fetch();
 
         return [
-            'tong_doanh_thu'     => (float) $revRow['tong_doanh_thu'],
-            'tong_don_hang'      => (int) $revRow['tong_don_hang'],
+            'tong_doanh_thu'     => (float)$revRow['tong_doanh_thu'],
+            'tong_don_hang'      => (int)$revRow['tong_don_hang'],
             'don_cho_duyet'      => $pendingCount,
             'tong_thanh_vien'    => $membersCount,
-            'tong_diem_kha_dung' => (int) $pointsRow['tong_diem_kha_dung'],
-            'tong_diem_tich_luy' => (int) $pointsRow['tong_diem_tich_luy'],
+            'tong_diem_kha_dung' => (int)$pointsRow['tong_diem_kha_dung'],
+            'tong_diem_tich_luy' => (int)$pointsRow['tong_diem_tich_luy'],
         ];
     }
 
@@ -99,8 +100,8 @@ class DashboardService
 
         foreach ($rows as $r) {
             $labels[] = 'Tháng ' . $r['thang_nam'];
-            $revenuesInMillions[] = round(((float) $r['doanh_thu']) / 1000000, 3);
-            $orderCounts[] = (int) $r['so_don'];
+            $revenuesInMillions[] = round(((float)$r['doanh_thu']) / 1000000, 3);
+            $orderCounts[] = (int)$r['so_don'];
         }
 
         return [
@@ -134,7 +135,7 @@ class DashboardService
 
         foreach ($rows as $r) {
             $labels[] = $r['ten_hang'];
-            $counts[] = (int) $r['so_luong_khach'];
+            $counts[] = (int)$r['so_luong_khach'];
             $colors[] = $r['mau_sac_the'] ?: '#94A3B8';
         }
 
@@ -145,4 +146,3 @@ class DashboardService
         ];
     }
 }
-

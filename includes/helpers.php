@@ -4,8 +4,6 @@
  * Cung cấp các helper truy vấn Sổ địa chỉ, Xác thực phiên và Flash messages
  */
 
-require_once __DIR__ . '/../config/database.php';
-
 /**
  * Lấy địa chỉ giao hàng mặc định của khách hàng
  *

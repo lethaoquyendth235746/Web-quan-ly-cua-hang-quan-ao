@@ -14,7 +14,6 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../../config/constants.php';
 
 // 1. Kiểm tra trạng thái đăng nhập
 if (empty($_SESSION['user']) && empty($_SESSION['current_user_id'])) {

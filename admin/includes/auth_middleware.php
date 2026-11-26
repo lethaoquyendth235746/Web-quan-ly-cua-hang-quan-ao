@@ -8,8 +8,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Use the unified database configuration (constants are defined there)
-require_once __DIR__ . '/../../config/database.php';
+// Nạp tầng kết nối kèm helper isUserLoggedIn() / getCurrentUser()
+require_once __DIR__ . '/../../config/db.php';
 
 // 1. Kiểm tra trạng thái đăng nhập
 if (!isUserLoggedIn()) {

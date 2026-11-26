@@ -7,7 +7,6 @@
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../config/db.php';
-require_once __DIR__ . '/../services/admin/OrderAdminService.php';
 require_once __DIR__ . '/../services/admin/LoyaltyEngineService.php';
 
 try {
@@ -59,7 +58,7 @@ try {
             throw new Exception("Hành động '{$action}' không được hỗ trợ.");
     }
 
-} catch (Exception $e) {
+} catch (Throwable $e) {
     http_response_code(400);
     echo json_encode([
         'success' => false,

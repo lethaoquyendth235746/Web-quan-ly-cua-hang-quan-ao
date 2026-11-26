@@ -8,7 +8,6 @@
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../config/db.php';
-require_once __DIR__ . '/../services/store/CartCheckoutService.php';
 
 try {
     // 1. Kiểm tra xác thực phiên đăng nhập của khách hàng
@@ -303,14 +302,7 @@ try {
     $dhCode = 'DH' . str_pad((string) $maDh, 2, '0', STR_PAD_LEFT);
     $addInfo = '#DH' . str_pad((string) $maDh, 2, '0', STR_PAD_LEFT);
 
-    $vietQrUrl = sprintf(
-        'https://img.vietqr.io/image/%s-%s-compact2.png?amount=%d&addInfo=%s&accountName=%s',
-        VIETQR_BANK_ID,
-        VIETQR_ACCOUNT_NO,
-        (int) round($thanhTien),
-        urlencode($addInfo),
-        urlencode(VIETQR_ACCOUNT_NAME)
-    );
+    $vietQrUrl = buildVietQRUrl($thanhTien, $maDh);
 
     echo json_encode([
         'success'         => true,
@@ -338,7 +330,7 @@ try {
         ],
     ], JSON_UNESCAPED_UNICODE);
 
-} catch (Exception $e) {
+} catch (Throwable $e) {
     if (isset($pdo) && $pdo instanceof PDO && $pdo->inTransaction()) {
         $pdo->rollBack();
     }

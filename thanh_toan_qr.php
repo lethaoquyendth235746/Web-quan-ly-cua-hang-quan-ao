@@ -6,7 +6,6 @@
  */
 
 require_once __DIR__ . '/config/db.php';
-require_once __DIR__ . '/config/vietqr.php';
 
 $currentUserId = getCurrentUserId();
 $maDh = isset($_GET['ma_dh']) ? (int) $_GET['ma_dh'] : 0;

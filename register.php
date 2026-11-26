@@ -14,7 +14,6 @@ require_once __DIR__ . '/includes/helpers.php';
 
 $pdo = getDBConnection();
 $error = '';
-$success = '';
 
 // Nếu đã đăng nhập, chuyển hướng về trang cá nhân
 if (!empty($_SESSION['user'])) {

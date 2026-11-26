@@ -351,7 +351,6 @@ $maxPointsToUse = min(50, $diemKhaDung);
 
 <script>
   (() => {
-    const subtotalAll = <?= json_encode((float)$checkoutSummary['subtotal']) ?>;
     const tierDiscountPercent = <?= json_encode((float)($loyaltyProfile['phan_tram_giam'] ?? 0)) ?>;
     const tierMultiplier = <?= json_encode($heSoTichDiem) ?>;
 

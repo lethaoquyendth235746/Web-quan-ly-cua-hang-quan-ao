@@ -290,8 +290,6 @@ $expectedCartPoints = (int) floor(($cartSubtotalAmount / POINTS_PER_VND) * $tier
       window.renderCartDrawer = function(summary) {
         if (!summary) return;
         const totalQty = Number(summary.total_qty || 0);
-        const subtotal = Number(summary.subtotal || 0);
-        const expectedPts = Number(summary.expected_points || 0);
         const items = summary.items || [];
 
         // 1. Cập nhật Badge trên Header

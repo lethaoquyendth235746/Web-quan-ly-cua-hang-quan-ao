@@ -127,9 +127,6 @@ $orderStatusBadges = [
       <?php foreach ($voucherCatalog as $idx => $v): ?>
         <?php
           $owned = $v['owned_info'];
-          $discountLabel = $v['loai_giam'] === 'PHAN_TRAM'
-              ? 'Giảm ' . number_format((float)$v['gia_tri_giam'], 0) . '%'
-              : 'Giảm ' . formatVND($v['gia_tri_giam']);
           $isOutOfStock = (int)$v['so_luong'] <= 0;
         ?>
         <article class="fade-up relative flex flex-col justify-between rounded-xl border border-dashed border-stone-300 bg-white p-6 shadow-sm <?= (!$v['is_tier_eligible'] || ($isOutOfStock && !$owned)) ? 'opacity-75' : '' ?>"
